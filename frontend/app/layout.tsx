@@ -12,7 +12,10 @@ export const metadata: Metadata = {
   description:
     "A Function-Invariant DNA Steganography & Provenance Verification Platform for Synthetic Biology.",
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
     shortcut: "/favicon.svg",
     apple: "/favicon.svg",
   },
