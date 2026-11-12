@@ -91,9 +91,10 @@ export default function TopologyEnginePage() {
 
   const [activeTab, setActiveTab] = useState<TabKey>("filtration");
 
-  // Filtration state
+  // Filtration state (Defaults to active smooth breathing cycle)
   const [epsilon, setEpsilon] = useState<number>(0.42);
-  const [isFiltrationPlaying, setIsFiltrationPlaying] = useState<boolean>(false);
+  const [isFiltrationPlaying, setIsFiltrationPlaying] = useState<boolean>(true);
+  const [filtrationDirection, setFiltrationDirection] = useState<number>(1);
   const [filtrationSpeed, setFiltrationSpeed] = useState<number>(1);
 
   // Dynamic Simplicial Complex Metrics
@@ -153,17 +154,24 @@ export default function TopologyEnginePage() {
     return pts;
   }, []);
 
-  // Simplex filtration animation loop
+  // Simplex filtration animation loop: smooth harmonic oscillation across persistent range [0.15, 0.75]
   useEffect(() => {
     if (!isFiltrationPlaying) return;
     const interval = setInterval(() => {
       setEpsilon((prev) => {
-        if (prev >= 1.2) return 0.05;
-        return parseFloat((prev + 0.01 * filtrationSpeed).toFixed(2));
+        let next = prev + 0.005 * filtrationDirection * filtrationSpeed;
+        if (next >= 0.72) {
+          setFiltrationDirection(-1);
+          next = 0.72;
+        } else if (next <= 0.14) {
+          setFiltrationDirection(1);
+          next = 0.14;
+        }
+        return parseFloat(next.toFixed(3));
       });
-    }, 50);
+    }, 45);
     return () => clearInterval(interval);
-  }, [isFiltrationPlaying, filtrationSpeed]);
+  }, [isFiltrationPlaying, filtrationDirection, filtrationSpeed]);
 
   // Compute exact algebraic topology metrics (Union-Find & Euler-Poincaré theorem)
   useEffect(() => {
