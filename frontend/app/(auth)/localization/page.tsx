@@ -342,6 +342,7 @@ export default function CarrierLocusMapping() {
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null);
   const [selectedCarrierIndex, setSelectedCarrierIndex] = useState<number>(31);
   const [isPlayingScan, setIsPlayingScan] = useState(true);
+  const [autoFollowBeam, setAutoFollowBeam] = useState(false);
   const [scanTick, setScanTick] = useState(0);
   const [filterMode, setFilterMode] = useState<"all" | "carriers" | "high_cai">("all");
 
@@ -370,14 +371,30 @@ export default function CarrierLocusMapping() {
     return computeGenomicSegments(currentConstruct, carrierLoci);
   }, [currentConstruct, carrierLoci]);
 
-  // Scanning animation loop
+  // Scanning animation loop with optional auto-follow beam tracking
   useEffect(() => {
     if (!isPlayingScan) return;
     const interval = setInterval(() => {
-      setScanTick((prev) => (prev + 1) % 360);
-    }, 40);
+      setScanTick((prev) => {
+        const next = (prev + 1) % 360;
+        if (autoFollowBeam && carrierLoci.length > 0) {
+          const currentBp = (next / 360) * currentConstruct.totalLengthBp;
+          let nearestIdx = 0;
+          let minDiff = Infinity;
+          for (let i = 0; i < carrierLoci.length; i++) {
+            const diff = Math.abs(carrierLoci[i].bp - currentBp);
+            if (diff < minDiff) {
+              minDiff = diff;
+              nearestIdx = i;
+            }
+          }
+          setSelectedCarrierIndex(nearestIdx);
+        }
+        return next;
+      });
+    }, 45);
     return () => clearInterval(interval);
-  }, [isPlayingScan]);
+  }, [isPlayingScan, autoFollowBeam, carrierLoci, currentConstruct.totalLengthBp]);
 
   // Map nucleotide bp to SVG X coordinate (80 to 920 px)
   const toSvgX = (bp: number) => {
@@ -436,6 +453,19 @@ export default function CarrierLocusMapping() {
           >
             {isPlayingScan ? <Pause className="w-3.5 h-3.5 text-primary" /> : <Play className="w-3.5 h-3.5 text-primary" />}
             {isPlayingScan ? "Pause Scan" : "Live Scan"}
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setAutoFollowBeam(!autoFollowBeam)}
+            className={`text-xs font-mono gap-1.5 border-border cursor-pointer transition-all ${
+              autoFollowBeam ? "bg-primary/20 text-primary border-primary/40 font-bold" : "text-muted-foreground hover:text-foreground"
+            }`}
+            title="Automatically track carrier locus under the scanning beam"
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${autoFollowBeam ? "bg-primary animate-ping" : "bg-zinc-500"}`} />
+            {autoFollowBeam ? "Auto-Follow ON" : "Auto-Follow"}
           </Button>
 
           <Link href="/analysis">
