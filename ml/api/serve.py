@@ -330,10 +330,19 @@ class ExtractRequest(BaseModel):
         ...,
         description="Uppercase ACGT sequence to extract watermark from.",
     )
-    carrierPositions: List[int] = Field(
-        ...,
-        description="Zero-indexed codon positions to inspect for watermark bits.",
+    carrierPositions: Optional[List[int]] = Field(
+        default=None,
+        description="Zero-indexed codon positions to inspect (legacy mode; nucleotide start = 3 * pos).",
         examples=[[14, 28, 45, 62]],
+    )
+    carrierStartOffsets: Optional[List[Optional[int]]] = Field(
+        default=None,
+        description=(
+            "Explicit 0-indexed nucleotide start offsets of mapped carrier codons in the observed sequence. "
+            "Pass null for an erased/ruptured carrier position (which outputs confidence=0.0). "
+            "Offsets need NOT be multiples of 3 (essential after indels)."
+        ),
+        examples=[[3, 6, None, 13]],
     )
     host: str = Field(
         default="E. coli K-12",
@@ -875,23 +884,33 @@ async def embed_endpoint(req: EmbedRequest) -> EmbedResponse:
 )
 async def extract_endpoint(req: ExtractRequest) -> ExtractResponse:
     """
-    Extract soft bit estimates from a watermarked sequence at `carrierPositions`.
+    Extract soft bit estimates from a watermarked sequence.
+
+    Supports two addressing modes:
+    1. `carrierStartOffsets`: Explicit nucleotide start offsets (can be non-multiples of 3;
+       null values denote explicit erasures). Sequence length does not need to be a multiple of 3.
+    2. `carrierPositions`: Codon indices (legacy mode; assumes 3 * pos).
 
     Returns:
     - `bitEstimates`: Hard-decision bits (0 or 1).
-    - `confidences`:  Soft confidence scores in [0, 1].
+    - `confidences`:  Soft confidence scores in [0, 1] (0.0 = erasure).
     """
     seq = req.sequence.strip().upper()
-    _validate_sequence(seq, require_codon_multiple=True)
+    # Sequence does NOT need to be a multiple of 3 if indels occurred
+    _validate_sequence(seq, require_codon_multiple=(req.carrierStartOffsets is None))
 
-    if not req.carrierPositions:
-        raise HTTPException(status_code=400, detail="carrierPositions must be non-empty.")
+    if not req.carrierPositions and not req.carrierStartOffsets:
+        raise HTTPException(
+            status_code=400,
+            detail="Either carrierStartOffsets or carrierPositions must be non-empty."
+        )
 
     if extract_bits is not None:
         try:
             result = extract_bits(
                 dna=seq,
                 carrier_positions=req.carrierPositions,
+                carrier_start_offsets=req.carrierStartOffsets,
                 codon_usage=_state.codon_usage,
             )
             if isinstance(result, tuple):
@@ -906,7 +925,8 @@ async def extract_endpoint(req: ExtractRequest) -> ExtractResponse:
             raise HTTPException(status_code=500, detail=f"Extraction failed: {exc}")
     else:
         logger.info("genestamp_ml.extract not available — using stub extractor.")
-        bit_estimates, confidences = _stub_extract(seq, req.carrierPositions)
+        target_positions = req.carrierPositions or [p // 3 if p is not None else 0 for p in (req.carrierStartOffsets or [])]
+        bit_estimates, confidences = _stub_extract(seq, target_positions)
 
     return ExtractResponse(bitEstimates=bit_estimates, confidences=confidences)
 
