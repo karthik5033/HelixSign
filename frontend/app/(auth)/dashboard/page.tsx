@@ -263,6 +263,10 @@ export default function DashboardPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Automated resilience sweeping state
+  const [isAutoSweeping, setIsAutoSweeping] = useState(true);
+  const [activeStepIndex, setActiveStepIndex] = useState(0);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
@@ -279,6 +283,20 @@ export default function DashboardPage() {
   const activeTrendData = useMemo(() => {
     return computeResilienceProgression(selectedRegime, activeConstruct);
   }, [selectedRegime, activeConstruct]);
+
+  // Automated cycle through experimental steps
+  useEffect(() => {
+    if (!isAutoSweeping) return;
+    const interval = setInterval(() => {
+      setActiveStepIndex((prev) => (prev + 1) % (activeTrendData.length || 1));
+    }, 1600);
+    return () => clearInterval(interval);
+  }, [isAutoSweeping, activeTrendData.length]);
+
+  // Active highlighted point
+  const currentTrendPoint = useMemo(() => {
+    return activeTrendData[activeStepIndex] || activeTrendData[activeTrendData.length - 1];
+  }, [activeTrendData, activeStepIndex]);
 
   // Live mathematical aggregations
   const computedStats = useMemo(() => {
@@ -486,7 +504,7 @@ export default function DashboardPage() {
               </CardDescription>
             </div>
 
-            {/* Regime Toggle Switcher */}
+            {/* Regime Toggle Switcher & Automated Sweep Control */}
             <div className="flex flex-wrap items-center gap-2">
               <div className="flex items-center rounded-lg bg-muted/60 p-0.5 border border-border text-[11px] font-mono">
                 {[
@@ -496,7 +514,10 @@ export default function DashboardPage() {
                 ].map((r) => (
                   <button
                     key={r.key}
-                    onClick={() => setSelectedRegime(r.key as LoadingRegime)}
+                    onClick={() => {
+                      setSelectedRegime(r.key as LoadingRegime);
+                      setActiveStepIndex(0);
+                    }}
                     className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer ${
                       selectedRegime === r.key
                         ? "bg-card text-foreground font-semibold shadow-sm"
@@ -507,12 +528,25 @@ export default function DashboardPage() {
                   </button>
                 ))}
               </div>
+
+              <button
+                onClick={() => setIsAutoSweeping(!isAutoSweeping)}
+                className={`px-2 py-1 rounded-lg border text-[11px] font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
+                  isAutoSweeping
+                    ? "bg-[#FF5500]/15 text-[#FF5500] border-[#FF5500]/40 font-bold shadow-sm"
+                    : "bg-muted/40 text-muted-foreground border-border hover:text-foreground"
+                }`}
+                title="Continuous automated sweep across mutation steps"
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isAutoSweeping ? "bg-[#FF5500] animate-ping" : "bg-zinc-500"}`} />
+                {isAutoSweeping ? "Auto Sweep" : "Sweep Paused"}
+              </button>
             </div>
           </CardHeader>
 
           <CardContent className="pt-4 space-y-4">
-            {/* Legend Banner */}
-            <div className="flex items-center justify-between text-[11px] font-mono px-1">
+            {/* Legend & Interactive Step Selector Ribbon */}
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono px-1">
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1.5 text-[#FF5500] font-semibold">
                   <span className="w-2.5 h-1 rounded-full bg-[#FF5500]" />
@@ -523,9 +557,29 @@ export default function DashboardPage() {
                   Uncorrected Naive Watermark
                 </span>
               </div>
-              <span className="text-zinc-500 hidden sm:inline">
-                Target: {activeConstruct.name} ({activeConstruct.carrierCount} carrier loci)
-              </span>
+
+              {/* Step markers */}
+              <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+                {activeTrendData.map((pt, pIdx) => {
+                  const isActive = pIdx === activeStepIndex;
+                  return (
+                    <button
+                      key={pt.step}
+                      onClick={() => {
+                        setIsAutoSweeping(false);
+                        setActiveStepIndex(pIdx);
+                      }}
+                      className={`px-2 py-0.5 rounded text-[10px] font-mono transition-all cursor-pointer ${
+                        isActive
+                          ? "bg-[#FF5500] text-white font-bold shadow-[0_0_8px_rgba(255,85,0,0.3)]"
+                          : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {pt.step}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Chart Area */}
@@ -585,33 +639,33 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </div>
 
-            {/* Steganographic Telemetry Bar Below Chart */}
+            {/* Steganographic Telemetry Bar Below Chart (Dynamically updates with active sweep step) */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-border/50 text-[11px] font-mono">
               <div className="p-2.5 rounded-lg bg-muted/20 border border-border/50">
                 <span className="text-muted-foreground block text-[10px]">RS Parity Margin</span>
                 <span className="font-bold text-xs mt-0.5 block text-primary">
-                  {computedStats.parityRemaining} ({computedStats.parityPercent}% Buffer)
+                  {currentTrendPoint.parityRemaining} / 4 Symbols ({((currentTrendPoint.parityRemaining / 4) * 100).toFixed(0)}% Buffer)
                 </span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-muted/20 border border-border/50">
                 <span className="text-muted-foreground block text-[10px]">Host CAI Concordance</span>
                 <span className="font-semibold text-xs mt-0.5 block text-foreground">
-                  w = {computedStats.caiScore} (Optimal w_i &ge; 0.85)
+                  w = {(currentTrendPoint.caiScore / 100).toFixed(3)} (Optimal w_i &ge; 0.85)
                 </span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-muted/20 border border-border/50">
                 <span className="text-muted-foreground block text-[10px]">Watermark Recovery</span>
                 <span className="font-bold text-foreground text-xs mt-0.5 block">
-                  {computedStats.recoveryRate}% Bitrate (vs {computedStats.rawRecoveryRate}% uncorrected)
+                  {currentTrendPoint.rsRecovery}% Bitrate (vs {currentTrendPoint.rawRecovery}% uncorrected)
                 </span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-muted/20 border border-border/50">
-                <span className="text-muted-foreground block text-[10px]">Active Construct &amp; Stress</span>
+                <span className="text-muted-foreground block text-[10px]">Simulated Stress Mode</span>
                 <span className="font-bold text-primary text-xs mt-0.5 block uppercase truncate">
-                  {selectedRegime} &bull; {activeConstruct.name}
+                  {currentTrendPoint.step} &bull; {currentTrendPoint.mutationRate}% Noise
                 </span>
               </div>
             </div>
