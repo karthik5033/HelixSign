@@ -8,16 +8,67 @@ Usage:
 Outputs:
     ml/artifacts/noise_benchmark.json  — recovery rates across substitution/indel noise levels
 
-IMPORTANT: All reported recovery rates are **raw extraction without ECC**.
-Reed-Solomon error correction is implemented in Person 2's backend layer and
-is NOT applied here.  Post-ECC recovery rates would be substantially higher.
+IMPORTANT — What this benchmark measures and what it does NOT measure
+======================================================================
+All reported recovery rates are **raw codon-position extraction without ECC**.
 
-Corrections applied vs. previous version:
-  1. Indel frame detection uses per-codon alignment (not net length difference)
-     to correctly detect compensating indels that leave net length unchanged.
-  2. Missing bits are represented as erasures (None) rather than zero-padding,
-     so accidentally matching zeros are not counted as correct.
-  3. Substitution / insertion / deletion channels are benchmarked separately.
+Substitution channel
+--------------------
+  Substitutions do not shift the reading frame. Recovery measures how often
+  each individual carrier codon is still readable as the same synonymous codon
+  after random base changes. BER is computed directly over all n_bits positions.
+
+Indel channel
+-------------
+  Indels shift the reading frame. The function ``_codon_frames_intact`` uses
+  Bio.Align.PairwiseAligner to check whether EVERY codon-start position in the
+  original sequence still maps to a codon-aligned position in the noisy sequence.
+
+  This is a conservative gate:
+    • If ANY codon-start is displaced, the entire sequence is treated as fully
+      unreadable and all n_bits positions are marked as erasures.
+    • If the alignment passes (all codon-starts intact), codon-position extraction
+      is attempted and individual bit erasures are counted separately.
+
+  Consequence: at even 0.5% per-base indel rate, the probability that at least
+  one codon-start is displaced in a 600-nt gene is high, so most trials fail the
+  gate and produce 100% erasure.
+
+  This is NOT a deficiency in the alignment algorithm. It correctly reflects the
+  physical reality that indels break the codon reading frame, and that raw
+  extraction without ECC cannot recover watermark bits from a frameshifted sequence.
+
+What PairwiseAligner does and does NOT do here
+----------------------------------------------
+  PairwiseAligner is used ONLY to map reference positions to observed positions.
+  It does NOT restore deleted bases or remove inserted bases.
+  It does NOT perform error correction.
+  Its role is purely diagnostic: given a known reference, determine whether the
+  observed indel pattern happened to preserve codon alignment.
+
+What Reed–Solomon ECC is expected to provide (Person 2's backend)
+-----------------------------------------------------------------
+  RS ECC operates on codeword symbols, not on individual nucleotides.
+  Correctly implemented, it can:
+    • Tolerate a bounded number of erasure positions (erased codeword symbols).
+    • Recover the original payload if the number of erasures is within the
+      code's correction capacity.
+  However, RS ECC does NOT by itself solve frame realignment. The backend must
+  also implement:
+    • Synchronisation recovery (locating the start of the ORF after indels).
+    • A defined mapping between RS codeword symbols and codon carrier positions.
+  The indel robustness of the full pipeline depends on these backend choices,
+  which are outside the scope of this ML benchmarking script.
+
+Corrections applied vs. previous version
+-----------------------------------------
+  1. Indel frame detection uses per-codon alignment (Bio.Align.PairwiseAligner),
+     not net length difference — catches compensating indels.
+  2. Missing bits are represented as erasures (None), not zero-padded — BER is
+     computed over non-erased bits only, with erasure_rate reported separately.
+  3. Insertion-only, deletion-only, and combined-indel channels benchmarked
+     separately.
+  4. Methodology limitations are documented in the output JSON under 'methodology'.
 """
 import sys
 import json
@@ -388,60 +439,118 @@ def main() -> None:
         print(f"Test FASTA not found at {test_fasta}.")
         return
 
-    seqs = [
-        str(r.seq).upper()
+    seqs_with_ids = [
+        (str(r.id), str(r.seq).upper())
         for r in SeqIO.parse(str(test_fasta), "fasta")
         if len(str(r.seq)) >= 600 and set(str(r.seq).upper()) <= {"A", "C", "G", "T"}
     ]
 
-    if not seqs:
+    if not seqs_with_ids:
         print("No suitable test genes found (need ≥600 bp).")
         return
 
-    test_seq = seqs[0]
-    print(f"Test sequence length: {len(test_seq)} bp")
+    print(f"Benchmarking across {len(seqs_with_ids)} test gene(s).\n")
 
-    eligible = find_eligible_positions(test_seq, codon_usage)
-    n_bits   = min(64, len(eligible))
+    # Run per-gene then macro-average across genes so results are not biased
+    # toward the characteristics of a single sequence.
+    per_gene_results = []
+    for gene_id, test_seq in seqs_with_ids:
+        eligible = find_eligible_positions(test_seq, codon_usage)
+        n_bits   = min(64, len(eligible))
+        if n_bits == 0:
+            print(f"  [{gene_id}] No eligible positions — skipping.")
+            continue
 
-    if n_bits == 0:
-        print("No eligible watermark positions found in test sequence. Aborting.")
+        carrier_positions = eligible[:n_bits]
+        bits = [i % 2 for i in range(n_bits)]
+
+        result_embed = embed_bits(test_seq, bits, carrier_positions, codon_usage)
+        stamped_dna  = result_embed[0] if isinstance(result_embed, tuple) else result_embed
+
+        print(f"  [{gene_id}] {len(test_seq)} bp, {n_bits} bits embedded, "
+              f"{N_TRIALS} trials × 4 channels × {len(SUBSTITUTION_RATES)+len(INDEL_RATES)*3} rates")
+
+        per_gene_results.append({
+            "gene_id": gene_id,
+            "length_nt": len(test_seq),
+            "n_bits": n_bits,
+            "substitution_benchmark": run_substitution_benchmark(
+                bits, carrier_positions, stamped_dna, codon_usage, SUBSTITUTION_RATES, N_TRIALS,
+            ),
+            "insertion_benchmark": run_insertion_benchmark(
+                bits, carrier_positions, stamped_dna, codon_usage, INDEL_RATES, N_TRIALS,
+            ),
+            "deletion_benchmark": run_deletion_benchmark(
+                bits, carrier_positions, stamped_dna, codon_usage, INDEL_RATES, N_TRIALS,
+            ),
+            "combined_indel_benchmark": run_indel_benchmark(
+                bits, carrier_positions, stamped_dna, codon_usage, INDEL_RATES, N_TRIALS,
+            ),
+        })
+
+    if not per_gene_results:
+        print("No genes produced results.")
         return
 
-    carrier_positions = eligible[:n_bits]
-    bits = [i % 2 for i in range(n_bits)]  # Alternating test pattern
-
-    result_embed = embed_bits(test_seq, bits, carrier_positions, codon_usage)
-    stamped_dna  = result_embed[0] if isinstance(result_embed, tuple) else result_embed
-
-    print(f"Embedded {n_bits} bits into {len(carrier_positions)} carrier positions.")
-    print(f"Running {N_TRIALS} Monte Carlo trials per noise configuration...\n")
+    # Macro-average across genes for each rate and channel
+    def _macro_avg(channel: str, rates: List[float]) -> dict:
+        out = {}
+        for rate in rates:
+            rs = str(rate)
+            gene_means = [g[channel][rs]["mean_recovery"] for g in per_gene_results if rs in g[channel]]
+            gene_ers   = [g[channel][rs]["mean_erasure_rate"] for g in per_gene_results if rs in g[channel]]
+            gene_bers  = [g[channel][rs]["mean_ber_non_erased"] for g in per_gene_results
+                          if rs in g[channel] and g[channel][rs]["mean_ber_non_erased"] is not None]
+            if not gene_means:
+                continue
+            macro_rec = sum(gene_means) / len(gene_means)
+            macro_er  = sum(gene_ers)   / len(gene_ers)
+            macro_ber = sum(gene_bers) / len(gene_bers) if gene_bers else None
+            out[rs] = {
+                "mean_recovery":        float(macro_rec),
+                "mean_erasure_rate":    float(macro_er),
+                "mean_ber_non_erased":  float(macro_ber) if macro_ber is not None else None,
+                "n_genes":              len(gene_means),
+                "trials_per_gene":      N_TRIALS,
+                "note":                 "macro-average across genes; raw extraction without ECC",
+            }
+        return out
 
     results = {
-        "test_sequence_length": len(test_seq),
-        "n_bits_embedded":      n_bits,
+        "n_genes_benchmarked": len(per_gene_results),
+        "gene_ids":            [g["gene_id"] for g in per_gene_results],
         "methodology": {
-            "erasure_handling":    "Missing/unreadable bits are marked as None (erasure). BER is computed over non-erased bits only.",
-            "frame_check":         "Codon-level alignment (BioPython pairwise2). Net-length equality alone is not sufficient.",
-            "ecc_applied":         False,
-            "ecc_note":            "Reed-Solomon ECC is in Person 2's backend. These results are raw extraction.",
+            "erasure_handling": (
+                "Missing/unreadable bits are marked as None (erasure). "
+                "BER is computed over non-erased bits only. "
+                "Erasure rate is reported separately."
+            ),
+            "frame_check": (
+                "Bio.Align.PairwiseAligner (global NW, match=1, mismatch=-1, gap_open=-2, gap_extend=-0.5). "
+                "Checks whether every codon-start in the original maps to a codon-aligned position in the noisy sequence. "
+                "CONSERVATIVE GATE: if any codon-start is displaced, all n_bits positions are marked as erasures. "
+                "The aligner maps positions; it does not restore deleted bases or perform error correction."
+            ),
+            "indel_limitation": (
+                "At 0.5% per-base indel rate, the probability that at least one codon-start is displaced "
+                "in a 600+ nt gene is high. Most trials fail the frame gate → 100% erasure. "
+                "This correctly reflects physical reality. ECC and synchronisation recovery "
+                "(Person 2's backend) are required to improve indel robustness. "
+                "RS ECC alone does not solve frame realignment."
+            ),
+            "aggregation": "macro-average across all test genes (each gene contributes equally regardless of length)",
+            "ecc_applied": False,
+            "ecc_note": (
+                "Reed-Solomon ECC is in Person 2's backend. These results are raw extraction. "
+                "RS ECC alone does not solve frame realignment — the backend must also implement "
+                "synchronisation recovery and a codon-position to RS-symbol mapping."
+            ),
         },
-        "substitution_benchmark": run_substitution_benchmark(
-            bits, carrier_positions, stamped_dna, codon_usage,
-            SUBSTITUTION_RATES, N_TRIALS,
-        ),
-        "insertion_benchmark": run_insertion_benchmark(
-            bits, carrier_positions, stamped_dna, codon_usage,
-            INDEL_RATES, N_TRIALS,
-        ),
-        "deletion_benchmark": run_deletion_benchmark(
-            bits, carrier_positions, stamped_dna, codon_usage,
-            INDEL_RATES, N_TRIALS,
-        ),
-        "combined_indel_benchmark": run_indel_benchmark(
-            bits, carrier_positions, stamped_dna, codon_usage,
-            INDEL_RATES, N_TRIALS,
-        ),
+        "per_gene_detail": per_gene_results,
+        "substitution_benchmark":    _macro_avg("substitution_benchmark",    SUBSTITUTION_RATES),
+        "insertion_benchmark":        _macro_avg("insertion_benchmark",        INDEL_RATES),
+        "deletion_benchmark":         _macro_avg("deletion_benchmark",         INDEL_RATES),
+        "combined_indel_benchmark":   _macro_avg("combined_indel_benchmark",   INDEL_RATES),
     }
 
     ARTIFACTS_DIR.mkdir(exist_ok=True)
@@ -449,9 +558,10 @@ def main() -> None:
     with open(out_path, "w") as fh:
         json.dump(results, fh, indent=2)
 
-    print(f"Benchmark saved to {out_path}")
+    print(f"\nBenchmark saved to {out_path}")
 
     # Summary table
+    print(f"\n[Macro-averaged across {len(per_gene_results)} gene(s), {N_TRIALS} trials each]")
     print("\nSubstitution Rate | Mean Recovery | Mean Erasure | Mean BER (non-erased)")
     print("-" * 70)
     for rate, rec in results["substitution_benchmark"].items():
@@ -461,12 +571,12 @@ def main() -> None:
             f"{rec['mean_erasure_rate']:>7.1%}      | {ber_str}"
         )
 
-    print("\nIndel Rate        | Mean Recovery | Mean Erasure | Mean BER (non-erased)")
+    print("\nCombined Indel Rate | Mean Recovery | Mean Erasure | Mean BER (non-erased)")
     print("-" * 70)
     for rate, rec in results["combined_indel_benchmark"].items():
         ber_str = f"{rec['mean_ber_non_erased']:.3f}" if rec["mean_ber_non_erased"] is not None else "  N/A"
         print(
-            f"  {float(rate):>8.4f}       | {rec['mean_recovery']:>7.1%}       | "
+            f"  {float(rate):>8.4f}         | {rec['mean_recovery']:>7.1%}       | "
             f"{rec['mean_erasure_rate']:>7.1%}      | {ber_str}"
         )
 

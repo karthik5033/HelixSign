@@ -1,162 +1,957 @@
 {
-  "test_sequence_length": 600,
-  "n_bits_embedded": 64,
+  "n_genes_benchmarked": 5,
+  "gene_ids": [
+    "b3920",
+    "b1703",
+    "b2022",
+    "b0930",
+    "b0568"
+  ],
   "methodology": {
-    "erasure_handling": "Missing/unreadable bits are marked as None (erasure). BER is computed over non-erased bits only.",
-    "frame_check": "Codon-level alignment (BioPython pairwise2). Net-length equality alone is not sufficient.",
+    "erasure_handling": "Missing/unreadable bits are marked as None (erasure). BER is computed over non-erased bits only. Erasure rate is reported separately.",
+    "frame_check": "Bio.Align.PairwiseAligner (global NW, match=1, mismatch=-1, gap_open=-2, gap_extend=-0.5). Checks whether every codon-start in the original maps to a codon-aligned position in the noisy sequence. CONSERVATIVE GATE: if any codon-start is displaced, all n_bits positions are marked as erasures. The aligner maps positions; it does not restore deleted bases or perform error correction.",
+    "indel_limitation": "At 0.5% per-base indel rate, the probability that at least one codon-start is displaced in a 600+ nt gene is high. Most trials fail the frame gate \u2192 100% erasure. This correctly reflects physical reality. ECC and synchronisation recovery (Person 2's backend) are required to improve indel robustness. RS ECC alone does not solve frame realignment.",
+    "aggregation": "macro-average across all test genes (each gene contributes equally regardless of length)",
     "ecc_applied": false,
-    "ecc_note": "Reed-Solomon ECC is in Person 2's backend. These results are raw extraction."
+    "ecc_note": "Reed-Solomon ECC is in Person 2's backend. These results are raw extraction. RS ECC alone does not solve frame realignment \u2014 the backend must also implement synchronisation recovery and a codon-position to RS-symbol mapping."
   },
+  "per_gene_detail": [
+    {
+      "gene_id": "b3920",
+      "length_nt": 600,
+      "n_bits": 64,
+      "substitution_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.9984375,
+          "std_recovery": 0.0046875,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.0015625,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.9932291666666667,
+          "std_recovery": 0.008730757611583442,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.0067708333333333336,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.9802083333333333,
+          "std_recovery": 0.014508737788733458,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.019791666666666666,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.9604166666666667,
+          "std_recovery": 0.019235609700645195,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.03958333333333333,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.03": {
+          "mean_recovery": 0.9552083333333333,
+          "std_recovery": 0.021998658418690496,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.04479166666666667,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.05": {
+          "mean_recovery": 0.921875,
+          "std_recovery": 0.03517071461694611,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.078125,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "insertion_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.6,
+          "std_recovery": 0.48989794855663565,
+          "mean_erasure_rate": 0.4,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.03333333333333333,
+          "std_recovery": 0.17950549357115014,
+          "mean_erasure_rate": 0.9666666666666667,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "deletion_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.4666666666666667,
+          "std_recovery": 0.49888765156985887,
+          "mean_erasure_rate": 0.5333333333333333,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.03333333333333333,
+          "std_recovery": 0.17950549357115014,
+          "mean_erasure_rate": 0.9666666666666667,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "combined_indel_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.5651041666666666,
+          "std_recovery": 0.4942390005555398,
+          "mean_erasure_rate": 0.43333333333333335,
+          "mean_ber_non_erased": 0.0027573529411764708,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.3223958333333333,
+          "std_recovery": 0.45825904937797524,
+          "mean_erasure_rate": 0.6666666666666666,
+          "mean_ber_non_erased": 0.0328125,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.06197916666666667,
+          "std_recovery": 0.2319135796371978,
+          "mean_erasure_rate": 0.9333333333333333,
+          "mean_ber_non_erased": 0.0703125,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.0421875,
+          "std_recovery": 0.157967127217184,
+          "mean_erasure_rate": 0.9333333333333333,
+          "mean_ber_non_erased": 0.3671875,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      }
+    },
+    {
+      "gene_id": "b1703",
+      "length_nt": 834,
+      "n_bits": 64,
+      "substitution_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.9994791666666667,
+          "std_recovery": 0.002804773337049221,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.0005208333333333333,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.9958333333333333,
+          "std_recovery": 0.006909634979907083,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.004166666666666667,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.9807291666666667,
+          "std_recovery": 0.014367827316805961,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.019270833333333334,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.9614583333333333,
+          "std_recovery": 0.02411632688081297,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.03854166666666667,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.03": {
+          "mean_recovery": 0.9598958333333333,
+          "std_recovery": 0.026046874479270805,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.04010416666666667,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.05": {
+          "mean_recovery": 0.9239583333333333,
+          "std_recovery": 0.03510895738823483,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.07604166666666666,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "insertion_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.5,
+          "std_recovery": 0.5,
+          "mean_erasure_rate": 0.5,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.03333333333333333,
+          "std_recovery": 0.17950549357115014,
+          "mean_erasure_rate": 0.9666666666666667,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "deletion_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.36666666666666664,
+          "std_recovery": 0.4818944098266986,
+          "mean_erasure_rate": 0.6333333333333333,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "combined_indel_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.4635416666666667,
+          "std_recovery": 0.4958212971228198,
+          "mean_erasure_rate": 0.5333333333333333,
+          "mean_ber_non_erased": 0.006696428571428571,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.2557291666666667,
+          "std_recovery": 0.3961994606089281,
+          "mean_erasure_rate": 0.7,
+          "mean_ber_non_erased": 0.14756944444444445,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.08385416666666666,
+          "std_recovery": 0.2538275786240315,
+          "mean_erasure_rate": 0.9,
+          "mean_ber_non_erased": 0.16145833333333334,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.19895833333333332,
+          "std_recovery": 0.3369819841458722,
+          "mean_erasure_rate": 0.7333333333333333,
+          "mean_ber_non_erased": 0.25390625,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      }
+    },
+    {
+      "gene_id": "b2022",
+      "length_nt": 1068,
+      "n_bits": 64,
+      "substitution_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.9979166666666667,
+          "std_recovery": 0.005311478659992484,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.0020833333333333333,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.9927083333333333,
+          "std_recovery": 0.009660019266141358,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.007291666666666667,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.9838541666666667,
+          "std_recovery": 0.015874740264716844,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.016145833333333335,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.9697916666666667,
+          "std_recovery": 0.024517921449874625,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.030208333333333334,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.03": {
+          "mean_recovery": 0.9583333333333334,
+          "std_recovery": 0.02147450846675865,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.041666666666666664,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.05": {
+          "mean_recovery": 0.9265625,
+          "std_recovery": 0.03256353965070956,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.0734375,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "insertion_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.3333333333333333,
+          "std_recovery": 0.47140452079103173,
+          "mean_erasure_rate": 0.6666666666666666,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.03333333333333333,
+          "std_recovery": 0.17950549357115014,
+          "mean_erasure_rate": 0.9666666666666667,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "deletion_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.26666666666666666,
+          "std_recovery": 0.44221663871405337,
+          "mean_erasure_rate": 0.7333333333333333,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "combined_indel_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.38333333333333336,
+          "std_recovery": 0.47337532824270523,
+          "mean_erasure_rate": 0.6,
+          "mean_ber_non_erased": 0.041666666666666664,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.21770833333333334,
+          "std_recovery": 0.369158789419344,
+          "mean_erasure_rate": 0.7333333333333333,
+          "mean_ber_non_erased": 0.18359375,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.03333333333333333,
+          "std_recovery": 0.17950549357115014,
+          "mean_erasure_rate": 0.9666666666666667,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.033854166666666664,
+          "std_recovery": 0.12745527027211895,
+          "mean_erasure_rate": 0.9333333333333333,
+          "mean_ber_non_erased": 0.4921875,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      }
+    },
+    {
+      "gene_id": "b0930",
+      "length_nt": 1401,
+      "n_bits": 64,
+      "substitution_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.9984375,
+          "std_recovery": 0.0046875,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.0015625,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.9953125,
+          "std_recovery": 0.0071602745233685,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.0046875,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.9828125,
+          "std_recovery": 0.01528270911575126,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.0171875,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.9625,
+          "std_recovery": 0.021949278651776538,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.0375,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.03": {
+          "mean_recovery": 0.9619791666666667,
+          "std_recovery": 0.026046874479270805,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.03802083333333333,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.05": {
+          "mean_recovery": 0.9286458333333333,
+          "std_recovery": 0.03194114188846243,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.07135416666666666,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "insertion_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.26666666666666666,
+          "std_recovery": 0.44221663871405337,
+          "mean_erasure_rate": 0.7333333333333333,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "deletion_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.16666666666666666,
+          "std_recovery": 0.37267799624996495,
+          "mean_erasure_rate": 0.8333333333333334,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "combined_indel_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.3145833333333333,
+          "std_recovery": 0.4488616485220016,
+          "mean_erasure_rate": 0.6666666666666666,
+          "mean_ber_non_erased": 0.05625,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.11979166666666667,
+          "std_recovery": 0.3120917472163523,
+          "mean_erasure_rate": 0.8666666666666667,
+          "mean_ber_non_erased": 0.1015625,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.03333333333333333,
+          "std_recovery": 0.17950549357115014,
+          "mean_erasure_rate": 0.9666666666666667,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.06510416666666667,
+          "std_recovery": 0.1959918739900685,
+          "mean_erasure_rate": 0.9,
+          "mean_ber_non_erased": 0.3489583333333333,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      }
+    },
+    {
+      "gene_id": "b0568",
+      "length_nt": 2973,
+      "n_bits": 64,
+      "substitution_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.9984375,
+          "std_recovery": 0.0046875,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.0015625,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.9953125,
+          "std_recovery": 0.0071602745233685,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.0046875,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.9838541666666667,
+          "std_recovery": 0.015353544763524662,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.016145833333333335,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.9645833333333333,
+          "std_recovery": 0.022797988154415926,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.035416666666666666,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.03": {
+          "mean_recovery": 0.9557291666666666,
+          "std_recovery": 0.022492523835092898,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.044270833333333336,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.05": {
+          "mean_recovery": 0.9307291666666667,
+          "std_recovery": 0.03415729673347832,
+          "mean_erasure_rate": 0.0,
+          "mean_ber_non_erased": 0.06927083333333334,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "insertion_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.03333333333333333,
+          "std_recovery": 0.17950549357115014,
+          "mean_erasure_rate": 0.9666666666666667,
+          "mean_ber_non_erased": 0.0,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "deletion_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.0,
+          "std_recovery": 0.0,
+          "mean_erasure_rate": 1.0,
+          "mean_ber_non_erased": null,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      },
+      "combined_indel_benchmark": {
+        "0.001": {
+          "mean_recovery": 0.34375,
+          "std_recovery": 0.4590134631740119,
+          "mean_erasure_rate": 0.6333333333333333,
+          "mean_ber_non_erased": 0.0625,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.005": {
+          "mean_recovery": 0.05416666666666667,
+          "std_recovery": 0.20837499583416644,
+          "mean_erasure_rate": 0.9333333333333333,
+          "mean_ber_non_erased": 0.1875,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.01": {
+          "mean_recovery": 0.021354166666666667,
+          "std_recovery": 0.11499570681901805,
+          "mean_erasure_rate": 0.9666666666666667,
+          "mean_ber_non_erased": 0.359375,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        },
+        "0.02": {
+          "mean_recovery": 0.06145833333333333,
+          "std_recovery": 0.18879471968398787,
+          "mean_erasure_rate": 0.9,
+          "mean_ber_non_erased": 0.3854166666666667,
+          "trials": 30,
+          "note": "raw extraction; erasures excluded from BER denominator"
+        }
+      }
+    }
+  ],
   "substitution_benchmark": {
     "0.001": {
-      "mean_recovery": 0.9994791666666667,
-      "std_recovery": 0.002804773337049221,
+      "mean_recovery": 0.9985416666666665,
       "mean_erasure_rate": 0.0,
-      "mean_ber_non_erased": 0.0005208333333333333,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "mean_ber_non_erased": 0.0014583333333333334,
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.005": {
-      "mean_recovery": 0.9927083333333333,
-      "std_recovery": 0.010468620438667593,
+      "mean_recovery": 0.9944791666666667,
       "mean_erasure_rate": 0.0,
-      "mean_ber_non_erased": 0.007291666666666667,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "mean_ber_non_erased": 0.005520833333333333,
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.01": {
-      "mean_recovery": 0.9817708333333334,
-      "std_recovery": 0.018524395045602854,
+      "mean_recovery": 0.9822916666666666,
       "mean_erasure_rate": 0.0,
-      "mean_ber_non_erased": 0.018229166666666668,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "mean_ber_non_erased": 0.017708333333333333,
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.02": {
-      "mean_recovery": 0.9744791666666667,
-      "std_recovery": 0.019129549658548916,
+      "mean_recovery": 0.9637499999999999,
       "mean_erasure_rate": 0.0,
-      "mean_ber_non_erased": 0.025520833333333333,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "mean_ber_non_erased": 0.03625,
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.03": {
-      "mean_recovery": 0.9630208333333333,
-      "std_recovery": 0.021905980046680304,
+      "mean_recovery": 0.9582291666666667,
       "mean_erasure_rate": 0.0,
-      "mean_ber_non_erased": 0.03697916666666667,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "mean_ber_non_erased": 0.04177083333333333,
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.05": {
-      "mean_recovery": 0.9276041666666667,
-      "std_recovery": 0.03111516048175801,
+      "mean_recovery": 0.9263541666666667,
       "mean_erasure_rate": 0.0,
-      "mean_ber_non_erased": 0.07239583333333334,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "mean_ber_non_erased": 0.07364583333333333,
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     }
   },
   "insertion_benchmark": {
     "0.001": {
-      "mean_recovery": 0.7333333333333333,
-      "std_recovery": 0.4422166387140533,
-      "mean_erasure_rate": 0.26666666666666666,
+      "mean_recovery": 0.3466666666666667,
+      "mean_erasure_rate": 0.6533333333333333,
       "mean_ber_non_erased": 0.0,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.005": {
-      "mean_recovery": 0.1,
-      "std_recovery": 0.30000000000000004,
-      "mean_erasure_rate": 0.9,
+      "mean_recovery": 0.02,
+      "mean_erasure_rate": 0.9800000000000001,
       "mean_ber_non_erased": 0.0,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.01": {
       "mean_recovery": 0.0,
-      "std_recovery": 0.0,
       "mean_erasure_rate": 1.0,
       "mean_ber_non_erased": null,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.02": {
       "mean_recovery": 0.0,
-      "std_recovery": 0.0,
       "mean_erasure_rate": 1.0,
       "mean_ber_non_erased": null,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     }
   },
   "deletion_benchmark": {
     "0.001": {
-      "mean_recovery": 0.7,
-      "std_recovery": 0.458257569495584,
-      "mean_erasure_rate": 0.3,
+      "mean_recovery": 0.2533333333333333,
+      "mean_erasure_rate": 0.7466666666666667,
       "mean_ber_non_erased": 0.0,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.005": {
-      "mean_recovery": 0.0,
-      "std_recovery": 0.0,
-      "mean_erasure_rate": 1.0,
-      "mean_ber_non_erased": null,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "mean_recovery": 0.006666666666666666,
+      "mean_erasure_rate": 0.9933333333333334,
+      "mean_ber_non_erased": 0.0,
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.01": {
       "mean_recovery": 0.0,
-      "std_recovery": 0.0,
       "mean_erasure_rate": 1.0,
       "mean_ber_non_erased": null,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.02": {
       "mean_recovery": 0.0,
-      "std_recovery": 0.0,
       "mean_erasure_rate": 1.0,
       "mean_ber_non_erased": null,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     }
   },
   "combined_indel_benchmark": {
     "0.001": {
-      "mean_recovery": 0.6166666666666667,
-      "std_recovery": 0.4775516260631468,
-      "mean_erasure_rate": 0.36666666666666664,
-      "mean_ber_non_erased": 0.02631578947368421,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "mean_recovery": 0.4140625,
+      "mean_erasure_rate": 0.5733333333333334,
+      "mean_ber_non_erased": 0.03397408963585434,
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.005": {
-      "mean_recovery": 0.25104166666666666,
-      "std_recovery": 0.39639351808594897,
-      "mean_erasure_rate": 0.7,
-      "mean_ber_non_erased": 0.16319444444444445,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "mean_recovery": 0.19395833333333334,
+      "mean_erasure_rate": 0.78,
+      "mean_ber_non_erased": 0.13060763888888888,
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.01": {
-      "mean_recovery": 0.08125,
-      "std_recovery": 0.24415031230780762,
-      "mean_erasure_rate": 0.9,
-      "mean_ber_non_erased": 0.1875,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "mean_recovery": 0.04677083333333333,
+      "mean_erasure_rate": 0.9466666666666667,
+      "mean_ber_non_erased": 0.11822916666666668,
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     },
     "0.02": {
-      "mean_recovery": 0.0,
-      "std_recovery": 0.0,
-      "mean_erasure_rate": 1.0,
-      "mean_ber_non_erased": null,
-      "trials": 30,
-      "note": "raw extraction; erasures excluded from BER denominator"
+      "mean_recovery": 0.0803125,
+      "mean_erasure_rate": 0.8800000000000001,
+      "mean_ber_non_erased": 0.36953125,
+      "n_genes": 5,
+      "trials_per_gene": 30,
+      "note": "macro-average across genes; raw extraction without ECC"
     }
   }
 }
