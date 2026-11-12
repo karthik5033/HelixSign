@@ -248,3 +248,4 @@ npm run dev
 - **Person 1:** Frontend Lead (`frontend/`)
 - **Person 2:** Backend Lead (`backend/`)
 - **Person 3:** ML & Data Lead (`ml/`)
+

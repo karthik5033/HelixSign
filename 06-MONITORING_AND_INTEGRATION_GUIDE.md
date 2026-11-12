@@ -273,3 +273,4 @@ For smooth live judge demonstrations, every endpoint must adhere to the followin
   - Run Stress Lab $\to$ slider at 2.0% mutation $\to$ confirm recovery $> 95\%$.
   - Run Attacker Arena $\to$ run synonymous shuffle $\to$ confirm watermark survives.
 - [ ] 6. Done! Ready to present.
+

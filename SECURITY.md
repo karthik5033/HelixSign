@@ -21,3 +21,4 @@ HelixSign is created to provide **transparent provenance, authenticity verificat
 ## 3. Reporting Security Vulnerabilities
 
 If you discover a security vulnerability or biological safety concern regarding watermark manipulation, please report it privately to the repository owners instead of opening a public GitHub issue.
+

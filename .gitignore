@@ -52,3 +52,4 @@ ml/data/raw/
 ml/artifacts/*.pt
 ml/artifacts/*.onnx
 ml/artifacts/*.bin
+
