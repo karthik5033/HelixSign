@@ -168,11 +168,13 @@ async def lifespan(app: FastAPI):
 
     _load_detectors()
 
-    # Mark service ready
+    # ml_ready = ALL core modules importable AND both detectors actually loaded
     _state.ml_ready = (
         load_codon_usage is not None
         and embed_bits is not None
         and extract_bits is not None
+        and _state.kmer_detector is not None
+        and _state.cnn_detector is not None
     )
     logger.info("ML ready = %s", _state.ml_ready)
 
@@ -250,16 +252,24 @@ def _validate_sequence(seq: str, require_codon_multiple: bool = True) -> None:
 
 # ----- /health -----
 
+class HealthServices(BaseModel):
+    bioEngine: bool = Field(..., description="Core bio/embed/extract modules loaded.")
+    kmerDetectorLoaded: bool = Field(..., description="k-mer XGBoost detector weights loaded.")
+    cnnDetectorLoaded: bool = Field(..., description="1D CNN detector weights loaded.")
+    codonUsageLoaded: bool = Field(..., description="Codon usage table loaded from JSON.")
+
+
 class HealthResponse(BaseModel):
     status: str = Field(..., description="Always 'ok' when the service is running.")
     version: str = Field(..., description="API version string.")
     mlReady: bool = Field(
         ...,
         description=(
-            "True when all core genestamp_ml modules loaded successfully. "
-            "False in stub/degraded mode."
+            "True when all core modules AND both detector models are loaded. "
+            "False when any component is missing or failed to load."
         ),
     )
+    services: HealthServices = Field(..., description="Granular per-component readiness.")
 
 
 # ----- /ml/embed -----
@@ -366,6 +376,15 @@ class DetectResponse(BaseModel):
             "detector. Values near 0.50 indicate chance level (stealth)."
         ),
     )
+    degraded: bool = Field(
+        default=False,
+        description=(
+            "True when one or both detectors are unavailable and results are "
+            "partial or absent. Check `kmerAvailable` and `cnnAvailable` for details."
+        ),
+    )
+    kmerAvailable: bool = Field(default=True, description="False when k-mer detector is not loaded.")
+    cnnAvailable: bool  = Field(default=True, description="False when CNN detector is not loaded.")
 
 
 # ----- /ml/naive-encode -----
@@ -698,13 +717,25 @@ async def health_check() -> HealthResponse:
     """
     Liveness / readiness probe.
 
-    Returns `mlReady: true` when all core genestamp_ml modules are importable
-    and the codon usage table was loaded successfully.
+    Returns `mlReady: true` only when ALL core genestamp_ml modules are
+    importable AND both pre-trained detector models are actually loaded.
+    The `services` field gives per-component granularity for debugging.
     """
+    bio_ok = (
+        load_codon_usage is not None
+        and embed_bits is not None
+        and extract_bits is not None
+    )
     return HealthResponse(
         status="ok",
         version=app.version,
         mlReady=_state.ml_ready,
+        services=HealthServices(
+            bioEngine=bio_ok,
+            kmerDetectorLoaded=_state.kmer_detector is not None,
+            cnnDetectorLoaded=_state.cnn_detector is not None,
+            codonUsageLoaded=_state.codon_usage is not None,
+        ),
     )
 
 
@@ -904,30 +935,59 @@ async def detect_endpoint(req: DetectRequest) -> DetectResponse:
     # Sequence doesn't have to be codon-aligned for detection
     _validate_sequence(seq, require_codon_multiple=False)
 
-    kmer_prob = 0.50
-    cnn_prob  = 0.50
+    kmer_prob      = None
+    cnn_prob       = None
+    kmer_available = False
+    cnn_available  = False
 
     if _state.kmer_detector is not None:
         try:
             preds = _state.kmer_detector.predict_proba([seq])
             kmer_prob = float(preds[0])
+            kmer_available = True
         except Exception as exc:
-            logger.warning("k-mer detector inference failed (%s) — returning stub 0.50.", exc)
-            kmer_prob = 0.50
+            logger.error("k-mer detector inference failed: %s", exc, exc_info=True)
+            # Do NOT silently return 0.50 — propagate as 503
+            raise HTTPException(
+                status_code=503,
+                detail=f"k-mer detector inference error: {exc}",
+            )
     else:
-        logger.debug("k-mer detector not loaded; returning stub probability 0.50.")
+        logger.warning("k-mer detector not loaded — /ml/detect is degraded.")
 
     if _state.cnn_detector is not None:
         try:
             preds = _state.cnn_detector.predict_proba([seq])
             cnn_prob = float(preds[0])
+            cnn_available = True
         except Exception as exc:
-            logger.warning("CNN detector inference failed (%s) — returning stub 0.50.", exc)
-            cnn_prob = 0.50
+            logger.error("CNN detector inference failed: %s", exc, exc_info=True)
+            raise HTTPException(
+                status_code=503,
+                detail=f"CNN detector inference error: {exc}",
+            )
     else:
-        logger.debug("CNN detector not loaded; returning stub probability 0.50.")
+        logger.warning("CNN detector not loaded — /ml/detect is degraded.")
 
-    return DetectResponse(kmerProbability=round(kmer_prob, 4), cnnProbability=round(cnn_prob, 4))
+    # Both detectors must be available; return 503 if either is missing
+    if not kmer_available or not cnn_available:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "One or more detectors are not loaded. "
+                f"kmer_detector={'loaded' if kmer_available else 'MISSING'}, "
+                f"cnn_detector={'loaded' if cnn_available else 'MISSING'}. "
+                "Run training/train_detector.py to generate model weights."
+            ),
+        )
+
+    return DetectResponse(
+        kmerProbability=round(kmer_prob, 4),
+        cnnProbability=round(cnn_prob, 4),
+        degraded=False,
+        kmerAvailable=True,
+        cnnAvailable=True,
+    )
 
 
 @app.post(

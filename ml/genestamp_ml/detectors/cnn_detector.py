@@ -254,45 +254,104 @@ class CNNDetector:
         return {"epochs": epochs, "history": history}
 
     # ------------------------------------------------------------------
-    def predict_proba(self, sequences: List[str]) -> np.ndarray:
+    def _windows_for_sequence(
+        self,
+        seq: str,
+        stride: int = 128,
+    ) -> np.ndarray:
+        """
+        Produce overlapping windows of *seq* with the given stride.
+
+        For sequences shorter than WINDOW_SIZE the single padded window is
+        returned.  Returns ndarray of shape (n_windows, 4, window_size).
+        """
+        n = len(seq)
+        if n <= self.window_size:
+            return sequences_to_windows([seq], self.window_size, center=False)
+
+        starts = list(range(0, n - self.window_size + 1, stride))
+        # Always include the final window so the 3' end is covered
+        if starts[-1] + self.window_size < n:
+            starts.append(n - self.window_size)
+
+        windows = []
+        for s in starts:
+            w = seq[s: s + self.window_size]
+            windows.append(one_hot_encode(w, self.window_size, center=False))
+        return np.stack(windows, axis=0)  # (n_windows, 4, window_size)
+
+    def predict_proba(
+        self,
+        sequences: List[str],
+        stride: int = 128,
+        aggregate: str = "max",
+    ) -> np.ndarray:
         """
         Return probability of class 1 (watermarked) for each sequence.
 
-        Uses center windowing for deterministic inference.
+        Uses a **multi-window** strategy:
+        1. Divide each sequence into overlapping ``window_size``-bp windows
+           (stride = *stride* bases).
+        2. Score every window independently.
+        3. Aggregate per-sequence scores via *aggregate* ('max' or 'mean').
+           - 'max'  — conservative: flag a sequence if any window looks watermarked.
+           - 'mean' — average evidence across all windows.
+
+        This eliminates the training/inference distribution mismatch that
+        existed when training used random windows but inference used only
+        the central window.
+
         Returns array of shape (N,).
         """
         if not self.trained:
             raise RuntimeError("CNNDetector has not been trained yet. Call fit() first.")
 
-        windows = sequences_to_windows(sequences, self.window_size, center=True)
-        X_t = torch.from_numpy(windows).to(self.device)
-
         self.model.eval()
-        with torch.no_grad():
-            probas = self.model(X_t).cpu().numpy()  # (N,)
+        seq_probas: List[float] = []
 
-        return probas
+        with torch.no_grad():
+            for seq in sequences:
+                windows = self._windows_for_sequence(seq, stride=stride)  # (W, 4, L)
+                X_t = torch.from_numpy(windows).to(self.device)
+                window_probs = self.model(X_t).cpu().numpy()  # (W,)
+                if aggregate == "max":
+                    seq_probas.append(float(window_probs.max()))
+                else:
+                    seq_probas.append(float(window_probs.mean()))
+
+        return np.array(seq_probas, dtype=np.float32)
 
     # ------------------------------------------------------------------
     def evaluate(
-        self, native_seqs: List[str], watermarked_seqs: List[str]
+        self,
+        native_seqs: List[str],
+        watermarked_seqs: List[str],
+        stride: int = 128,
+        aggregate: str = "max",
     ) -> dict:
         """
         Evaluate on held-out native and watermarked sequences.
 
-        Returns dict with keys: auc, accuracy.
+        Uses multi-window ``predict_proba``.  Returns dict with keys:
+        auc, accuracy, n_native, n_watermarked, stride, aggregate.
         """
         all_seqs = native_seqs + watermarked_seqs
         y_true = np.concatenate(
             [np.zeros(len(native_seqs)), np.ones(len(watermarked_seqs))]
         )
 
-        probas = self.predict_proba(all_seqs)
+        probas = self.predict_proba(all_seqs, stride=stride, aggregate=aggregate)
         auc = float(roc_auc_score(y_true, probas))
         preds = (probas >= 0.5).astype(int)
         acc = float(accuracy_score(y_true, preds))
 
-        return {"auc": auc, "accuracy": acc}
+        return {
+            "auc": auc,
+            "accuracy": acc,
+            "n_native": len(native_seqs),
+            "n_watermarked": len(watermarked_seqs),
+            "windowing": {"window_size": self.window_size, "stride": stride, "aggregate": aggregate},
+        }
 
     # ------------------------------------------------------------------
     def save(self, path: str) -> None:
