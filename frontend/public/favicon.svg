@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <defs>
+    <linearGradient id="logoGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF5500" />
+      <stop offset="0.6" stop-color="#ea580c" />
+      <stop offset="1" stop-color="#c2410c" />
+    </linearGradient>
+  </defs>
+  <path
+    d="M12 2C6.477 2 2 6.477 2 12c0 5.523 4.477 10 10 10 2.215 0 4.266-.72 5.928-1.936l-3.32-3.32A5.328 5.328 0 0112 17.333c-2.946 0-5.333-2.388-5.333-5.333 0-2.946 2.387-5.333 5.333-5.333 1.942 0 3.642 1.042 4.566 2.597l4.02-2.01C18.825 4.095 15.65 2 12 2z"
+    fill="url(#logoGrad)"
+  />
+  <path
+    d="M21.99 12c0 1.764-.46 3.42-1.267 4.858l-3.95-1.975A5.27 5.27 0 0017.333 12c0-.987-.27-1.912-.74-2.705l3.95-1.975c.954 1.458 1.447 3.037 1.447 4.68z"
+    fill="#FF5500"
+  />
+</svg>
