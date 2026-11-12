@@ -1,8 +1,7 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createHash, randomUUID } from 'node:crypto';
-import { getSupabaseConfig, isDatabaseConfigured } from '@/lib/env';
 import { sequenceSimilarity } from '@/core/sequence';
 import type { RegistryStamp } from '@/types';
+import { getDatabase, resetDatabase } from './sqlite';
 
 export interface StampRecord {
   id: string;
@@ -45,7 +44,7 @@ export interface OwnershipCodes {
 
 type CodeKind = 'owner' | 'project' | 'batch';
 
-interface DbStampRow {
+interface StampRow {
   id: string;
   owner_code: number;
   owner_name: string;
@@ -58,38 +57,26 @@ interface DbStampRow {
   sequence_hash: string;
   original_sequence_hash: string;
   stamped_sequence: string;
-  carrier_positions: number[] | null;
+  carrier_positions: string | null;
   capacity_used: number;
   capacity_total: number | null;
   created_at: string;
 }
 
-const memoryStamps = new Map<string, StampRecord>();
-const memorySequenceHashes = new Map<string, string>();
-const memoryCodeByKey = new Map<string, number>();
-const memoryNameByCode = new Map<string, string>();
-const memoryUsedCodes = new Map<CodeKind, Set<number>>([
-  ['owner', new Set()],
-  ['project', new Set()],
-  ['batch', new Set()],
-]);
-
-let client: SupabaseClient | null | undefined;
-
-function getClient(): SupabaseClient | null {
-  if (client !== undefined) return client;
-  const config = getSupabaseConfig();
-  if (!config) {
-    client = null;
-    return client;
+function parseCarrierPositions(value: string | null): number[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((entry) => Number(entry))
+      .filter((entry) => Number.isInteger(entry) && entry >= 0);
+  } catch {
+    return [];
   }
-  client = createClient(config.url, config.serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-  return client;
 }
 
-function rowToRecord(row: DbStampRow): StampRecord {
+function rowToRecord(row: StampRow): StampRecord {
   return {
     id: row.id,
     ownerCode: row.owner_code,
@@ -103,7 +90,7 @@ function rowToRecord(row: DbStampRow): StampRecord {
     sequenceHash: row.sequence_hash,
     originalSequenceHash: row.original_sequence_hash,
     stampedSequence: row.stamped_sequence,
-    carrierPositions: Array.isArray(row.carrier_positions) ? row.carrier_positions : [],
+    carrierPositions: parseCarrierPositions(row.carrier_positions),
     capacityUsed: row.capacity_used,
     capacityTotal: row.capacity_total ?? 0,
     createdAt: row.created_at,
@@ -115,65 +102,35 @@ function codeForName(kind: CodeKind, name: string): number {
   return digest.readUInt16BE(0);
 }
 
-function memoryAssignCode(kind: CodeKind, name: string): number {
-  const key = `${kind}:${name}`;
-  const existing = memoryCodeByKey.get(key);
-  if (existing !== undefined) return existing;
-
-  const used = memoryUsedCodes.get(kind)!;
-  const base = codeForName(kind, name);
-  let code = base;
-  for (let offset = 0; offset < 0x10000; offset += 1) {
-    code = (base + offset) & 0xffff;
-    if (!used.has(code)) break;
-  }
-  used.add(code);
-  memoryCodeByKey.set(key, code);
-  memoryNameByCode.set(`${kind}:${code}`, name);
-  return code;
-}
-
-function memoryAssignCodes(input: {
-  ownerName: string;
-  projectName: string;
-  batchName: string;
-}): OwnershipCodes {
-  return {
-    ownerCode: memoryAssignCode('owner', input.ownerName),
-    projectCode: memoryAssignCode('project', input.projectName),
-    batchCode: memoryAssignCode('batch', input.batchName),
-  };
-}
-
-async function dbGetOrAssignCode(kind: CodeKind, name: string): Promise<number> {
-  const supabase = getClient();
-  if (!supabase) throw new Error('Supabase is not configured');
-
-  const { data: existing, error } = await supabase
-    .from('entity_codes')
-    .select('code')
-    .eq('kind', kind)
-    .eq('name', name)
-    .maybeSingle();
-  if (error) throw error;
+function assignCode(kind: CodeKind, name: string): number {
+  const db = getDatabase();
+  const existing = db
+    .prepare('select code from entity_codes where kind = ? and name = ?')
+    .get(kind, name) as { code: number } | undefined;
   if (existing) return Number(existing.code);
 
+  const lookupCode = db.prepare('select name from entity_codes where kind = ? and code = ?');
+  const insert = db.prepare('insert into entity_codes (kind, name, code) values (?, ?, ?)');
   const base = codeForName(kind, name);
-  for (let offset = 0; offset < 64; offset += 1) {
+
+  for (let offset = 0; offset < 0x10000; offset += 1) {
     const code = (base + offset) & 0xffff;
-    const { data: taken, error: lookupError } = await supabase
-      .from('entity_codes')
-      .select('name')
-      .eq('kind', kind)
-      .eq('code', code)
-      .maybeSingle();
-    if (lookupError) throw lookupError;
+    const taken = lookupCode.get(kind, code) as { name: string } | undefined;
     if (taken) continue;
 
-    const { error: insertError } = await supabase.from('entity_codes').insert({ kind, name, code });
-    if (!insertError) return code;
-    // A concurrent writer may have claimed this code; retry with the next one.
+    try {
+      insert.run(kind, name, code);
+      return code;
+    } catch (error) {
+      // The name may have been inserted by another connection; re-read it.
+      const raced = db
+        .prepare('select code from entity_codes where kind = ? and name = ?')
+        .get(kind, name) as { code: number } | undefined;
+      if (raced) return Number(raced.code);
+      if (offset === 0xffff) throw error;
+    }
   }
+
   throw new Error(`Unable to allocate a ${kind} code`);
 }
 
@@ -182,22 +139,24 @@ export async function getOrAssignCodes(input: {
   projectName: string;
   batchName: string;
 }): Promise<OwnershipCodes> {
-  if (isDatabaseConfigured()) {
-    try {
-      const [ownerCode, projectCode, batchCode] = await Promise.all([
-        dbGetOrAssignCode('owner', input.ownerName),
-        dbGetOrAssignCode('project', input.projectName),
-        dbGetOrAssignCode('batch', input.batchName),
-      ]);
-      return { ownerCode, projectCode, batchCode };
-    } catch (error) {
-      console.warn('[helixsign] Supabase code allocation failed; using in-memory registry:', error);
-    }
-  }
-  return memoryAssignCodes(input);
+  return {
+    ownerCode: assignCode('owner', input.ownerName),
+    projectCode: assignCode('project', input.projectName),
+    batchCode: assignCode('batch', input.batchName),
+  };
 }
 
-function memoryInsertStamp(input: StampInsert, codes: OwnershipCodes): StampRecord {
+export async function insertStamp(
+  input: StampInsert,
+  codes: OwnershipCodes,
+): Promise<StampRecord> {
+  const db = getDatabase();
+
+  const duplicate = db
+    .prepare('select * from stamps where sequence_hash = ?')
+    .get(input.sequenceHash) as unknown as StampRow | undefined;
+  if (duplicate) return rowToRecord(duplicate);
+
   const record: StampRecord = {
     id: `stmp_${randomUUID().replace(/-/g, '').slice(0, 12)}`,
     ownerCode: codes.ownerCode,
@@ -216,83 +175,54 @@ function memoryInsertStamp(input: StampInsert, codes: OwnershipCodes): StampReco
     capacityTotal: input.capacityTotal,
     createdAt: new Date().toISOString(),
   };
-  memoryStamps.set(record.id, record);
-  memorySequenceHashes.set(record.sequenceHash, record.id);
+
+  db.prepare(
+    `insert into stamps (
+      id, owner_code, owner_name, project_code, project_name, batch_code, batch_name,
+      host, gene_name, sequence_hash, original_sequence_hash, stamped_sequence,
+      carrier_positions, capacity_used, capacity_total, created_at
+    ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    record.id,
+    record.ownerCode,
+    record.ownerName,
+    record.projectCode,
+    record.projectName,
+    record.batchCode,
+    record.batchName,
+    record.host,
+    record.geneName,
+    record.sequenceHash,
+    record.originalSequenceHash,
+    record.stampedSequence,
+    JSON.stringify(record.carrierPositions),
+    record.capacityUsed,
+    record.capacityTotal,
+    record.createdAt,
+  );
+
   return record;
 }
 
-export async function insertStamp(
-  input: StampInsert,
-  codes: OwnershipCodes,
-): Promise<StampRecord> {
-  if (isDatabaseConfigured()) {
-    const supabase = getClient();
-    if (supabase) {
-      const { data, error } = await supabase
-        .from('stamps')
-        .insert({
-          owner_code: codes.ownerCode,
-          owner_name: input.ownerName,
-          project_code: codes.projectCode,
-          project_name: input.projectName,
-          batch_code: codes.batchCode,
-          batch_name: input.batchName,
-          host: input.host,
-          gene_name: input.geneName ?? null,
-          sequence_hash: input.sequenceHash,
-          original_sequence_hash: input.originalSequenceHash,
-          stamped_sequence: input.stampedSequence,
-          carrier_positions: input.carrierPositions,
-          capacity_used: input.capacityUsed,
-          capacity_total: input.capacityTotal,
-        })
-        .select('*')
-        .single();
-
-      if (!error && data) return rowToRecord(data as DbStampRow);
-      console.warn('[helixsign] Supabase insert failed; using in-memory registry:', error);
-    }
-  }
-  return memoryInsertStamp(input, codes);
-}
-
 export async function getStampById(id: string): Promise<StampRecord | null> {
-  const supabase = getClient();
-  if (supabase) {
-    const { data, error } = await supabase.from('stamps').select('*').eq('id', id).maybeSingle();
-    if (!error && data) return rowToRecord(data as DbStampRow);
-  }
-  return memoryStamps.get(id) ?? null;
+  const row = getDatabase()
+    .prepare('select * from stamps where id = ?')
+    .get(id) as unknown as StampRow | undefined;
+  return row ? rowToRecord(row) : null;
 }
 
 export async function getStampByHash(hash: string): Promise<StampRecord | null> {
-  const supabase = getClient();
-  if (supabase) {
-    const { data, error } = await supabase
-      .from('stamps')
-      .select('*')
-      .eq('sequence_hash', hash)
-      .maybeSingle();
-    if (!error && data) return rowToRecord(data as DbStampRow);
-  }
-  const id = memorySequenceHashes.get(hash);
-  return id ? memoryStamps.get(id) ?? null : null;
+  const row = getDatabase()
+    .prepare('select * from stamps where sequence_hash = ?')
+    .get(hash) as unknown as StampRow | undefined;
+  return row ? rowToRecord(row) : null;
 }
 
 export async function listStamps(limit = 50, offset = 0): Promise<StampRecord[]> {
-  const supabase = getClient();
-  if (supabase) {
-    const { data, error } = await supabase
-      .from('stamps')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-    if (!error && data) return (data as DbStampRow[]).map(rowToRecord);
-  }
-
-  return [...memoryStamps.values()]
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(offset, offset + limit);
+  const rows = getDatabase()
+    .prepare('select * from stamps order by created_at desc limit ? offset ?')
+    .all(limit, offset) as unknown as StampRow[];
+  return rows.map(rowToRecord);
 }
 
 export async function listAllStamps(limit = 2000): Promise<StampRecord[]> {
@@ -319,26 +249,16 @@ export async function findCandidateStamps(
 }
 
 export async function getEntityName(kind: CodeKind, code: number): Promise<string | null> {
-  const supabase = getClient();
-  if (supabase) {
-    const { data, error } = await supabase
-      .from('entity_codes')
-      .select('name')
-      .eq('kind', kind)
-      .eq('code', code)
-      .maybeSingle();
-    if (!error && data) return String(data.name);
-  }
-  return memoryNameByCode.get(`${kind}:${code}`) ?? null;
+  const row = getDatabase()
+    .prepare('select name from entity_codes where kind = ? and code = ?')
+    .get(kind, code) as { name: string } | undefined;
+  return row ? String(row.name) : null;
 }
 
 export async function databaseHealthy(): Promise<boolean> {
-  if (!isDatabaseConfigured()) return false;
-  const supabase = getClient();
-  if (!supabase) return false;
   try {
-    const { error } = await supabase.from('stamps').select('id', { head: true, count: 'exact' }).limit(1);
-    return !error;
+    getDatabase().prepare('select 1 as ok').get();
+    return true;
   } catch {
     return false;
   }
@@ -356,11 +276,7 @@ export function toRegistryStamp(record: StampRecord): RegistryStamp {
   };
 }
 
-/** Test helper. */
+/** Test helper: clear all rows while keeping the connection open. */
 export function clearMemoryRegistry(): void {
-  memoryStamps.clear();
-  memorySequenceHashes.clear();
-  memoryCodeByKey.clear();
-  memoryNameByCode.clear();
-  memoryUsedCodes.forEach((set) => set.clear());
+  resetDatabase();
 }

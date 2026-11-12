@@ -13,6 +13,12 @@ next-env.d.ts
 # Test artifacts
 coverage/
 
+# Local registry database
+data/
+*.db
+*.db-wal
+*.db-shm
+
 # Environment files
 .env
 .env.local

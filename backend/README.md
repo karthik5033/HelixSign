@@ -14,16 +14,15 @@ npm run dev                  # http://127.0.0.1:3001
 ```
 
 `USE_STUBS=true` (the default when unset) keeps the whole API functional with a
-deterministic local ML fallback. No Python service or Supabase project is
-required for local development.
+deterministic local ML fallback. The registry is SQLite, so no Python service,
+database server, or cloud account is required for local development.
 
 ### Environment
 
 | Variable | Purpose |
 | --- | --- |
 | `MASTER_KEY` | 32-byte hex master secret for HKDF and payload MACs. Required outside local dev. |
-| `SUPABASE_URL` | Supabase project URL. Omit to use the in-memory registry. |
-| `SUPABASE_SERVICE_KEY` | Service-role key, backend only. Never expose to the browser. |
+| `DATABASE_PATH` | SQLite registry file, default `./data/helixsign.db`. Use `:memory:` for ephemeral runs. |
 | `USE_STUBS` | `true` (default) uses the local ML fallback; `false` calls `ML_SERVICE_URL`. |
 | `ML_SERVICE_URL` | Person 3's FastAPI service, default `http://127.0.0.1:8000`. |
 | `ALLOWED_ORIGINS` | Comma-separated frontend origins for CORS. |
@@ -64,10 +63,15 @@ backend never returns the master key or carrier positions.
 
 ## Registry
 
-Run `supabase/schema.sql` once, then set the two `SUPABASE_*` variables. Without
-them the backend uses an in-memory registry, which is intentionally ephemeral.
-The database stores the stamped sequence and carrier positions so forensic trace
-and indel-tolerant verification survive process restarts.
+The registry is a local SQLite database (`backend/data/helixsign.db` by
+default). The schema is created automatically on first open, so there is no
+migration step and no external service to configure. The database stores the
+stamped sequence and carrier positions, so forensic trace and indel-tolerant
+verification survive process restarts.
+
+SQLite needs a persistent filesystem. If the backend is later deployed to a
+serverless platform with read-only or ephemeral storage, point `DATABASE_PATH`
+at a mounted volume or replace the registry adapter with a hosted Postgres.
 
 ## Tests
 
