@@ -1,0 +1,58 @@
+{
+  "test_sequence_length": 600,
+  "n_bits_embedded": 64,
+  "substitution_benchmark": {
+    "0.001": {
+      "mean_recovery": 0.996875,
+      "std_recovery": 0.00625,
+      "trials": 30
+    },
+    "0.005": {
+      "mean_recovery": 0.9916666666666667,
+      "std_recovery": 0.010468620438667593,
+      "trials": 30
+    },
+    "0.01": {
+      "mean_recovery": 0.9828125,
+      "std_recovery": 0.015806240526555746,
+      "trials": 30
+    },
+    "0.02": {
+      "mean_recovery": 0.9583333333333334,
+      "std_recovery": 0.02562161224218509,
+      "trials": 30
+    },
+    "0.03": {
+      "mean_recovery": 0.9473958333333333,
+      "std_recovery": 0.0240318166563736,
+      "trials": 30
+    },
+    "0.05": {
+      "mean_recovery": 0.921875,
+      "std_recovery": 0.038273277230987154,
+      "trials": 30
+    }
+  },
+  "indel_benchmark": {
+    "0.001": {
+      "mean_recovery": 0.5666666666666667,
+      "std_recovery": 0.49553562491061687,
+      "trials": 30
+    },
+    "0.005": {
+      "mean_recovery": 0.2640625,
+      "std_recovery": 0.3768908492383217,
+      "trials": 30
+    },
+    "0.01": {
+      "mean_recovery": 0.16875,
+      "std_recovery": 0.31846903466689924,
+      "trials": 30
+    },
+    "0.02": {
+      "mean_recovery": 0.30625,
+      "std_recovery": 0.3475312860616533,
+      "trials": 30
+    }
+  }
+}

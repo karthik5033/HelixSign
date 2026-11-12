@@ -1,0 +1,521 @@
+{
+  "metadata": {
+    "organism": "E. coli K-12 MG1655",
+    "accession": "NC_000913.3",
+    "total_cds": 4300,
+    "total_sense_codons": 1330036
+  },
+  "codon_table": {
+    "TTT": {
+      "amino_acid": "F",
+      "count": 29696,
+      "frequency": 0.02232722,
+      "rscu": 1.146519
+    },
+    "TTC": {
+      "amino_acid": "F",
+      "count": 22106,
+      "frequency": 0.0166206,
+      "rscu": 0.853481
+    },
+    "TTA": {
+      "amino_acid": "L",
+      "count": 18391,
+      "frequency": 0.01382745,
+      "rscu": 0.774526
+    },
+    "TTG": {
+      "amino_acid": "L",
+      "count": 18243,
+      "frequency": 0.01371617,
+      "rscu": 0.768293
+    },
+    "CTT": {
+      "amino_acid": "L",
+      "count": 14653,
+      "frequency": 0.011017,
+      "rscu": 0.617103
+    },
+    "CTC": {
+      "amino_acid": "L",
+      "count": 14900,
+      "frequency": 0.0112027,
+      "rscu": 0.627505
+    },
+    "CTA": {
+      "amino_acid": "L",
+      "count": 5176,
+      "frequency": 0.00389162,
+      "rscu": 0.217984
+    },
+    "CTG": {
+      "amino_acid": "L",
+      "count": 71106,
+      "frequency": 0.05346171,
+      "rscu": 2.994588
+    },
+    "ATT": {
+      "amino_acid": "I",
+      "count": 40705,
+      "frequency": 0.03060443,
+      "rscu": 1.527258
+    },
+    "ATC": {
+      "amino_acid": "I",
+      "count": 33734,
+      "frequency": 0.02536322,
+      "rscu": 1.265705
+    },
+    "ATA": {
+      "amino_acid": "I",
+      "count": 5518,
+      "frequency": 0.00414876,
+      "rscu": 0.207036
+    },
+    "ATG": {
+      "amino_acid": "M",
+      "count": 37235,
+      "frequency": 0.02799548,
+      "rscu": 1.0
+    },
+    "GTT": {
+      "amino_acid": "V",
+      "count": 24394,
+      "frequency": 0.01834086,
+      "rscu": 1.031688
+    },
+    "GTC": {
+      "amino_acid": "V",
+      "count": 20453,
+      "frequency": 0.01537778,
+      "rscu": 0.865012
+    },
+    "GTA": {
+      "amino_acid": "V",
+      "count": 14533,
+      "frequency": 0.01092677,
+      "rscu": 0.61464
+    },
+    "GTG": {
+      "amino_acid": "V",
+      "count": 35199,
+      "frequency": 0.0264647,
+      "rscu": 1.48866
+    },
+    "TCT": {
+      "amino_acid": "S",
+      "count": 11204,
+      "frequency": 0.00842383,
+      "rscu": 0.874493
+    },
+    "TCC": {
+      "amino_acid": "S",
+      "count": 11480,
+      "frequency": 0.00863135,
+      "rscu": 0.896035
+    },
+    "TCA": {
+      "amino_acid": "S",
+      "count": 9365,
+      "frequency": 0.00704116,
+      "rscu": 0.730955
+    },
+    "TCG": {
+      "amino_acid": "S",
+      "count": 11895,
+      "frequency": 0.00894337,
+      "rscu": 0.928426
+    },
+    "CCT": {
+      "amino_acid": "P",
+      "count": 9274,
+      "frequency": 0.00697274,
+      "rscu": 0.628362
+    },
+    "CCC": {
+      "amino_acid": "P",
+      "count": 7261,
+      "frequency": 0.00545925,
+      "rscu": 0.491971
+    },
+    "CCA": {
+      "amino_acid": "P",
+      "count": 11221,
+      "frequency": 0.00843661,
+      "rscu": 0.760282
+    },
+    "CCG": {
+      "amino_acid": "P",
+      "count": 31280,
+      "frequency": 0.02351816,
+      "rscu": 2.119385
+    },
+    "ACT": {
+      "amino_acid": "T",
+      "count": 11766,
+      "frequency": 0.00884638,
+      "rscu": 0.658901
+    },
+    "ACC": {
+      "amino_acid": "T",
+      "count": 31329,
+      "frequency": 0.023555,
+      "rscu": 1.754438
+    },
+    "ACA": {
+      "amino_acid": "T",
+      "count": 9151,
+      "frequency": 0.00688026,
+      "rscu": 0.51246
+    },
+    "ACG": {
+      "amino_acid": "T",
+      "count": 19182,
+      "frequency": 0.01442217,
+      "rscu": 1.074201
+    },
+    "GCT": {
+      "amino_acid": "A",
+      "count": 20322,
+      "frequency": 0.01527929,
+      "rscu": 0.640588
+    },
+    "GCC": {
+      "amino_acid": "A",
+      "count": 34294,
+      "frequency": 0.02578426,
+      "rscu": 1.081011
+    },
+    "GCA": {
+      "amino_acid": "A",
+      "count": 26896,
+      "frequency": 0.02022201,
+      "rscu": 0.847812
+    },
+    "GCG": {
+      "amino_acid": "A",
+      "count": 45384,
+      "frequency": 0.03412238,
+      "rscu": 1.430589
+    },
+    "TAT": {
+      "amino_acid": "Y",
+      "count": 21356,
+      "frequency": 0.01605671,
+      "rscu": 1.135052
+    },
+    "TAC": {
+      "amino_acid": "Y",
+      "count": 16274,
+      "frequency": 0.01223576,
+      "rscu": 0.864948
+    },
+    "TAA": {
+      "amino_acid": "*",
+      "count": 0,
+      "frequency": 0.0,
+      "rscu": 0.0
+    },
+    "TAG": {
+      "amino_acid": "*",
+      "count": 0,
+      "frequency": 0.0,
+      "rscu": 0.0
+    },
+    "TGA": {
+      "amino_acid": "*",
+      "count": 3,
+      "frequency": 2.26e-06,
+      "rscu": 0.0
+    },
+    "CAT": {
+      "amino_acid": "H",
+      "count": 17163,
+      "frequency": 0.01290416,
+      "rscu": 1.138696
+    },
+    "CAC": {
+      "amino_acid": "H",
+      "count": 12982,
+      "frequency": 0.00976064,
+      "rscu": 0.861304
+    },
+    "CAA": {
+      "amino_acid": "Q",
+      "count": 20501,
+      "frequency": 0.01541387,
+      "rscu": 0.692859
+    },
+    "CAG": {
+      "amino_acid": "Q",
+      "count": 38677,
+      "frequency": 0.02907966,
+      "rscu": 1.307141
+    },
+    "AAT": {
+      "amino_acid": "N",
+      "count": 23160,
+      "frequency": 0.01741306,
+      "rscu": 0.892537
+    },
+    "AAC": {
+      "amino_acid": "N",
+      "count": 28737,
+      "frequency": 0.02160618,
+      "rscu": 1.107463
+    },
+    "AAA": {
+      "amino_acid": "K",
+      "count": 44943,
+      "frequency": 0.03379081,
+      "rscu": 1.534519
+    },
+    "AAG": {
+      "amino_acid": "K",
+      "count": 13633,
+      "frequency": 0.0102501,
+      "rscu": 0.465481
+    },
+    "GAT": {
+      "amino_acid": "D",
+      "count": 42684,
+      "frequency": 0.03209236,
+      "rscu": 1.251418
+    },
+    "GAC": {
+      "amino_acid": "D",
+      "count": 25533,
+      "frequency": 0.01919722,
+      "rscu": 0.748582
+    },
+    "GAA": {
+      "amino_acid": "E",
+      "count": 53085,
+      "frequency": 0.03991245,
+      "rscu": 1.38084
+    },
+    "GAG": {
+      "amino_acid": "E",
+      "count": 23803,
+      "frequency": 0.01789651,
+      "rscu": 0.61916
+    },
+    "TGT": {
+      "amino_acid": "C",
+      "count": 6843,
+      "frequency": 0.00514497,
+      "rscu": 0.88468
+    },
+    "TGC": {
+      "amino_acid": "C",
+      "count": 8627,
+      "frequency": 0.00648629,
+      "rscu": 1.11532
+    },
+    "TGG": {
+      "amino_acid": "W",
+      "count": 20299,
+      "frequency": 0.01526199,
+      "rscu": 1.0
+    },
+    "CGT": {
+      "amino_acid": "R",
+      "count": 28245,
+      "frequency": 0.02123627,
+      "rscu": 2.301768
+    },
+    "CGC": {
+      "amino_acid": "R",
+      "count": 29586,
+      "frequency": 0.02224451,
+      "rscu": 2.41105
+    },
+    "CGA": {
+      "amino_acid": "R",
+      "count": 4647,
+      "frequency": 0.00349389,
+      "rscu": 0.378698
+    },
+    "CGG": {
+      "amino_acid": "R",
+      "count": 7112,
+      "frequency": 0.00534722,
+      "rscu": 0.579578
+    },
+    "AGA": {
+      "amino_acid": "R",
+      "count": 2597,
+      "frequency": 0.00195258,
+      "rscu": 0.211637
+    },
+    "AGG": {
+      "amino_acid": "R",
+      "count": 1439,
+      "frequency": 0.00108193,
+      "rscu": 0.117268
+    },
+    "AGT": {
+      "amino_acid": "S",
+      "count": 11527,
+      "frequency": 0.00866668,
+      "rscu": 0.899703
+    },
+    "AGC": {
+      "amino_acid": "S",
+      "count": 21401,
+      "frequency": 0.01609054,
+      "rscu": 1.670387
+    },
+    "GGT": {
+      "amino_acid": "G",
+      "count": 33018,
+      "frequency": 0.02482489,
+      "rscu": 1.349974
+    },
+    "GGC": {
+      "amino_acid": "G",
+      "count": 39781,
+      "frequency": 0.02990972,
+      "rscu": 1.626486
+    },
+    "GGA": {
+      "amino_acid": "G",
+      "count": 10396,
+      "frequency": 0.00781633,
+      "rscu": 0.425051
+    },
+    "GGG": {
+      "amino_acid": "G",
+      "count": 14638,
+      "frequency": 0.01100572,
+      "rscu": 0.598489
+    }
+  },
+  "synonymous_groups": {
+    "F": [
+      "TTC",
+      "TTT"
+    ],
+    "L": [
+      "CTA",
+      "CTC",
+      "CTG",
+      "CTT",
+      "TTA",
+      "TTG"
+    ],
+    "I": [
+      "ATA",
+      "ATC",
+      "ATT"
+    ],
+    "M": [
+      "ATG"
+    ],
+    "V": [
+      "GTA",
+      "GTC",
+      "GTG",
+      "GTT"
+    ],
+    "S": [
+      "AGC",
+      "AGT",
+      "TCA",
+      "TCC",
+      "TCG",
+      "TCT"
+    ],
+    "P": [
+      "CCA",
+      "CCC",
+      "CCG",
+      "CCT"
+    ],
+    "T": [
+      "ACA",
+      "ACC",
+      "ACG",
+      "ACT"
+    ],
+    "A": [
+      "GCA",
+      "GCC",
+      "GCG",
+      "GCT"
+    ],
+    "Y": [
+      "TAC",
+      "TAT"
+    ],
+    "H": [
+      "CAC",
+      "CAT"
+    ],
+    "Q": [
+      "CAA",
+      "CAG"
+    ],
+    "N": [
+      "AAC",
+      "AAT"
+    ],
+    "K": [
+      "AAA",
+      "AAG"
+    ],
+    "D": [
+      "GAC",
+      "GAT"
+    ],
+    "E": [
+      "GAA",
+      "GAG"
+    ],
+    "C": [
+      "TGC",
+      "TGT"
+    ],
+    "W": [
+      "TGG"
+    ],
+    "R": [
+      "AGA",
+      "AGG",
+      "CGA",
+      "CGC",
+      "CGG",
+      "CGT"
+    ],
+    "G": [
+      "GGA",
+      "GGC",
+      "GGG",
+      "GGT"
+    ]
+  },
+  "eligible_amino_acids": [
+    "A",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "K",
+    "L",
+    "N",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "V",
+    "Y"
+  ],
+  "ineligible": [
+    "M",
+    "W"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "kmer_detector": {
+    "naive_baseline": {
+      "auc": 0.5,
+      "accuracy": 0.5,
+      "threshold": 0.5
+    },
+    "helixsign_stealth": {
+      "auc": 0.5,
+      "accuracy": 0.5,
+      "threshold": 0.5
+    }
+  },
+  "cnn_detector": {
+    "naive_baseline": {
+      "auc": 0.5,
+      "accuracy": 0.5
+    },
+    "helixsign_stealth": {
+      "auc": 0.5,
+      "accuracy": 0.5
+    }
+  }
+}
