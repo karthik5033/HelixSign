@@ -7,7 +7,10 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.48.0",
@@ -17,10 +20,13 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@types/node": "^20.17.0",
+    "@eslint/eslintrc": "^3.3.7",
+    "@types/node": "^24.19.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "typescript": "^5.7.0"
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.29",
+    "typescript": "^5.7.0",
+    "vitest": "^5.1.0"
   }
 }
-
