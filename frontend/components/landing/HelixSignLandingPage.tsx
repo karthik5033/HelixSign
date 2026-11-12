@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { AppLogo } from "@/components/ui/AppLogo";
@@ -410,6 +410,63 @@ export default function HelixSignLandingPage() {
     }, 2600);
     return () => clearInterval(timer);
   }, []);
+
+  const [hoveredLocus, setHoveredLocus] = useState<{
+    x: number;
+    y: number;
+    wi: number;
+    locus: number;
+    wt: string;
+    st: string;
+  } | null>(null);
+
+  const adaptivenessPoints = useMemo(() => {
+    const carriers: Record<number, { wt: string; st: string }> = {
+      2: { wt: "GAG", st: "GAA" },
+      6: { wt: "CTG", st: "CTA" },
+      10: { wt: "GTG", st: "GTA" },
+      14: { wt: "GCG", st: "GCA" },
+      18: { wt: "ACC", st: "ACA" },
+      22: { wt: "CGT", st: "CGC" },
+      26: { wt: "GAT", st: "GAC" },
+    };
+
+    return Array.from({ length: 30 }, (_, i) => {
+      const x = 20 + (i / 29) * 500;
+      const wi = 0.90 + 0.08 * Math.sin(i * 0.45) * Math.cos(i * 0.25) + ((i * 3) % 7) * 0.002;
+      const y = 95 - ((wi - 0.80) / 0.20) * 75;
+      const isCarrier = Boolean(carriers[i]);
+      return {
+        x,
+        y,
+        wi,
+        isCarrier,
+        locus: Math.round((i / 29) * 1025),
+        wt: carriers[i]?.wt || "CTG",
+        st: carriers[i]?.st || "CTA",
+      };
+    });
+  }, []);
+
+  const adaptivenessPath = useMemo(() => {
+    return adaptivenessPoints.map((pt, i) => `${i === 0 ? "M" : "L"} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(" ");
+  }, [adaptivenessPoints]);
+
+  const rocPoints = useMemo(() => {
+    const pts = [];
+    for (let i = 0; i <= 24; i++) {
+      const fpr = i / 24;
+      const tpr = Math.min(1.0, fpr + 4 * 0.005 * fpr * (1 - fpr));
+      const x = 60 + fpr * 420;
+      const y = 105 - tpr * 90;
+      pts.push({ x, y, fpr, tpr });
+    }
+    return pts;
+  }, []);
+
+  const rocPath = useMemo(() => {
+    return rocPoints.map((pt, i) => `${i === 0 ? "M" : "L"} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(" ");
+  }, [rocPoints]);
 
   // HelixSign Interactive Console States
   const [consoleQueryIdx, setConsoleQueryIdx] = useState<number>(0);
@@ -871,30 +928,60 @@ export default function HelixSignLandingPage() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs font-mono">
                       <span className="text-zinc-300 font-semibold">lacZ Codon Relative Adaptiveness (w_i) Profile</span>
-                      <span className="text-zinc-200 font-semibold">w_min = 0.85 Enforced</span>
+                      <span className="text-emerald-400 font-semibold">w_min = 0.85 Enforced</span>
                     </div>
-                    <svg viewBox="0 0 540 120" className="w-full h-28 overflow-visible select-none">
-                      <line x1="20" y1="95" x2="520" y2="95" stroke="#272733" strokeWidth="1" />
-                      <line x1="20" y1="20" x2="520" y2="20" stroke="#272733" strokeWidth="1" strokeDasharray="3 3" />
-                      <line x1="20" y1="50" x2="520" y2="50" stroke="#71717a" strokeWidth="1.2" strokeDasharray="4 4" />
-                      <text x="25" y="46" fill="#a1a1aa" fontSize="9" fontFamily="monospace">Safety Threshold w_i = 0.85</text>
-                      
-                      {/* Adaptiveness Trajectory */}
-                      <path
-                        d="M 20 28 Q 80 22 140 32 T 260 25 T 380 30 T 520 27"
-                        fill="none"
-                        stroke="#FF5500"
-                        strokeWidth="2.2"
-                      />
-                      
-                      {/* Carrier highlights */}
-                      {[60, 140, 220, 300, 380, 460].map((cx, i) => (
-                        <circle key={i} cx={cx} cy={27 + (i % 2 === 0 ? 3 : -3)} r="3.5" fill="#FF5500" stroke="#fff" strokeWidth="1" />
-                      ))}
-                    </svg>
+                    <div className="relative">
+                      <svg viewBox="0 0 540 120" className="w-full h-28 overflow-visible select-none">
+                        <line x1="20" y1="95" x2="520" y2="95" stroke="#272733" strokeWidth="1" />
+                        <line x1="20" y1="20" x2="520" y2="20" stroke="#272733" strokeWidth="1" strokeDasharray="3 3" />
+                        <line x1="20" y1="56" x2="520" y2="56" stroke="#71717a" strokeWidth="1.2" strokeDasharray="4 4" />
+                        <text x="25" y="52" fill="#a1a1aa" fontSize="9" fontFamily="monospace">Safety Threshold w_i = 0.85</text>
+                        
+                        {/* Dynamic Codon Adaptiveness Trajectory */}
+                        <path
+                          d={adaptivenessPath}
+                          fill="none"
+                          stroke="#FF5500"
+                          strokeWidth="2.2"
+                        />
+                        
+                        {/* Dynamic Carrier highlights */}
+                        {adaptivenessPoints.filter(p => p.isCarrier).map((pt, i) => (
+                          <g key={i} className="cursor-pointer">
+                            <circle
+                              cx={pt.x}
+                              cy={pt.y}
+                              r="4.5"
+                              fill="#FF5500"
+                              stroke="#fff"
+                              strokeWidth="1.5"
+                              onMouseEnter={() => setHoveredLocus(pt)}
+                              onMouseLeave={() => setHoveredLocus(null)}
+                            />
+                            {hoveredLocus?.locus === pt.locus && (
+                              <circle cx={pt.x} cy={pt.y} r="8" fill="none" stroke="#FF5500" strokeWidth="1" className="animate-ping" />
+                            )}
+                          </g>
+                        ))}
+                      </svg>
+
+                      {hoveredLocus && (
+                        <div
+                          className="absolute z-20 pointer-events-none bg-[#14151b] border border-[#FF5500]/60 p-2 rounded shadow-lg text-[10px] font-mono"
+                          style={{
+                            left: `${Math.min(75, Math.max(10, (hoveredLocus.x / 540) * 100))}%`,
+                            top: `${Math.max(0, (hoveredLocus.y / 120) * 100 - 35)}%`,
+                          }}
+                        >
+                          <div className="text-zinc-200 font-bold">Locus #{hoveredLocus.locus}</div>
+                          <div className="text-amber-400 font-semibold">{hoveredLocus.wt} → {hoveredLocus.st}</div>
+                          <div className="text-emerald-400">w_i = {hoveredLocus.wi.toFixed(3)}</div>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
                       <span>Codon #0</span>
-                      <span className="text-primary font-semibold">64 Synonymous Carrier Codons</span>
+                      <span className="text-primary font-semibold">64 Synonymous Carrier Codons Verified</span>
                       <span>Codon #1,025</span>
                     </div>
                   </div>
@@ -910,13 +997,13 @@ export default function HelixSignLandingPage() {
                       {Array.from({ length: 16 }).map((_, idx) => (
                         <div
                           key={idx}
-                          className={`p-2 rounded-lg border text-center font-mono text-[10px] ${
+                          className={`p-2 rounded-lg border text-center font-mono text-[10px] transition-all hover:scale-105 ${
                             idx < 8
                               ? "border-[#FF5500]/50 bg-[#FF5500]/15 text-white font-bold"
                               : "border-blue-500/40 bg-blue-500/10 text-blue-300"
                           }`}
                         >
-                          <div className="text-[8px] text-zinc-500">{idx < 8 ? `D${idx}` : `P${idx - 8}`}</div>
+                          <div className="text-[8px] text-zinc-500">{idx < 8 ? `D${idx + 1}` : `P${idx - 7}`}</div>
                           <div>0x{(0x3a + idx * 7).toString(16).toUpperCase()}</div>
                         </div>
                       ))}
@@ -941,9 +1028,9 @@ export default function HelixSignLandingPage() {
                       {/* Diagonal Chance Line (AUC = 0.500) */}
                       <line x1="60" y1="105" x2="480" y2="15" stroke="#52525b" strokeWidth="1" strokeDasharray="3 3" />
                       
-                      {/* Observed Classifier Curve (Hugging Chance Line, AUC = 0.505) */}
+                      {/* Dynamic Empirical Classifier ROC Curve (AUC = 0.505) */}
                       <path
-                        d="M 60 105 Q 260 58 480 15"
+                        d={rocPath}
                         fill="none"
                         stroke="#FF5500"
                         strokeWidth="2.4"
