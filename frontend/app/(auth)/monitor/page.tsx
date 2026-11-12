@@ -97,8 +97,13 @@ export default function RealTimeMonitorPage() {
   const [windowSize, setWindowSize] = useState("30 Trials");
   const [displayMode, setDisplayMode] = useState<"recovery" | "kmer">("recovery");
 
-  // Simulation time clock
+  // Simulation time clock & manual burst trigger
   const [tick, setTick] = useState(0);
+  const [burstCountdown, setBurstCountdown] = useState(0);
+
+  const handleTriggerBurst = () => {
+    setBurstCountdown(45); // 45 ticks (~2.25s) of biological noise burst
+  };
 
   const activeConstruct = useMemo(() => {
     return MONITORED_CONSTRUCTS.find((c) => c.id === selectedConstructId) || MONITORED_CONSTRUCTS[0];
@@ -153,6 +158,7 @@ export default function RealTimeMonitorPage() {
     if (!isStreaming) return;
     const timer = setInterval(() => {
       setTick((prev) => prev + 1);
+      setBurstCountdown((prev) => (prev > 0 ? prev - 1 : 0));
     }, 50); // 20 FPS simulation loop
     return () => clearInterval(timer);
   }, [isStreaming]);
@@ -160,11 +166,11 @@ export default function RealTimeMonitorPage() {
   // Base channel noise level
   const defaultChannelNoise = useMemo(() => {
     switch (selectedChannel) {
-      case "CH-01": return 1.0;  // 1% Point Substitution
-      case "CH-02": return 0.5;  // 0.5% Indel Slippage
-      case "CH-03": return 15.0; // 15% Adversarial Shuffling
-      case "CH-04": return 2.0;  // 2% Pol III Drift
-      default: return 1.0;
+      case "CH-01": return 1.2;  // 1.2% Point Substitution
+      case "CH-02": return 0.8;  // 0.8% Indel Slippage
+      case "CH-03": return 14.0; // 14% Adversarial Shuffling
+      case "CH-04": return 2.4;  // 2.4% Pol III Drift
+      default: return 1.2;
     }
   }, [selectedChannel]);
 
@@ -176,27 +182,31 @@ export default function RealTimeMonitorPage() {
     const uncorrPts: number[] = new Array(SAMPLE_COUNT);
     const noisePts: number[] = new Array(SAMPLE_COUNT);
 
-    // Periodic stochastic burst window
-    const cyclePos = tick % 140;
-    const burstActive = cyclePos >= 40 && cyclePos <= 85;
-    const burstCenter = Math.floor(((cyclePos - 40) / 45) * SAMPLE_COUNT);
+    // Periodic stochastic burst window or manual burst
+    const cyclePos = tick % 160;
+    const isPeriodicBurst = cyclePos >= 50 && cyclePos <= 90;
+    const isManualBurst = burstCountdown > 0;
+    const burstActive = isPeriodicBurst || isManualBurst;
+    const burstCenter = isManualBurst
+      ? Math.floor(((45 - burstCountdown) / 45) * SAMPLE_COUNT)
+      : Math.floor(((cyclePos - 50) / 40) * SAMPLE_COUNT);
 
     let latestNoise = activeBaseNoise;
 
     for (let i = 0; i < SAMPLE_COUNT; i++) {
-      const t = i + tick * 1.2;
-      // High-order biological noise harmonic oscillation
-      const noiseJitter = 0.22 * Math.sin(0.09 * t) + 0.12 * Math.cos(0.21 * t);
+      const t = i + tick * 1.4;
+      // High-order biological noise harmonic oscillation with stochastic micro-jitter
+      const noiseJitter = 0.35 * Math.sin(0.12 * t) + 0.18 * Math.cos(0.27 * t);
 
       let burstAdd = 0;
       if (burstActive) {
         const dist = Math.abs(i - burstCenter);
-        if (dist < 40) {
-          burstAdd = (activeBaseNoise * 1.5 + 2.0) * Math.exp(-(dist * dist) / 160);
+        if (dist < 50) {
+          burstAdd = (activeBaseNoise * 1.8 + 3.5) * Math.exp(-(dist * dist) / 200);
         }
       }
 
-      const totalNoise = Math.max(0.05, Math.min(30.0, activeBaseNoise + noiseJitter + burstAdd));
+      const totalNoise = Math.max(0.1, Math.min(32.0, activeBaseNoise + noiseJitter + burstAdd));
       noisePts[i] = totalNoise;
 
       if (i === SAMPLE_COUNT - 1) {
@@ -209,24 +219,26 @@ export default function RealTimeMonitorPage() {
       uncorrPts[i] = parseFloat(uncorrectedRate.toFixed(2));
 
       // 2. Reed-Solomon RS(16,8) over GF(2^8) with t = 4 correctable symbol errors
-      // Approximate symbol error accumulation: s = round(pBit * 16)
-      const symbolErrors = Math.floor(pBit * 16);
-
       // Multi-tile redundancy boost for SpCas9 (4 independent tiles)
       const effectiveTolerance = activeConstruct.eccTiles > 1 ? 26.0 : 22.5;
 
       if (totalNoise <= effectiveTolerance) {
-        // Mathematically guaranteed 100% recovery within Berlekamp-Massey capacity
-        recPts[i] = 100.0;
+        // Mathematically guaranteed error-free recovery within Berlekamp-Massey capacity
+        // Subtle algebraic syndrome jitter (0.1%) during active decoding
+        const syndromeJitter = burstActive ? Math.sin(t * 0.5) * 0.15 : 0;
+        recPts[i] = Math.min(100.0, parseFloat((100.0 - Math.abs(syndromeJitter)).toFixed(2)));
       } else {
         // Waterfall breakdown drop-off past t = 4 error capacity
         const excess = totalNoise - effectiveTolerance;
-        const degraded = Math.max(0.0, 100.0 - excess * 14.5);
+        const degraded = Math.max(0.0, 100.0 - excess * 15.5);
         recPts[i] = parseFloat(degraded.toFixed(2));
       }
     }
 
-    const parityUsedNow = Math.min(4, Math.floor((latestNoise / 25.0) * 4) + (burstActive ? 1 : 0));
+    // Dynamic syndrome parity utilization (0 to 4 symbols)
+    const baseErrors = Math.floor((latestNoise / 22.5) * 4);
+    const stochasticFluctuation = (Math.sin(tick * 0.15) > 0.45 ? 1 : 0);
+    const parityUsedNow = Math.min(4, Math.max(0, baseErrors + (burstActive ? 2 : stochasticFluctuation)));
 
     return {
       recoveryPoints: recPts,
@@ -236,7 +248,7 @@ export default function RealTimeMonitorPage() {
       isBurstActive: burstActive,
       currentNoiseNow: latestNoise,
     };
-  }, [tick, activeBaseNoise, activeConstruct]);
+  }, [tick, activeBaseNoise, activeConstruct, burstCountdown]);
 
   // Periodic trial log updates during live streaming
   const lastLoggedTick = useRef(0);
@@ -293,12 +305,27 @@ export default function RealTimeMonitorPage() {
         <div className="flex items-center gap-2">
           <Button
             size="sm"
+            variant="outline"
+            onClick={handleTriggerBurst}
+            className={`h-8 text-xs font-mono gap-1.5 cursor-pointer transition-all ${
+              burstCountdown > 0
+                ? "bg-[#FF5500]/20 border-[#FF5500] text-[#FF5500] shadow-[0_0_12px_rgba(255,85,0,0.3)] font-bold"
+                : "border-[#FF5500]/40 text-[#FF5500] hover:bg-[#FF5500]/10"
+            }`}
+            title="Inject simulated biological mutation burst into the channel"
+          >
+            <Zap className={`h-3.5 w-3.5 ${burstCountdown > 0 ? "animate-bounce" : ""}`} />
+            {burstCountdown > 0 ? "Burst Active..." : "Inject Mutation Burst"}
+          </Button>
+
+          <Button
+            size="sm"
             variant={isStreaming ? "outline" : "default"}
             onClick={() => setIsStreaming(!isStreaming)}
             className="gap-1.5 text-xs font-semibold cursor-pointer border-border h-8 font-mono"
           >
             {isStreaming ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-            {isStreaming ? "Pause Noise Simulator" : "Resume Stress Test"}
+            {isStreaming ? "Pause Stream" : "Resume Stream"}
           </Button>
 
           <Link href="/analysis">
@@ -540,6 +567,41 @@ export default function RealTimeMonitorPage() {
                 <line x1="0" y1="31" x2="20" y2="31" stroke="#06b6d4" strokeWidth="1.3" strokeDasharray="2,2" />
                 <text x="26" y="34" fill="#06b6d4" fontSize="9" fontFamily="monospace">Channel Noise (%)</text>
               </g>
+
+              {/* Dynamic Oscilloscope Real-Time CRT Sweep Head */}
+              {isStreaming && (
+                <g>
+                  {/* Glowing Sweep Line */}
+                  <line
+                    x1={((tick * 4) % 800)}
+                    y1="12"
+                    x2={((tick * 4) % 800)}
+                    y2="220"
+                    stroke="#FF5500"
+                    strokeWidth="1.5"
+                    strokeDasharray="3 2"
+                    opacity="0.85"
+                  />
+                  {/* Sweep Head Pulse Point on RS Recovery Trace */}
+                  <circle
+                    cx={((tick * 4) % 800)}
+                    cy={220 - (recoveryPoints[Math.min(SAMPLE_COUNT - 1, Math.floor((((tick * 4) % 800) / 800) * SAMPLE_COUNT))] / 100) * 190}
+                    r="5"
+                    fill="#FF5500"
+                    stroke="#FFFFFF"
+                    strokeWidth="1.5"
+                  />
+                  {/* Sweep Head Pulse Point on Naive Decay Trace */}
+                  <circle
+                    cx={((tick * 4) % 800)}
+                    cy={220 - (rawUncorrectedPoints[Math.min(SAMPLE_COUNT - 1, Math.floor((((tick * 4) % 800) / 800) * SAMPLE_COUNT))] / 100) * 190}
+                    r="3.5"
+                    fill="#71717a"
+                    stroke="#FFFFFF"
+                    strokeWidth="1"
+                  />
+                </g>
+              )}
             </svg>
           ) : (
             /* Mode 2: Codon k-mer Frequency Divergence Spectrum (W₁) */
@@ -632,10 +694,33 @@ export default function RealTimeMonitorPage() {
               </div>
               <span className="text-xs font-semibold text-primary block mt-1">
                 {currentParityUsed > 0
-                  ? `${currentParityUsed} Symbol Errors Corrected (${4 - currentParityUsed} Margin Left)`
+                  ? `${currentParityUsed} Symbol Error(s) Corrected (${4 - currentParityUsed} Margin Left)`
                   : "Zero Parity Errors (Nominal State)"}
               </span>
-              <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed font-mono">
+
+              {/* 4-Symbol Parity Allocation Meters */}
+              <div className="grid grid-cols-4 gap-1.5 my-3">
+                {[0, 1, 2, 3].map((symIdx) => {
+                  const isEngaged = symIdx < currentParityUsed;
+                  return (
+                    <div
+                      key={symIdx}
+                      className={`py-1.5 px-1 rounded-lg border text-center transition-all ${
+                        isEngaged
+                          ? "bg-[#FF5500]/25 border-[#FF5500] text-[#FF5500] shadow-[0_0_8px_rgba(255,85,0,0.25)] font-bold"
+                          : "bg-[#14141d] border-border/60 text-zinc-500 font-mono"
+                      }`}
+                    >
+                      <span className="text-[9px] block">P{symIdx + 1}</span>
+                      <span className="text-[10px] font-bold block mt-0.5">
+                        {isEngaged ? "ACTIVE" : "IDLE"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed font-mono">
                 {currentParityUsed > 0
                   ? `Berlekamp-Massey algorithm actively locating error polynomials across ${activeConstruct.carrierCount} carrier loci.`
                   : "Within normal operating boundaries. Zero uncorrected bit errors detected across the channel."}
