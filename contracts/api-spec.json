@@ -1,0 +1,430 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HelixSign API Contract",
+    "version": "1.0.0",
+    "description": "Shared frozen API contract between Frontend, Backend, and ML Microservice for HelixSign."
+  },
+  "paths": {
+    "/api/stamp": {
+      "post": {
+        "summary": "Watermark an engineered coding sequence",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ownerName", "projectName", "batchName", "sequence"],
+                "properties": {
+                  "ownerName": { "type": "string" },
+                  "projectName": { "type": "string" },
+                  "batchName": { "type": "string" },
+                  "sequence": { "type": "string", "pattern": "^[ACGTacgt]+$" },
+                  "host": { "type": "string", "default": "E. coli K-12" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful stamp result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StampResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/verify": {
+      "post": {
+        "summary": "Verify and recover watermark from suspect sequence",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["sequence"],
+                "properties": {
+                  "sequence": { "type": "string", "pattern": "^[ACGTacgt]+$" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/VerifyResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stealth": {
+      "post": {
+        "summary": "Compare detector scores between HelixSign and naive watermark",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["sequence"],
+                "properties": {
+                  "sequence": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stealth comparison metrics",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StealthResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stress": {
+      "post": {
+        "summary": "Simulate noise channel and calculate recovery rate curve",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["sequence", "substitutionRate"],
+                "properties": {
+                  "sequence": { "type": "string" },
+                  "substitutionRate": { "type": "number", "minimum": 0.001, "maximum": 0.05 },
+                  "indelRate": { "type": "number", "minimum": 0, "maximum": 0.02, "default": 0 },
+                  "trials": { "type": "integer", "default": 30, "maximum": 50 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stress recovery metrics",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StressResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/attack": {
+      "post": {
+        "summary": "Run an interactive attack against a stamped construct",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["sequence", "attackType", "intensity"],
+                "properties": {
+                  "sequence": { "type": "string" },
+                  "attackType": {
+                    "type": "string",
+                    "enum": [
+                      "random_mutation",
+                      "trim_ends",
+                      "delete_block",
+                      "shuffle_synonymous",
+                      "resynonymize_fraction"
+                    ]
+                  },
+                  "intensity": { "type": "number" },
+                  "seed": { "type": "integer", "default": 42 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Attack execution result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AttackResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trace": {
+      "post": {
+        "summary": "Forensic trace of unknown construct against registry",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["suspectSequence"],
+                "properties": {
+                  "suspectSequence": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ranked candidate matches",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TraceResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/registry": {
+      "get": {
+        "summary": "Get list of registered stamps",
+        "responses": {
+          "200": {
+            "description": "List of stamps",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RegistryResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "summary": "Health check for backend and connected services",
+        "responses": {
+          "200": {
+            "description": "Health status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "version": { "type": "string" },
+                    "stubsActive": { "type": "boolean" },
+                    "mlServiceConnected": { "type": "boolean" },
+                    "databaseConnected": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "StampResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "example": "success" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "stampId": { "type": "string" },
+              "owner": { "type": "string" },
+              "project": { "type": "string" },
+              "batch": { "type": "string" },
+              "originalSequenceLength": { "type": "integer" },
+              "stampedSequence": { "type": "string" },
+              "proteinTranslation": { "type": "string" },
+              "proteinIdentityPercent": { "type": "number", "example": 100.0 },
+              "mutations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "codonIndex": { "type": "integer" },
+                    "fromCodon": { "type": "string" },
+                    "toCodon": { "type": "string" },
+                    "aminoAcid": { "type": "string" }
+                  }
+                }
+              },
+              "stats": {
+                "type": "object",
+                "properties": {
+                  "gcBefore": { "type": "number" },
+                  "gcAfter": { "type": "number" },
+                  "caiSimilarity": { "type": "number" },
+                  "longestHomopolymer": { "type": "integer" },
+                  "capacityUsed": { "type": "integer" },
+                  "capacityTotal": { "type": "integer" }
+                }
+              },
+              "createdAt": { "type": "string" }
+            }
+          }
+        }
+      },
+      "VerifyResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["verified", "partially_recovered", "not_found"] },
+          "data": {
+            "type": "object",
+            "properties": {
+              "owner": { "type": "string" },
+              "project": { "type": "string" },
+              "batch": { "type": "string" },
+              "errorsCorrected": { "type": "integer" },
+              "confidenceScore": { "type": "number" },
+              "timestamp": { "type": "string" }
+            }
+          }
+        }
+      },
+      "StealthResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "naiveTag": {
+                "type": "object",
+                "properties": {
+                  "kmerDetectorProb": { "type": "number" },
+                  "cnnDetectorProb": { "type": "number" },
+                  "aucScore": { "type": "number" }
+                }
+              },
+              "helixSign": {
+                "type": "object",
+                "properties": {
+                  "kmerDetectorProb": { "type": "number" },
+                  "cnnDetectorProb": { "type": "number" },
+                  "aucScore": { "type": "number" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "StressResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "substitutionRate": { "type": "number" },
+              "indelRate": { "type": "number" },
+              "trials": { "type": "integer" },
+              "recoveryRate": { "type": "number" },
+              "averageErrorsCorrected": { "type": "number" },
+              "breakdownThresholdReached": { "type": "boolean" },
+              "curve": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "noiseRate": { "type": "number" },
+                    "recoveryPercent": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "AttackResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "attackType": { "type": "string" },
+              "intensity": { "type": "number" },
+              "watermarkSurvived": { "type": "boolean" },
+              "proteinIntact": { "type": "boolean" },
+              "mutationsApplied": { "type": "integer" },
+              "recoveryConfidence": { "type": "number" },
+              "breakPointEstimated": { "type": "number" }
+            }
+          }
+        }
+      },
+      "TraceResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "matches": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "stampId": { "type": "string" },
+                    "owner": { "type": "string" },
+                    "project": { "type": "string" },
+                    "batch": { "type": "string" },
+                    "similarityPercent": { "type": "number" },
+                    "confidence": { "type": "number" },
+                    "tamperedRegions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "start": { "type": "integer" },
+                          "end": { "type": "integer" },
+                          "type": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "RegistryResponse": {
+        "type": "object",
+        "properties": {
+          "stamps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "owner": { "type": "string" },
+                "project": { "type": "string" },
+                "batch": { "type": "string" },
+                "sequenceHash": { "type": "string" },
+                "capacityUsed": { "type": "integer" },
+                "createdAt": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

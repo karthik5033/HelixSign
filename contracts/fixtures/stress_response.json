@@ -1,0 +1,19 @@
+{
+  "data": {
+    "substitutionRate": 0.02,
+    "indelRate": 0.005,
+    "trials": 30,
+    "recoveryRate": 96.7,
+    "averageErrorsCorrected": 2.4,
+    "breakdownThresholdReached": false,
+    "curve": [
+      { "noiseRate": 0.001, "recoveryPercent": 100.0 },
+      { "noiseRate": 0.005, "recoveryPercent": 100.0 },
+      { "noiseRate": 0.010, "recoveryPercent": 99.1 },
+      { "noiseRate": 0.020, "recoveryPercent": 96.7 },
+      { "noiseRate": 0.030, "recoveryPercent": 88.4 },
+      { "noiseRate": 0.040, "recoveryPercent": 71.2 },
+      { "noiseRate": 0.050, "recoveryPercent": 46.5 }
+    ]
+  }
+}

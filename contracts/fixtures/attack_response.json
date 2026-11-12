@@ -1,0 +1,11 @@
+{
+  "data": {
+    "attackType": "shuffle_synonymous",
+    "intensity": 0.15,
+    "watermarkSurvived": true,
+    "proteinIntact": true,
+    "mutationsApplied": 12,
+    "recoveryConfidence": 0.942,
+    "breakPointEstimated": 0.38
+  }
+}

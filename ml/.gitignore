@@ -1,0 +1,35 @@
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Model Weights & Checkpoints (Never commit large binaries)
+*.pt
+*.pth
+*.bin
+*.onnx
+*.pkl
+*.joblib
+artifacts/*.pt
+artifacts/*.pth
+artifacts/*.bin
+artifacts/*.onnx
+
+# Raw Data (Commit download scripts, not raw bulk fasta)
+data/raw/
+*.tar.gz
+*.zip
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Environment files
+.env
+.env.local

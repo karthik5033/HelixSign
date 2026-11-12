@@ -1,0 +1,22 @@
+{
+  "stamps": [
+    {
+      "id": "stmp_e9b4a1c2",
+      "owner": "ApexBio Lab",
+      "project": "Project Helios",
+      "batch": "B-2026-X1",
+      "sequenceHash": "a3f5c9e1284d72836471e98bb42f1a60e0a5c48b291d3748261e48f729481a54",
+      "capacityUsed": 64,
+      "createdAt": "2026-11-12T22:30:00Z"
+    },
+    {
+      "id": "stmp_12a7f8b9",
+      "owner": "TerraGen Strains",
+      "project": "Nitrogen Fixation",
+      "batch": "NF-402",
+      "sequenceHash": "b781e9841264c9273645a8e1039841fca9481264b19283746152a83917462514",
+      "capacityUsed": 64,
+      "createdAt": "2026-11-12T20:15:00Z"
+    }
+  ]
+}

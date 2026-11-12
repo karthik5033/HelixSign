@@ -1,0 +1,14 @@
+{
+  "data": {
+    "naiveTag": {
+      "kmerDetectorProb": 0.992,
+      "cnnDetectorProb": 0.985,
+      "aucScore": 0.998
+    },
+    "helixSign": {
+      "kmerDetectorProb": 0.512,
+      "cnnDetectorProb": 0.498,
+      "aucScore": 0.505
+    }
+  }
+}

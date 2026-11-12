@@ -1,0 +1,17 @@
+# HelixSign Monorepo Code Ownership
+# Lines define automatic review assignments on Pull Requests
+
+# Global default
+* @karthik5033
+
+# Frontend (Person 1)
+/frontend/ @karthik5033
+
+# Backend (Person 2)
+/backend/ @karthik5033
+
+# ML & Data Engine (Person 3)
+/ml/ @karthik5033
+
+# Contracts & Shared Specifications (Requires mutual agreement)
+/contracts/ @karthik5033

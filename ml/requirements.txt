@@ -1,0 +1,25 @@
+# HelixSign ML & Data Dependencies
+# Python >= 3.10 required
+
+# Core PyTorch (CPU by default; use CUDA-enabled build for Colab training)
+torch>=2.2.0
+numpy>=1.24.0
+scipy>=1.11.0
+
+# Bioinformatics
+biopython>=1.83
+
+# Machine Learning & Detectors
+scikit-learn>=1.4.0
+xgboost>=2.0.0
+
+# API Microservice
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.0
+python-dotenv>=1.0.0
+
+# Utilities & Visualization
+tqdm>=4.66.0
+requests>=2.31.0
+matplotlib>=3.8.0

@@ -1,0 +1,18 @@
+{
+  "data": {
+    "matches": [
+      {
+        "stampId": "stmp_e9b4a1c2",
+        "owner": "ApexBio Lab",
+        "project": "Project Helios",
+        "batch": "B-2026-X1",
+        "similarityPercent": 98.4,
+        "confidence": 0.978,
+        "tamperedRegions": [
+          { "start": 142, "end": 154, "type": "point_mutation" },
+          { "start": 412, "end": 420, "type": "synonymous_shuffle" }
+        ]
+      }
+    ]
+  }
+}

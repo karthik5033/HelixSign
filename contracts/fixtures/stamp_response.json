@@ -1,0 +1,27 @@
+{
+  "status": "success",
+  "data": {
+    "stampId": "stmp_e9b4a1c2",
+    "owner": "ApexBio Lab",
+    "project": "Project Helios",
+    "batch": "B-2026-X1",
+    "originalSequenceLength": 900,
+    "stampedSequence": "ATGGCCAAGTACTACCGCGACGTTGTCAGCAAGGACGCCCTCGAGATGCTCGACGAAGACGAGAAGGTTTACCCGCAGCTGTACGCATGA",
+    "proteinTranslation": "MAKYXRDVVSKDALEMLDEDEKVYPQLYA*",
+    "proteinIdentityPercent": 100.0,
+    "mutations": [
+      { "codonIndex": 14, "fromCodon": "GAA", "toCodon": "GAG", "aminoAcid": "E" },
+      { "codonIndex": 28, "fromCodon": "CTG", "toCodon": "TTA", "aminoAcid": "L" },
+      { "codonIndex": 35, "fromCodon": "GTT", "toCodon": "GTA", "aminoAcid": "V" }
+    ],
+    "stats": {
+      "gcBefore": 51.2,
+      "gcAfter": 51.4,
+      "caiSimilarity": 0.985,
+      "longestHomopolymer": 4,
+      "capacityUsed": 64,
+      "capacityTotal": 240
+    },
+    "createdAt": "2026-11-12T22:30:00Z"
+  }
+}
