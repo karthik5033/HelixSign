@@ -1793,10 +1793,25 @@ export default function HelixSignLandingPage() {
               );
             })()}
           </div>
+
+          {/* Console Pipeline Live Workflow Status Bar */}
+          <div className="mt-4 px-4 py-3 rounded-xl border border-[#23232c] bg-[#131318] flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-zinc-400 shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-zinc-200 font-semibold">Simulated Workflow: Continuous Live Evaluation</span>
+            </div>
+            <div className="flex items-center gap-4 text-[11px] text-zinc-400">
+              <span className="text-zinc-300">Target: <strong className="text-white">{CONSOLE_DEMO_QUERIES[consoleQueryIdx]?.construct || "Construct"}</strong></span>
+              <span>•</span>
+              <span>WGAN-GP Stealth: <strong className="text-emerald-400">AUC 0.505</strong></span>
+              <span>•</span>
+              <span>Reed-Solomon: <strong className="text-[#FF5500]">0x7E Verified</strong></span>
+            </div>
+          </div>
         </div>
 
         {/* Terminal CLI Integration */}
-        <div className="mt-14 sm:mt-16 text-center">
+        <div className="mt-20 sm:mt-28 text-center">
           <h3 className="text-xl sm:text-2xl font-[550] tracking-[-0.02em] text-white">
             Instant terminal &amp; bioinformatic pipeline integration
           </h3>
