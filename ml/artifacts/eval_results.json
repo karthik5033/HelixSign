@@ -1,0 +1,171 @@
+{
+  "seeds": [
+    42,
+    100,
+    2026
+  ],
+  "train_count": 2400,
+  "val_count": 548,
+  "test_count": 568,
+  "partitioning": "gene-level (split column from processed CSV)",
+  "evaluation_note": "All AUC values are computed on the held-out TEST partition. Results are raw extraction without ECC. ECC (Reed-Solomon) is implemented in the backend layer (Person 2).",
+  "per_seed": [
+    {
+      "seed": 42,
+      "kmer_detector": {
+        "naive_baseline": {
+          "auc": 0.9996342491569133,
+          "accuracy": 0.9903169014084507,
+          "threshold": 0.5
+        },
+        "helixsign_stealth": {
+          "auc": 0.4762757885340211,
+          "accuracy": 0.49559859154929575,
+          "threshold": 0.5
+        },
+        "train_partition": "train",
+        "eval_partition": "test",
+        "note": "raw extraction without ECC"
+      },
+      "cnn_detector": {
+        "naive_baseline": {
+          "auc": 0.9999628049990082,
+          "accuracy": 0.511443661971831,
+          "n_native": 568,
+          "n_watermarked": 568,
+          "windowing": {
+            "window_size": 256,
+            "stride": 128,
+            "aggregate": "max"
+          }
+        },
+        "helixsign_stealth": {
+          "auc": 0.47316690636778413,
+          "accuracy": 0.49911971830985913,
+          "n_native": 568,
+          "n_watermarked": 568,
+          "windowing": {
+            "window_size": 256,
+            "stride": 128,
+            "aggregate": "max"
+          }
+        },
+        "train_partition": "train",
+        "eval_partition": "test",
+        "note": "raw extraction without ECC"
+      }
+    },
+    {
+      "seed": 100,
+      "kmer_detector": {
+        "naive_baseline": {
+          "auc": 0.9996342491569133,
+          "accuracy": 0.9903169014084507,
+          "threshold": 0.5
+        },
+        "helixsign_stealth": {
+          "auc": 0.4901681214044832,
+          "accuracy": 0.4964788732394366,
+          "threshold": 0.5
+        },
+        "train_partition": "train",
+        "eval_partition": "test",
+        "note": "raw extraction without ECC"
+      },
+      "cnn_detector": {
+        "naive_baseline": {
+          "auc": 0.99832312537195,
+          "accuracy": 0.5193661971830986,
+          "n_native": 568,
+          "n_watermarked": 568,
+          "windowing": {
+            "window_size": 256,
+            "stride": 128,
+            "aggregate": "max"
+          }
+        },
+        "helixsign_stealth": {
+          "auc": 0.521788521622694,
+          "accuracy": 0.5061619718309859,
+          "n_native": 568,
+          "n_watermarked": 568,
+          "windowing": {
+            "window_size": 256,
+            "stride": 128,
+            "aggregate": "max"
+          }
+        },
+        "train_partition": "train",
+        "eval_partition": "test",
+        "note": "raw extraction without ECC"
+      }
+    },
+    {
+      "seed": 2026,
+      "kmer_detector": {
+        "naive_baseline": {
+          "auc": 0.9996342491569133,
+          "accuracy": 0.9903169014084507,
+          "threshold": 0.5
+        },
+        "helixsign_stealth": {
+          "auc": 0.46594487700853005,
+          "accuracy": 0.4982394366197183,
+          "threshold": 0.5
+        },
+        "train_partition": "train",
+        "eval_partition": "test",
+        "note": "raw extraction without ECC"
+      },
+      "cnn_detector": {
+        "naive_baseline": {
+          "auc": 0.9881549419757985,
+          "accuracy": 0.5079225352112676,
+          "n_native": 568,
+          "n_watermarked": 568,
+          "windowing": {
+            "window_size": 256,
+            "stride": 128,
+            "aggregate": "max"
+          }
+        },
+        "helixsign_stealth": {
+          "auc": 0.5147183718508233,
+          "accuracy": 0.5,
+          "n_native": 568,
+          "n_watermarked": 568,
+          "windowing": {
+            "window_size": 256,
+            "stride": 128,
+            "aggregate": "max"
+          }
+        },
+        "train_partition": "train",
+        "eval_partition": "test",
+        "note": "raw extraction without ECC"
+      }
+    }
+  ],
+  "aggregate": {
+    "kmer_naive_auc": {
+      "mean": 0.9996342491569133,
+      "std": 0.0,
+      "n_seeds": 3
+    },
+    "kmer_helixsign_auc": {
+      "mean": 0.47746292898234477,
+      "std": 0.012155178694677976,
+      "n_seeds": 3
+    },
+    "cnn_naive_auc": {
+      "mean": 0.9954802907822522,
+      "std": 0.006396693573402424,
+      "n_seeds": 3
+    },
+    "cnn_helixsign_auc": {
+      "mean": 0.5032245999471004,
+      "std": 0.02626966809707016,
+      "n_seeds": 3
+    }
+  }
+}

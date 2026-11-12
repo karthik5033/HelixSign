@@ -1,0 +1,13 @@
+{
+  "audit_timestamp": "2026-11-12T20:56:43Z",
+  "dataset_file": "ecoli_mg1655_cds_clean.csv",
+  "total_cds_in_dataset": 4290,
+  "tested_cds_count": 4290,
+  "skipped_cds_no_eligible_codons": 0,
+  "total_synonymous_mutations_evaluated": 765026,
+  "protein_identity_violations_count": 0,
+  "violations": [],
+  "new_homopolymers_exceeding_4_bp_created": 192,
+  "audit_passed": true,
+  "execution_seconds": 6.07
+}

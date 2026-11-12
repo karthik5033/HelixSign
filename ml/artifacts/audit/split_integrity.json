@@ -1,0 +1,19 @@
+{
+  "train_count": 2400,
+  "validation_count": 548,
+  "test_count": 568,
+  "five_test_genes": [
+    "b0568",
+    "b0930",
+    "b1703",
+    "b2022",
+    "b3920"
+  ],
+  "five_test_genes_in_train": [],
+  "five_test_genes_in_val": [],
+  "train_val_overlap": [],
+  "train_test_overlap": [],
+  "val_test_overlap": [],
+  "overlaps_found": false,
+  "verdict": "PASS \u2014 no cross-partition leakage detected"
+}
