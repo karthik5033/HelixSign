@@ -182,39 +182,46 @@ def _codon_frames_intact(original: str, noisy: str) -> bool:
     # Length changed but still divisible by 3 → need alignment to check
     # whether individual codon positions are still readable.
     try:
-        from Bio import pairwise2
-        alignments = pairwise2.align.globalms(
-            original, noisy,
-            match=1, mismatch=-1, open=-2, extend=-0.5,
-            one_alignment_only=True,
-        )
-        if not alignments:
-            return False
-        aligned_orig, aligned_noisy = alignments[0].seqA, alignments[0].seqB
+        from Bio.Align import PairwiseAligner
+        aligner = PairwiseAligner()
+        aligner.mode = "global"
+        aligner.match_score = 1
+        aligner.mismatch_score = -1
+        aligner.open_gap_score = -2
+        aligner.extend_gap_score = -0.5
 
-        # Map each original position to its aligned position in noisy
-        orig_pos = 0
+        alignments = aligner.align(original, noisy)
+        try:
+            alignment = next(iter(alignments))
+        except StopIteration:
+            return False
+
+        # Build position map: original_pos → noisy_pos (or None if deleted)
+        aligned_orig  = alignment[0]  # original with gaps
+        aligned_noisy = alignment[1]  # noisy with gaps
+
+        orig_pos  = 0
         noisy_pos = 0
         orig_to_noisy: dict = {}
         for a_o, a_n in zip(aligned_orig, aligned_noisy):
             if a_o != "-" and a_n != "-":
                 orig_to_noisy[orig_pos] = noisy_pos
-                orig_pos += 1
+                orig_pos  += 1
                 noisy_pos += 1
             elif a_o == "-":
-                noisy_pos += 1
+                noisy_pos += 1          # insertion in noisy
             else:
-                orig_to_noisy[orig_pos] = None  # deleted
+                orig_to_noisy[orig_pos] = None  # deletion in noisy
                 orig_pos += 1
 
-        # Check that every codon-start in original maps to a codon-start in noisy
+        # Every codon-start in original must map to a codon-aligned position in noisy
         n_codons = len(original) // 3
         for ci in range(n_codons):
             noisy_mapped = orig_to_noisy.get(ci * 3)
             if noisy_mapped is None:
-                return False  # codon start was deleted
+                return False   # codon start was deleted
             if noisy_mapped % 3 != 0:
-                return False  # codon start is now mid-codon in noisy
+                return False   # codon start is now mid-codon in noisy
 
         return True
 
