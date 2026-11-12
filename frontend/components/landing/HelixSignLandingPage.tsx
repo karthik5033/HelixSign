@@ -526,20 +526,78 @@ export default function HelixSignLandingPage() {
   const [activeModelDropdown, setActiveModelDropdown] = useState<string>("HelixSign Codec v2.0");
   const [ringBufferPct, setRingBufferPct] = useState<number>(68);
 
+  // Virtual Cursor Simulation for Console Showcase
+  const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({ x: 14, y: 19 });
+  const [isCursorClicking, setIsCursorClicking] = useState<boolean>(false);
+  const [isUserHoveringConsole, setIsUserHoveringConsole] = useState<boolean>(false);
+
+  // Infinite logical simulated workflow animation loop with proper cursor movements
   useEffect(() => {
     if (!isConsolePlaying) return;
+
+    let step = 0;
+    const constructPositions = [
+      { x: 14, y: 19 }, // lacZ
+      { x: 28, y: 19 }, // sfGFP
+      { x: 44, y: 19 }, // SpCas9
+    ];
+
     const timer = setInterval(() => {
-      setConsoleStage((prev) => {
-        if (prev < 3) {
-          return prev + 1;
-        } else {
-          setConsoleQueryIdx((q) => (q + 1) % CONSOLE_DEMO_QUERIES.length);
-          setSelectedEventIdx((e) => (e + 1) % 3);
-          return 0;
+      // 8-step logical workflow cycle per construct demo
+      const currentConstruct = Math.floor(step / 8) % CONSOLE_DEMO_QUERIES.length;
+      const phase = step % 8;
+
+      switch (phase) {
+        case 0:
+          // 1. Move cursor to construct switcher button
+          setCursorPos(constructPositions[currentConstruct]);
+          setIsCursorClicking(false);
+          break;
+        case 1:
+          // 2. Click construct button
+          setIsCursorClicking(true);
+          setConsoleQueryIdx(currentConstruct);
+          setConsoleStage(0);
+          setTimeout(() => setIsCursorClicking(false), 240);
+          break;
+        case 2:
+          // 3. Move cursor down to Tool Step 1 and execute
+          setCursorPos({ x: 28, y: 45 });
+          setConsoleStage(1);
+          break;
+        case 3:
+          // 4. Move cursor down to Tool Step 2 and execute
+          setCursorPos({ x: 28, y: 59 });
+          setConsoleStage(2);
+          break;
+        case 4:
+          // 5. Move cursor to Synthesis Result Box
+          setCursorPos({ x: 30, y: 77 });
+          setConsoleStage(3);
+          break;
+        case 5: {
+          // 6. Glide cursor over to right telemetry inspector row
+          const eventRow = currentConstruct % 3;
+          setCursorPos({ x: 74, y: 44 + eventRow * 13 });
+          break;
         }
-      });
-      setRingBufferPct(64 + Math.floor(Math.random() * 9));
-    }, 3400);
+        case 6: {
+          // 7. Click the event row
+          const eventRow = currentConstruct % 3;
+          setIsCursorClicking(true);
+          setSelectedEventIdx(eventRow);
+          setTimeout(() => setIsCursorClicking(false), 240);
+          break;
+        }
+        case 7:
+          // 8. Result inspection pause before advancing to next construct
+          setRingBufferPct(64 + Math.floor(Math.random() * 9));
+          break;
+      }
+
+      step++;
+    }, 1150); // 1.15s per phase = 9.2s full logical cycle per construct, running infinitely
+
     return () => clearInterval(timer);
   }, [isConsolePlaying]);
 
@@ -1474,8 +1532,47 @@ export default function HelixSignLandingPage() {
             Stamp engineered gene constructs, verify translation sequence fidelity, and recover provenance watermarks from noisy sequencing reads.
           </p>
 
-          {/* AI / Engineering Console Container */}
-          <div className="mt-12 rounded-2xl border border-[#272733] bg-[#16161c]/95 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.85)] overflow-hidden text-left text-xs">
+          {/* AI / Engineering Console Container with Smooth Infinite Cursor Workflow */}
+          <div
+            onMouseEnter={() => setIsUserHoveringConsole(true)}
+            onMouseLeave={() => setIsUserHoveringConsole(false)}
+            className="relative mt-12 rounded-2xl border border-[#272733] bg-[#16161c]/95 backdrop-blur-md shadow-[0_25px_80px_rgba(0,0,0,0.85)] overflow-hidden text-left text-xs"
+          >
+            {/* Simulated Virtual Cursor Pointer for Autonomous Demonstration */}
+            <div
+              className={`absolute pointer-events-none z-30 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                isUserHoveringConsole || !isConsolePlaying ? "opacity-0 scale-75" : "opacity-100 scale-100"
+              }`}
+              style={{
+                left: `${cursorPos.x}%`,
+                top: `${cursorPos.y}%`,
+                transform: `translate(-3px, -3px) ${isCursorClicking ? "scale(0.82)" : "scale(1)"}`,
+              }}
+            >
+              {/* Animated Click Ripple */}
+              {isCursorClicking && (
+                <div className="absolute -top-3.5 -left-3.5 w-9 h-9 rounded-full border-2 border-[#FF5500] animate-ping opacity-90" />
+              )}
+
+              {/* High-Fidelity OS Vector Cursor Arrow */}
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="drop-shadow-[0_3px_10px_rgba(0,0,0,0.9)] filter"
+              >
+                <path
+                  d="M3 2L19 10.5L11.5 13L8 21.5L3 2Z"
+                  fill="#FFFFFF"
+                  stroke="#0C0D12"
+                  strokeWidth="1.8"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+
             {(() => {
               const currQuery = CONSOLE_DEMO_QUERIES[consoleQueryIdx] || CONSOLE_DEMO_QUERIES[0];
               return (
@@ -1518,22 +1615,25 @@ export default function HelixSignLandingPage() {
 
                       {/* Construct Switcher */}
                       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] font-mono">
-                        {CONSOLE_DEMO_QUERIES.map((q, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => {
-                              setConsoleQueryIdx(idx);
-                              setConsoleStage(0);
-                            }}
-                            className={`px-2.5 py-1 rounded-md transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                              consoleQueryIdx === idx
-                                ? "bg-[#252533] text-white border border-[#FF5500]/40 shadow-sm"
-                                : "bg-[#141419] text-zinc-400 border border-[#23232c] hover:text-zinc-200"
-                            }`}
-                          >
-                            <span>{q.construct}</span>
-                          </button>
-                        ))}
+                        {CONSOLE_DEMO_QUERIES.map((q, idx) => {
+                          const isActive = consoleQueryIdx === idx;
+                          return (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                setConsoleQueryIdx(idx);
+                                setConsoleStage(0);
+                              }}
+                              className={`px-2.5 py-1 rounded-md transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                                isActive
+                                  ? "bg-[#252533] text-white border border-[#FF5500] shadow-[0_0_12px_rgba(255,85,0,0.2)] font-semibold"
+                                  : "bg-[#141419] text-zinc-400 border border-[#23232c] hover:text-zinc-200"
+                              }`}
+                            >
+                              <span>{q.construct}</span>
+                            </button>
+                          );
+                        })}
                       </div>
 
                       {/* Query Prompt Bubble */}
@@ -1541,14 +1641,18 @@ export default function HelixSignLandingPage() {
                         <div className="px-4 py-2.5 rounded-2xl bg-[#24242d] border border-[#2f2f3a] text-zinc-100 text-xs font-medium max-w-sm shadow-md transition-all">
                           <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono mb-1">
                             <span>Principal Investigator</span>
-                            <span className="text-[#FF5500]">{currQuery.construct}</span>
+                            <span className="text-[#FF5500] font-semibold">{currQuery.construct}</span>
                           </div>
                           {currQuery.query}
                         </div>
                       </div>
 
-                      {/* Tool Step 1 */}
-                      <div className="flex items-center justify-between p-3 rounded-lg border border-[#23232c] bg-[#141418] text-zinc-300">
+                      {/* Tool Step 1 with Live Execution State */}
+                      <div className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+                        consoleStage >= 1
+                          ? "border-[#23232c] bg-[#141418] text-zinc-300"
+                          : "border-amber-900/50 bg-amber-950/20 text-amber-200"
+                      }`}>
                         <div className="flex items-center gap-2">
                           <Wrench className="w-3.5 h-3.5 text-zinc-400" />
                           <span className="font-mono text-[11px]">
@@ -1557,14 +1661,24 @@ export default function HelixSignLandingPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] font-mono text-zinc-400 bg-[#1c1c24] px-1.5 py-0.5 rounded border border-[#2a2a38]">
-                            {currQuery.step1Metric}
+                            {consoleStage >= 1 ? currQuery.step1Metric : "Evaluating..."}
                           </span>
-                          <Check className="w-3.5 h-3.5 text-[#FF5500]" />
+                          {consoleStage >= 1 ? (
+                            <Check className="w-3.5 h-3.5 text-[#FF5500]" />
+                          ) : (
+                            <RotateCw className="w-3.5 h-3.5 text-amber-500 animate-spin" />
+                          )}
                         </div>
                       </div>
 
-                      {/* Tool Step 2 */}
-                      <div className="flex items-center justify-between p-3 rounded-lg border border-[#23232c] bg-[#141418] text-zinc-300">
+                      {/* Tool Step 2 with Live Execution State */}
+                      <div className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+                        consoleStage >= 2
+                          ? "border-[#23232c] bg-[#141418] text-zinc-300"
+                          : consoleStage === 1
+                          ? "border-amber-900/50 bg-amber-950/20 text-amber-200"
+                          : "border-border/40 bg-[#111116] text-zinc-500 opacity-60"
+                      }`}>
                         <div className="flex items-center gap-2">
                           <span className="text-zinc-400">❖</span>
                           <span className="font-mono text-[11px]">
@@ -1573,14 +1687,24 @@ export default function HelixSignLandingPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] font-mono text-zinc-400 bg-[#1c1c24] px-1.5 py-0.5 rounded border border-[#2a2a38]">
-                            {currQuery.step2Metric}
+                            {consoleStage >= 2 ? currQuery.step2Metric : consoleStage === 1 ? "Optimizing..." : "Queued"}
                           </span>
-                          <Check className="w-3.5 h-3.5 text-[#FF5500]" />
+                          {consoleStage >= 2 ? (
+                            <Check className="w-3.5 h-3.5 text-[#FF5500]" />
+                          ) : consoleStage === 1 ? (
+                            <RotateCw className="w-3.5 h-3.5 text-amber-500 animate-spin" />
+                          ) : (
+                            <Clock className="w-3.5 h-3.5 text-zinc-600" />
+                          )}
                         </div>
                       </div>
 
-                      {/* Result Box */}
-                      <div className="p-3 rounded-lg border border-[#272735] bg-[#181822] text-xs text-zinc-200 leading-relaxed font-sans shadow-sm">
+                      {/* Result Box with Illumination on Stage 3 */}
+                      <div className={`p-3 rounded-lg border transition-all text-xs text-zinc-200 leading-relaxed font-sans shadow-sm ${
+                        consoleStage >= 3
+                          ? "border-[#FF5500]/50 bg-[#191924] shadow-[0_0_15px_rgba(255,85,0,0.12)]"
+                          : "border-[#272735] bg-[#181822] opacity-80"
+                      }`}>
                         <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#FF5500] mb-1 font-semibold">
                           <Zap className="w-3 h-3 fill-current" />
                           <span>HELIXSIGN PROVENANCE SYNTHESIS</span>
@@ -1615,31 +1739,46 @@ export default function HelixSignLandingPage() {
                       </div>
 
                       <div className="space-y-1.5">
-                        {currQuery.events.map((ev, idx) => (
-                          <div
-                            key={idx}
-                            onClick={() => setSelectedEventIdx(idx)}
-                            className="flex items-center justify-between p-2.5 rounded-lg border border-[#22222b] bg-[#15151a] hover:border-zinc-700 transition-all cursor-pointer"
-                          >
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-7 h-7 rounded-full text-[10px] font-bold flex items-center justify-center font-mono bg-zinc-800 border border-zinc-700/60 text-zinc-300">
-                                0{idx + 1}
-                              </div>
-                              <div>
-                                <div className="text-xs font-semibold text-white">
-                                  <span>{ev.id} ({ev.mode})</span>
+                        {currQuery.events.map((ev, idx) => {
+                          const isSelected = selectedEventIdx === idx;
+                          return (
+                            <div
+                              key={idx}
+                              onClick={() => setSelectedEventIdx(idx)}
+                              className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer ${
+                                isSelected
+                                  ? "border-[#FF5500]/70 bg-[#FF5500]/15 shadow-sm scale-[1.01]"
+                                  : "border-[#22222b] bg-[#15151a] hover:border-zinc-700 hover:bg-[#181920]"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <div className={`w-7 h-7 rounded-full text-[10px] font-bold flex items-center justify-center font-mono border ${
+                                  isSelected
+                                    ? "bg-[#FF5500] text-white border-[#FF5500]"
+                                    : "bg-zinc-800 border-zinc-700/60 text-zinc-300"
+                                }`}>
+                                  0{idx + 1}
                                 </div>
-                                <div className="text-[11px] text-zinc-400 font-mono mt-0.5">
-                                  {ev.amp} • {ev.h1}
+                                <div>
+                                  <div className="text-xs font-semibold text-white">
+                                    <span>{ev.id} ({ev.mode})</span>
+                                  </div>
+                                  <div className="text-[11px] text-zinc-400 font-mono mt-0.5">
+                                    {ev.amp} • {ev.h1}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
 
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30 font-medium font-mono">
-                              {ev.freq}
-                            </span>
-                          </div>
-                        ))}
+                              <span className={`text-[10px] px-2 py-0.5 rounded font-medium font-mono ${
+                                isSelected
+                                  ? "bg-[#FF5500] text-white font-bold"
+                                  : "bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30"
+                              }`}>
+                                {ev.freq}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 
