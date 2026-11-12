@@ -28,7 +28,7 @@ if str(_ML_ROOT) not in sys.path:
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StrictInt, model_validator
 import uvicorn
 
 # ---------------------------------------------------------------------------
@@ -330,12 +330,12 @@ class ExtractRequest(BaseModel):
         ...,
         description="Uppercase ACGT sequence to extract watermark from.",
     )
-    carrierPositions: Optional[List[int]] = Field(
+    carrierPositions: Optional[List[StrictInt]] = Field(
         default=None,
         description="Zero-indexed codon positions to inspect (legacy mode; nucleotide start = 3 * pos).",
         examples=[[14, 28, 45, 62]],
     )
-    carrierStartOffsets: Optional[List[Optional[int]]] = Field(
+    carrierStartOffsets: Optional[List[Optional[StrictInt]]] = Field(
         default=None,
         description=(
             "Explicit 0-indexed nucleotide start offsets of mapped carrier codons in the observed sequence. "
@@ -348,6 +348,39 @@ class ExtractRequest(BaseModel):
         default="E. coli K-12",
         description="Host organism identifier (must match the one used during embedding).",
     )
+
+    @model_validator(mode="after")
+    def validate_addressing_modes(self) -> "ExtractRequest":
+        has_pos = self.carrierPositions is not None
+        has_offsets = self.carrierStartOffsets is not None
+
+        if has_pos and has_offsets:
+            raise ValueError(
+                "Mutual exclusivity violated: provide either carrierPositions or carrierStartOffsets, not both."
+            )
+        if not has_pos and not has_offsets:
+            raise ValueError(
+                "Either carrierPositions or carrierStartOffsets must be provided."
+            )
+
+        if has_pos:
+            if len(self.carrierPositions) == 0:
+                raise ValueError("carrierPositions must be non-empty.")
+            for i, p in enumerate(self.carrierPositions):
+                if isinstance(p, bool) or not isinstance(p, int):
+                    raise ValueError(f"carrierPositions[{i}] must be an integer, got {type(p).__name__}")
+                if p < 0:
+                    raise ValueError(f"carrierPositions[{i}] must be non-negative, got {p}")
+
+        if has_offsets:
+            if len(self.carrierStartOffsets) == 0:
+                raise ValueError("carrierStartOffsets must be non-empty.")
+            for i, off in enumerate(self.carrierStartOffsets):
+                if off is not None:
+                    if isinstance(off, bool) or not isinstance(off, int):
+                        raise ValueError(f"carrierStartOffsets[{i}] must be an integer or null, got {type(off).__name__}")
+
+        return self
 
 
 class ExtractResponse(BaseModel):
@@ -670,51 +703,6 @@ def _stub_embed(
     return "".join(seq_list), mutations
 
 
-def _stub_extract(
-    sequence: str,
-    carrier_positions: List[int],
-) -> Tuple[List[int], List[float]]:
-    """
-    Minimal extractor stub: reads codon at each carrier position and maps it
-    to bit 0 (index 0 in sorted synonym list) or bit 1 (index 1+).
-    """
-    SYNONYMS: Dict[str, List[str]] = {
-        "F": ["TTC", "TTT"], "L": ["CTA", "CTC", "CTG", "CTT", "TTA", "TTG"],
-        "I": ["ATA", "ATC", "ATT"], "V": ["GTA", "GTC", "GTG", "GTT"],
-        "S": ["AGC", "AGT", "TCA", "TCC", "TCG", "TCT"],
-        "P": ["CCA", "CCC", "CCG", "CCT"], "T": ["ACA", "ACC", "ACG", "ACT"],
-        "A": ["GCA", "GCC", "GCG", "GCT"], "Y": ["TAC", "TAT"],
-        "H": ["CAC", "CAT"], "Q": ["CAA", "CAG"], "N": ["AAC", "AAT"],
-        "K": ["AAA", "AAG"], "D": ["GAC", "GAT"], "E": ["GAA", "GAG"],
-        "C": ["TGC", "TGT"], "R": ["AGA", "AGG", "CGA", "CGC", "CGG", "CGT"],
-        "G": ["GGA", "GGC", "GGG", "GGT"],
-        "M": ["ATG"], "W": ["TGG"], "*": ["TAA", "TAG", "TGA"],
-    }
-    CODON_TO_AA: Dict[str, str] = {
-        c: aa for aa, codons in SYNONYMS.items() for c in codons
-    }
-
-    bit_estimates: List[int]   = []
-    confidences:   List[float] = []
-
-    for pos in carrier_positions:
-        start = pos * 3
-        if start + 3 > len(sequence):
-            bit_estimates.append(0)
-            confidences.append(0.5)
-            continue
-        codon = sequence[start: start + 3]
-        aa = CODON_TO_AA.get(codon, "X")
-        synonyms_sorted = sorted(SYNONYMS.get(aa, [codon]))
-        try:
-            idx = synonyms_sorted.index(codon)
-        except ValueError:
-            idx = 0
-        bit = 0 if idx == 0 else 1
-        bit_estimates.append(bit)
-        confidences.append(0.99 if len(synonyms_sorted) >= 2 else 0.5)
-
-    return bit_estimates, confidences
 
 
 # ---------------------------------------------------------------------------
@@ -886,7 +874,7 @@ async def extract_endpoint(req: ExtractRequest) -> ExtractResponse:
     """
     Extract soft bit estimates from a watermarked sequence.
 
-    Supports two addressing modes:
+    Supports two mutually exclusive addressing modes:
     1. `carrierStartOffsets`: Explicit nucleotide start offsets (can be non-multiples of 3;
        null values denote explicit erasures). Sequence length does not need to be a multiple of 3.
     2. `carrierPositions`: Codon indices (legacy mode; assumes 3 * pos).
@@ -896,37 +884,36 @@ async def extract_endpoint(req: ExtractRequest) -> ExtractResponse:
     - `confidences`:  Soft confidence scores in [0, 1] (0.0 = erasure).
     """
     seq = req.sequence.strip().upper()
-    # Sequence does NOT need to be a multiple of 3 if indels occurred
+    # Sequence does NOT need to be a multiple of 3 if carrierStartOffsets is used (post-indel recovery)
     _validate_sequence(seq, require_codon_multiple=(req.carrierStartOffsets is None))
 
-    if not req.carrierPositions and not req.carrierStartOffsets:
+    if extract_bits is None:
+        logger.error("genestamp_ml.extract is not loaded; cannot service extraction request.")
         raise HTTPException(
-            status_code=400,
-            detail="Either carrierStartOffsets or carrierPositions must be non-empty."
+            status_code=503,
+            detail="ML extraction engine is unavailable (genestamp_ml.extract not loaded).",
         )
 
-    if extract_bits is not None:
-        try:
-            result = extract_bits(
-                dna=seq,
-                carrier_positions=req.carrierPositions,
-                carrier_start_offsets=req.carrierStartOffsets,
-                codon_usage=_state.codon_usage,
-            )
-            if isinstance(result, tuple):
-                bit_estimates, confidences = result
-            elif isinstance(result, dict):
-                bit_estimates = result["bit_estimates"]
-                confidences   = result["confidences"]
-            else:
-                raise ValueError(f"Unexpected return type from extract_bits: {type(result)}")
-        except Exception as exc:
-            logger.error("extract_bits() error: %s", exc, exc_info=True)
-            raise HTTPException(status_code=500, detail=f"Extraction failed: {exc}")
-    else:
-        logger.info("genestamp_ml.extract not available — using stub extractor.")
-        target_positions = req.carrierPositions or [p // 3 if p is not None else 0 for p in (req.carrierStartOffsets or [])]
-        bit_estimates, confidences = _stub_extract(seq, target_positions)
+    try:
+        result = extract_bits(
+            dna=seq,
+            carrier_positions=req.carrierPositions,
+            carrier_start_offsets=req.carrierStartOffsets,
+            codon_usage=_state.codon_usage,
+        )
+        if isinstance(result, tuple):
+            bit_estimates, confidences = result
+        elif isinstance(result, dict):
+            bit_estimates = result["bit_estimates"]
+            confidences   = result["confidences"]
+        else:
+            raise ValueError(f"Unexpected return type from extract_bits: {type(result)}")
+    except (ValueError, TypeError) as exc:
+        logger.warning("extract_bits validation error: %s", exc)
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        logger.error("extract_bits() error: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Extraction failed: {exc}")
 
     return ExtractResponse(bitEstimates=bit_estimates, confidences=confidences)
 
