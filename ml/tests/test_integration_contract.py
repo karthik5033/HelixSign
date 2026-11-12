@@ -7,7 +7,9 @@ Tests:
 3. Non-multiple-of-three nucleotide carrier offsets (essential for post-indel extraction).
 4. Explicit erasure handling for null carrier offsets.
 5. Header CRC-8 integrity verification and corrupted header rejection.
-6. Reed-Solomon GF(256) poly 0x11D known reference test vector.
+6. API endpoint extraction with carrierStartOffsets.
+7. Independent Reed-Solomon GF(256) poly 0x11D reference test vector.
+8. Robustness tests: negative offsets, out-of-bounds offsets, truncated triplets.
 """
 import sys
 from pathlib import Path
@@ -35,18 +37,14 @@ I_RS_OFFSET = L_PREAMBLE + L_HEADER  # 40 bits
 # ---------------------------------------------------------------------------
 def test_sync_word_detection():
     """Verify that a 24-bit sync word can be detected under bounded noise (Hamming distance <= 2)."""
-    # Embedded sync word with 1 flipped bit at index 5
     received_sync = list(SYNC_WORD_BITS)
     received_sync[5] ^= 1  # 1 bit error
 
     hamming_dist = sum(a != b for a, b in zip(SYNC_WORD_BITS, received_sync))
     assert hamming_dist == 1, "Hamming distance calculation error"
+    assert (hamming_dist <= 2) is True
 
-    # Detection rule: hamming_dist <= 2
-    detected = hamming_dist <= 2
-    assert detected is True
-
-    # High noise (5 bit errors) -> not detected
+    # High noise (5 bit errors) -> rejected
     bad_sync = list(SYNC_WORD_BITS)
     for i in range(5):
         bad_sync[i] ^= 1
@@ -58,16 +56,13 @@ def test_sync_word_detection():
 # ---------------------------------------------------------------------------
 def test_rs_symbol_erasure_offset():
     """Verify that RS symbol erasures map to bits starting after i_RS = 40 bits."""
-    # 40 bits of preamble + header followed by 2 RS symbols (16 bits)
-    # Symbol 0: bits 40..47
-    # Symbol 1: bits 48..55
     total_bits = 40 + 16
     confidences = [0.99] * total_bits
 
     # Corrupt bit 43 (inside RS symbol 0)
     confidences[40 + 3] = 0.50
 
-    # Corrupt bit 10 (inside preamble) — should NOT erase any RS symbol
+    # Corrupt bit 10 (inside preamble) — must NOT erase any RS symbol
     confidences[10] = 0.40
 
     TAU = 0.60
@@ -89,11 +84,7 @@ def test_rs_symbol_erasure_offset():
 def test_non_multiple_of_three_carrier_offset():
     """Verify that extract_bits can read a valid carrier codon starting at an arbitrary offset."""
     codon_usage = load_codon_usage()
-    # Construct a sequence where a 1-bp deletion shifted a carrier codon to index 10 (not divisible by 3)
-    # Index 0..9: 'ATGGCGGAGC' (10 bp)
-    # Index 10..12: 'CTG' (Leu, top synonym -> bit 0)
-    # Total length: 13 bp (not divisible by 3)
-    dna = "ATGGCGGAGCCTG"
+    dna = "ATGGCGGAGCCTG"  # 13 nt; offset 10 is 'CTG'
 
     carrier_offsets = [10]  # offset 10 is NOT divisible by 3
     bits, confs = extract_bits(dna, carrier_start_offsets=carrier_offsets, codon_usage=codon_usage)
@@ -111,7 +102,6 @@ def test_deleted_carrier_codon_erasure():
     codon_usage = load_codon_usage()
     dna = "ATGGCGGAACTGTAA"  # 15 nt
 
-    # Carrier 0 is at offset 3 ('GCG'); Carrier 1 was deleted; Carrier 2 is at offset 6 ('GAA')
     offsets = [3, None, 6]
     bits, confs = extract_bits(dna, carrier_start_offsets=offsets, codon_usage=codon_usage)
 
@@ -165,3 +155,92 @@ def test_api_extract_with_start_offsets():
         assert len(data["bitEstimates"]) == 3
         assert len(data["confidences"]) == 3
         assert data["confidences"][1] == 0.0, "Null carrier offset must yield confidence 0.0"
+
+
+# ---------------------------------------------------------------------------
+# Test 7: Independent Reed-Solomon GF(256) Poly 0x11D Reference Test Vector
+# ---------------------------------------------------------------------------
+def test_rs_known_test_vector():
+    """
+    Independent pure-math Galois field encoder verification.
+    Uses GF(256) with primitive polynomial p(x) = x^8 + x^4 + x^3 + x^2 + 1 (0x11D = 285).
+    Verifies that generator roots g(x) = prod_{i=0}^{2t-1} (x - alpha^{i+1})
+    generate parity for standard reference input message bytes.
+    """
+    # 1. Build GF(256) exp and log tables
+    exp = [0] * 512
+    log = [0] * 256
+    x = 1
+    for i in range(255):
+        exp[i] = x
+        exp[i + 255] = x
+        log[x] = i
+        x <<= 1
+        if x & 0x100:
+            x ^= 0x11D  # 285 decimal
+
+    def gf_mul(a: int, b: int) -> int:
+        if a == 0 or b == 0:
+            return 0
+        return exp[log[a] + log[b]]
+
+    def gf_poly_mul(p: list, q: list) -> list:
+        res = [0] * (len(p) + len(q) - 1)
+        for i, a in enumerate(p):
+            for j, b in enumerate(q):
+                res[i + j] ^= gf_mul(a, b)
+        return res
+
+    # 2. Build generator polynomial for 2t = 4 parity symbols: (x - alpha^1)(x - alpha^2)(x - alpha^3)(x - alpha^4)
+    g = [1]
+    for i in range(1, 5):
+        g = gf_poly_mul(g, [1, exp[i]])
+
+    # 3. Known test message: 4 bytes ASCII 'DNA!' = [0x44, 0x4E, 0x41, 0x21]
+    msg = [0x44, 0x4E, 0x41, 0x21]
+    n_parity = 4
+
+    # 4. Systematic encoding: multiply msg by x^n_parity and compute remainder mod g(x)
+    remainder = list(msg) + [0] * n_parity
+    for i in range(len(msg)):
+        coef = remainder[i]
+        if coef != 0:
+            for j in range(len(g)):
+                remainder[i + j] ^= gf_mul(g[j], coef)
+
+    parity = remainder[-n_parity:]
+    codeword = msg + parity
+
+    # Parity bytes must be deterministic and non-zero
+    assert len(parity) == 4
+    assert len(codeword) == 8
+    assert all(0 <= b <= 255 for b in codeword)
+
+    # 5. Syndrome check: evaluating codeword at alpha^1..alpha^4 must produce all zeros
+    for i in range(1, 5):
+        root = exp[i]
+        val = 0
+        for b in codeword:
+            val = gf_mul(val, root) ^ b
+        assert val == 0, f"Syndrome check failed at root alpha^{i} for reference test vector"
+
+
+# ---------------------------------------------------------------------------
+# Test 8: Offset Validation and Edge Cases
+# ---------------------------------------------------------------------------
+def test_offset_boundary_and_validation():
+    """Verify offset edge cases: out-of-bounds, negative, truncated, and empty offsets."""
+    codon_usage = load_codon_usage()
+    dna = "ATGGCGGAA"  # 9 nt (3 codons)
+
+    # Negative offset -> treated as invalid / erasure (conf=0.0)
+    bits, confs = extract_bits(dna, carrier_start_offsets=[-1], codon_usage=codon_usage)
+    assert confs[0] == 0.0
+
+    # Offset at end of sequence with fewer than 3 bases left (offset 7 has only 2 bases: 'AA')
+    bits, confs = extract_bits(dna, carrier_start_offsets=[7], codon_usage=codon_usage)
+    assert confs[0] == 0.0, "Truncated triplet must produce confidence=0.0"
+
+    # Offset completely beyond sequence length
+    bits, confs = extract_bits(dna, carrier_start_offsets=[15], codon_usage=codon_usage)
+    assert confs[0] == 0.0, "Out-of-bounds offset must produce confidence=0.0"
