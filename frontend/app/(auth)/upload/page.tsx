@@ -405,70 +405,104 @@ export default function StampStudioPage() {
           <Card className="border border-border bg-card shadow-sm flex flex-col flex-1">
             <CardHeader className="pb-3 border-b border-border/50">
               <div className="flex items-center justify-between gap-2">
-                <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
                   Carrier Codon Allocation Ledger
                 </CardTitle>
-                <span className="text-xs font-mono text-muted-foreground">Table 11 Codec</span>
+                <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#1E1E28] border border-[#2E2E3E] text-zinc-300 font-semibold">
+                  Table 11 Codec
+                </span>
               </div>
-              <CardDescription className="text-sm">
+              <CardDescription className="text-sm text-zinc-400 mt-1">
                 Synonymous carrier codon substitutions mapped across target CDS open reading frames
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-5 space-y-4 flex flex-col flex-1">
               {/* Biophysical Health Metrics Bar (4 mini stats) */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <div className="p-2 rounded-lg border border-border bg-secondary/30">
-                  <span className="text-[9px] font-mono text-muted-foreground uppercase block">Peptide Match</span>
-                  <span className="text-sm font-bold font-mono text-foreground block mt-0.5">100.0%</span>
-                  <span className="text-[9px] text-muted-foreground block">0 alterations</span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+                <div className="p-3 rounded-xl border border-border/70 bg-[#141419]">
+                  <span className="text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider block">
+                    Peptide Match
+                  </span>
+                  <span className="text-base sm:text-lg font-extrabold font-mono text-white block mt-1">
+                    100.0%
+                  </span>
+                  <span className="text-xs font-mono text-zinc-400 block mt-0.5">
+                    0 alterations
+                  </span>
                 </div>
-                <div className="p-2 rounded-lg border border-border bg-secondary/30">
-                  <span className="text-[9px] font-mono text-muted-foreground uppercase block">GC Drift</span>
-                  <span className="text-sm font-bold font-mono text-foreground block mt-0.5">50.8% &rarr; 51.1%</span>
-                  <span className="text-[9px] text-muted-foreground block">&Delta;GC: +0.3% (Safe)</span>
+                <div className="p-3 rounded-xl border border-border/70 bg-[#141419]">
+                  <span className="text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider block">
+                    GC Drift
+                  </span>
+                  <span className="text-base sm:text-lg font-extrabold font-mono text-white block mt-1">
+                    50.8% &rarr; 51.1%
+                  </span>
+                  <span className="text-xs font-mono text-zinc-400 block mt-0.5">
+                    &Delta;GC: +0.3% (Safe)
+                  </span>
                 </div>
-                <div className="p-2 rounded-lg border border-border bg-secondary/30">
-                  <span className="text-[9px] font-mono text-muted-foreground uppercase block">Host CAI Score</span>
-                  <span className="text-sm font-bold font-mono text-primary block mt-0.5">0.988</span>
-                  <span className="text-[9px] text-muted-foreground block">Optimal Translation</span>
+                <div className="p-3 rounded-xl border border-border/70 bg-[#141419]">
+                  <span className="text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider block">
+                    Host CAI Score
+                  </span>
+                  <span className="text-base sm:text-lg font-extrabold font-mono text-[#FF5500] block mt-1">
+                    0.988
+                  </span>
+                  <span className="text-xs font-mono text-zinc-400 block mt-0.5">
+                    Optimal Translation
+                  </span>
                 </div>
-                <div className="p-2 rounded-lg border border-border bg-secondary/30">
-                  <span className="text-[9px] font-mono text-muted-foreground uppercase block">Max Homopolymer</span>
-                  <span className="text-sm font-bold font-mono text-foreground block mt-0.5">4 bp</span>
-                  <span className="text-[9px] text-muted-foreground block">Twist/IDT Verified</span>
+                <div className="p-3 rounded-xl border border-border/70 bg-[#141419]">
+                  <span className="text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider block">
+                    Max Homopolymer
+                  </span>
+                  <span className="text-base sm:text-lg font-extrabold font-mono text-white block mt-1">
+                    4 bp
+                  </span>
+                  <span className="text-xs font-mono text-zinc-400 block mt-0.5">
+                    Twist/IDT Verified
+                  </span>
                 </div>
               </div>
 
               {/* Synonymous Codon Substitution Track */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
-                  <span className="font-semibold text-foreground">Synonymous Carrier Codon Track:</span>
-                  <span className="text-muted-foreground font-semibold">{currentPreset.mutations.length} Carrier Codons Verified</span>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between text-sm font-mono">
+                  <span className="font-semibold text-white flex items-center gap-1.5">
+                    Synonymous Carrier Codon Track:
+                  </span>
+                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold">
+                    {currentPreset.mutations.length} Carrier Codons Verified
+                  </span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {currentPreset.mutations.map((mut) => (
                     <div
                       key={mut.codonIndex}
                       onMouseEnter={() => setActiveDiffCodon(mut.codonIndex)}
                       onMouseLeave={() => setActiveDiffCodon(null)}
-                      className={`p-2 rounded-lg border transition-all text-xs font-mono cursor-pointer ${
+                      className={`p-3 rounded-xl border transition-all font-mono cursor-pointer ${
                         activeDiffCodon === mut.codonIndex
                           ? "border-[#FF5500] bg-[#FF5500]/15 shadow-sm scale-102"
-                          : "border-border bg-secondary/40 hover:border-zinc-500"
+                          : "border-border/80 bg-[#15151c] hover:border-zinc-500"
                       }`}
                     >
-                      <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-0.5">
-                        <span>Locus #{mut.codonIndex}</span>
-                        <span className="text-muted-foreground font-bold">{mut.aminoAcid}</span>
+                      <div className="flex items-center justify-between text-xs text-zinc-300 mb-1.5">
+                        <span className="font-semibold text-zinc-300">Locus #{mut.codonIndex}</span>
+                        <span className="px-1.5 py-0.5 rounded bg-[#20202C] border border-[#303042] text-xs font-bold text-white">
+                          {mut.aminoAcid}
+                        </span>
                       </div>
-                      <div className="flex items-center justify-between text-xs font-bold">
-                        <span className="text-muted-foreground line-through">{mut.fromCodon}</span>
-                        <span className="text-primary">&rarr;</span>
-                        <span className="text-[#FF5500] bg-primary/20 px-1 py-0.2 rounded">{mut.toCodon}</span>
+                      <div className="flex items-center justify-between py-1 text-sm font-bold">
+                        <span className="text-zinc-400 line-through text-xs font-mono">{mut.fromCodon}</span>
+                        <span className="text-primary text-sm font-bold px-1">&rarr;</span>
+                        <span className="text-white bg-[#FF5500]/25 border border-[#FF5500]/40 px-2 py-0.5 rounded text-xs font-bold font-mono tracking-wider">
+                          {mut.toCodon}
+                        </span>
                       </div>
-                      <div className="mt-0.5 text-[10px] text-muted-foreground font-mono">
-                        w_i = {mut.wi.toFixed(3)}
+                      <div className="mt-1 text-xs text-zinc-400 font-mono flex items-center justify-between">
+                        <span>w_i = <strong className="text-zinc-200">{mut.wi.toFixed(3)}</strong></span>
                       </div>
                     </div>
                   ))}
@@ -476,12 +510,12 @@ export default function StampStudioPage() {
               </div>
 
               {/* Biological Invariance Guarantee Banner */}
-              <div className="p-3 rounded-lg border border-border bg-secondary/20 text-xs text-zinc-300 space-y-1">
-                <div className="flex items-center gap-1.5 text-foreground font-semibold text-xs">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <div className="p-3.5 rounded-xl border border-border/80 bg-[#14141A] space-y-1.5">
+                <div className="flex items-center gap-2 text-white font-semibold text-sm">
+                  <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
                   <span>Translationally Silent Provenance Seal Guaranteed</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                <p className="text-xs sm:text-[13px] text-zinc-300 leading-relaxed font-sans">
                   Reconstructed coding sequence produces identical primary polypeptide chain. Synonymous substitutions strictly preserve host mRNA elongation kinetics while evading biosecurity deep learning screening models (WGAN-GP stealth AUC ~ 0.505).
                 </p>
               </div>
@@ -492,9 +526,9 @@ export default function StampStudioPage() {
                   size="sm"
                   variant="outline"
                   onClick={handleCopySequence}
-                  className="gap-1.5 text-xs font-mono"
+                  className="gap-1.5 text-xs sm:text-sm font-medium h-9 px-3.5 font-mono"
                 >
-                  {isCopied ? <Check className="w-3.5 h-3.5 text-muted-foreground" /> : <Copy className="w-3.5 h-3.5" />}
+                  {isCopied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
                   {isCopied ? "Sequence Copied" : "Copy Stamped CDS"}
                 </Button>
 
@@ -502,14 +536,14 @@ export default function StampStudioPage() {
                   <Button
                     size="sm"
                     onClick={handleDownloadFasta}
-                    className="bg-[#FF5500] hover:bg-[#E54B00] text-white text-xs gap-1.5 font-semibold cursor-pointer shadow-sm"
+                    className="bg-[#FF5500] hover:bg-[#E54B00] text-white text-xs sm:text-sm gap-1.5 font-semibold h-9 px-4 cursor-pointer shadow-sm"
                   >
-                    <Download className="w-3.5 h-3.5" />
+                    <Download className="w-4 h-4" />
                     Download Stamped FASTA
                   </Button>
                   <Link href="/reports">
-                    <Button size="sm" variant="outline" className="text-xs gap-1.5 font-mono">
-                      <Database className="w-3.5 h-3.5" />
+                    <Button size="sm" variant="outline" className="text-xs sm:text-sm gap-1.5 font-mono h-9 px-3.5">
+                      <Database className="w-4 h-4" />
                       View in Registry
                     </Button>
                   </Link>
