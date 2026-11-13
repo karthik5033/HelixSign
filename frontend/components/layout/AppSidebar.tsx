@@ -16,6 +16,7 @@ import {
   Sliders,
   PanelLeftClose,
   PanelLeftOpen,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppLogo } from "@/components/ui/AppLogo";
@@ -23,6 +24,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/AuthContext";
 
 export const NAV_ITEMS = [
+  { label: "Input Sequence", href: "/input", icon: Sparkles },
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { label: "Construct Ingestion", href: "/upload", icon: Waves },
   { label: "Steganographic Pipeline", href: "/analysis", icon: Activity },

@@ -11,6 +11,7 @@ import {
   Layers,
   BookOpen,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/ThemeContext";
@@ -32,6 +33,7 @@ export function TopHeader() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const getPageTitle = () => {
+    if (pathname.includes("/input")) return "Sequence & Construct Input Studio";
     if (pathname.includes("/dashboard")) return "Construct Overview & Provenance";
     if (pathname.includes("/upload")) return "Construct Ingestion & Stamp Studio";
     if (pathname.includes("/analysis")) return "Steganographic Pipeline Explorer";
@@ -82,6 +84,15 @@ export function TopHeader() {
 
         {/* Right: Quick Links, Theme Toggle, Notifications */}
         <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          <Link href="/input">
+            <Button
+              size="sm"
+              className="bg-[#FF5500] hover:bg-[#e04b00] text-white font-semibold text-xs gap-1.5 h-8 px-3 rounded-lg shadow-sm cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Input Sequence</span>
+            </Button>
+          </Link>
           <Link
             href="/architecture"
             className="text-xs text-muted-foreground hover:text-foreground px-2.5 py-1.5 rounded-md hover:bg-muted transition-colors flex items-center gap-1.5 font-medium"

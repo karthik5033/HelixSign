@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 import { TopHeader } from "@/components/layout/TopHeader";
 
 const routeTitles: Record<string, string> = {
+  "/input": "Sequence & Construct Input Studio",
   "/dashboard": "Construct Overview & Provenance",
   "/upload": "Construct Ingestion & Stamp Studio",
   "/analysis": "Steganographic Pipeline Explorer",

@@ -77,3 +77,4 @@ export function MlPipelineStatusBadge({ compact = false }: { compact?: boolean }
     </div>
   );
 }
+
