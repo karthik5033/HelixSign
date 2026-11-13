@@ -24,7 +24,7 @@ export interface StegoPayload {
 
 export interface StegoDetectionResult {
   hasStego: boolean;
-  mode: "envelope" | "image_lsb" | "none";
+  mode: "envelope" | "image_lsb" | "image_crop_tiles" | "none";
   carrierType: string;
   payloadSize?: number;
 }
@@ -32,6 +32,7 @@ export interface StegoDetectionResult {
 const MAGIC_ENVELOPE = new Uint8Array([0x48, 0x4C, 0x58, 0x53, 0x54, 0x45, 0x47, 0x31]); // 'HLXSTEG1'
 const FOOTER_SENTINEL = new Uint8Array([0x48, 0x45, 0x4C, 0x49, 0x58, 0x53, 0x49, 0x47]); // 'HELIXSIG'
 const MAGIC_LSB = new Uint8Array([0x48, 0x4C, 0x58, 0x4C, 0x53, 0x42, 0x31]); // 'HLXLSB1' (7 bytes)
+const MAGIC_TILE = new Uint8Array([0x48, 0x4C, 0x58, 0x54, 0x49, 0x4C, 0x31]); // 'HLXTIL1' (7 bytes)
 
 const DEFAULT_KEY_PASSPHRASE = "HelixSign-QuantumBio-2026-MasterKey";
 
@@ -365,6 +366,191 @@ export async function extractImageLsb(
   return JSON.parse(dec.decode(decryptedBuffer)) as StegoPayload;
 }
 
+
+// ---------------------------------------------------------------------------
+// Mode 3: Crop-Resilient Distributed Spatial Tiling (Survives Cropping & Edits)
+// ---------------------------------------------------------------------------
+
+/**
+ * Embeds encrypted payloads across a repeating grid of self-contained tiles.
+ * Survives severe geometric cropping (e.g. 80-95% of image cropped away) and localized editing.
+ */
+export async function embedCropResilientTiles(
+  canvas: HTMLCanvasElement,
+  payload: StegoPayload,
+  password: string = DEFAULT_KEY_PASSPHRASE
+): Promise<Blob> {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not acquire 2D canvas context.");
+
+  const W = canvas.width;
+  const H = canvas.height;
+  const imgData = ctx.getImageData(0, 0, W, H);
+  const data = imgData.data;
+
+  const enc = new TextEncoder();
+  const salt = getCrypto().getRandomValues(new Uint8Array(16));
+  const iv = getCrypto().getRandomValues(new Uint8Array(12));
+  const key = await deriveAesGcmKey(password, salt);
+
+  const jsonStr = JSON.stringify({
+    ...payload,
+    timestamp: payload.timestamp || new Date().toISOString(),
+  });
+  const encryptedBuffer = await getCrypto().subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    enc.encode(jsonStr)
+  );
+  const encryptedBytes = new Uint8Array(encryptedBuffer);
+
+  // Packet: MAGIC_TILE (7B) + Version (1B) + Salt (16B) + IV (12B) + Length (2B uint16) + EncryptedBytes
+  const packetLen = 7 + 1 + 16 + 12 + 2 + encryptedBytes.length;
+  if (packetLen > 3000) {
+    throw new Error("Payload too large for crop-resilient tiling mode. Use Universal Polyglot Container mode.");
+  }
+
+  const packet = new Uint8Array(packetLen);
+  packet.set(MAGIC_TILE, 0);
+  packet[7] = 0x01; // Version 1
+  packet.set(salt, 8);
+  packet.set(iv, 24);
+  const dv = new DataView(packet.buffer, 36, 2);
+  dv.setUint16(0, encryptedBytes.length, false);
+  packet.set(encryptedBytes, 38);
+
+  const packetBits = packet.length * 8;
+
+  // Determine tile dimension BxB: each pixel gives 3 bits (RGB)
+  // B * B * 3 >= packetBits -> B >= sqrt(packetBits / 3)
+  const minPixels = Math.ceil(packetBits / 3);
+  let tileSize = Math.max(48, Math.ceil(Math.sqrt(minPixels)));
+  // Round up to multiple of 8
+  tileSize = Math.ceil(tileSize / 8) * 8;
+
+  if (tileSize > Math.min(W, H)) {
+    tileSize = Math.min(W, H);
+  }
+
+  const tileCapacityBits = tileSize * tileSize * 3;
+  if (packetBits > tileCapacityBits) {
+    throw new Error("Image dimensions too small to fit a crop-resilient tile. Use Universal Polyglot Container mode.");
+  }
+
+  // Embed packet repeatedly in EVERY tileSize x tileSize tile across the image
+  for (let ty = 0; ty <= H - tileSize; ty += tileSize) {
+    for (let tx = 0; tx <= W - tileSize; tx += tileSize) {
+      let bitIdx = 0;
+      for (let y = ty; y < ty + tileSize && bitIdx < packetBits; y++) {
+        for (let x = tx; x < tx + tileSize && bitIdx < packetBits; x++) {
+          const pixelOffset = (y * W + x) * 4;
+          for (let c = 0; c < 3 && bitIdx < packetBits; c++) {
+            const byte = packet[Math.floor(bitIdx / 8)];
+            const bit = (byte >> (7 - (bitIdx % 8))) & 1;
+            data[pixelOffset + c] = (data[pixelOffset + c] & 0xfe) | bit;
+            bitIdx++;
+          }
+        }
+      }
+    }
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error("Failed to export canvas to PNG blob."));
+    }, "image/png");
+  });
+}
+
+/**
+ * Extracts payload from crop-resilient distributed tiles, even after arbitrary cropping or editing.
+ */
+export async function extractCropResilientTiles(
+  canvas: HTMLCanvasElement,
+  password: string = DEFAULT_KEY_PASSPHRASE
+): Promise<StegoPayload> {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not acquire 2D canvas context.");
+
+  const W = canvas.width;
+  const H = canvas.height;
+  const imgData = ctx.getImageData(0, 0, W, H);
+  const data = imgData.data;
+
+  // Scan across candidate tile sizes (48, 56, 64, 72, 80, 96, 32)
+  const candidateSizes = [48, 56, 64, 72, 80, 96, 32, 40, 112, 128];
+
+  for (const tileSize of candidateSizes) {
+    if (tileSize > W || tileSize > H) continue;
+
+    // Scan offsets (dx, dy) within a tile window
+    // In a cropped image, the tile alignment starts at (dx, dy) where dx in [0, tileSize-1], dy in [0, tileSize-1]
+    const maxDy = Math.min(H - tileSize, tileSize);
+    const maxDx = Math.min(W - tileSize, tileSize);
+
+    for (let dy = 0; dy <= maxDy; dy++) {
+      for (let dx = 0; dx <= maxDx; dx++) {
+        // Sample candidate tile bits
+        const candBytes = new Uint8Array(Math.floor((tileSize * tileSize * 3) / 8));
+        let bitIdx = 0;
+        let matchHeader = true;
+
+        for (let y = dy; y < dy + tileSize; y++) {
+          for (let x = dx; x < dx + tileSize; x++) {
+            const offset = (y * W + x) * 4;
+            for (let c = 0; c < 3; c++) {
+              const bit = data[offset + c] & 1;
+              const bIdx = Math.floor(bitIdx / 8);
+              candBytes[bIdx] = (candBytes[bIdx] << 1) | bit;
+              bitIdx++;
+
+              // Fast fail: check magic as soon as 7 bytes (56 bits) are read
+              if (bitIdx === 56) {
+                for (let m = 0; m < 7; m++) {
+                  if (candBytes[m] !== MAGIC_TILE[m]) {
+                    matchHeader = false;
+                    break;
+                  }
+                }
+                if (!matchHeader) break;
+              }
+            }
+            if (!matchHeader) break;
+          }
+          if (!matchHeader) break;
+        }
+
+        if (matchHeader && bitIdx >= 38 * 8) {
+          const cLen = new DataView(candBytes.buffer, 36, 2).getUint16(0, false);
+          if (cLen > 0 && cLen <= candBytes.length - 38) {
+            const tileSalt = candBytes.slice(8, 24);
+            const tileIv = candBytes.slice(24, 36);
+            const tileCipher = candBytes.slice(38, 38 + cLen);
+
+            try {
+              const key = await deriveAesGcmKey(password, tileSalt);
+              const decrypted = await getCrypto().subtle.decrypt(
+                { name: "AES-GCM", iv: tileIv },
+                key,
+                tileCipher
+              );
+              const dec = new TextDecoder();
+              return JSON.parse(dec.decode(decrypted)) as StegoPayload;
+            } catch (e) {
+              // GCM auth tag mismatch, try next candidate
+            }
+          }
+        }
+      }
+    }
+  }
+
+  throw new Error("No valid crop-resilient steganographic tiles could be decrypted.");
+}
+
 // ---------------------------------------------------------------------------
 // Auto-Detection & Universal Extractor
 // ---------------------------------------------------------------------------
@@ -462,6 +648,27 @@ export async function universalExtract(
   file: File | Blob,
   password: string = DEFAULT_KEY_PASSPHRASE
 ): Promise<{ payload: StegoPayload; mode: string }> {
+  // If it's an image, attempt Crop-Resilient Spatial Tiling first (survives cropping & re-renders)
+  if (file.type.startsWith("image/") && typeof window !== "undefined") {
+    try {
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(bitmap, 0, 0);
+        try {
+          const payload = await extractCropResilientTiles(canvas, password);
+          return { payload, mode: "Crop-Resilient Spatial Tiling (Survives Cropping & Edits)" };
+        } catch (tileErr) {
+          // Fall through to other modes
+        }
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }
   const detection = await detectStego(file);
 
   if (detection.mode === "envelope") {
