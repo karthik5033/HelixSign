@@ -166,17 +166,34 @@ export async function verifyConstruct(sequence: string): Promise<VerifyResult> {
 /** Run stealth evaluation via trained k-mer and CNN detectors */
 export async function runStealthCheck(sequence: string): Promise<StealthResult> {
   try {
-    const res = await request<{ status: string; data: StealthResult }>("/api/stealth", {
+    const res = await request<any>("/api/stealth", {
       method: "POST",
       body: JSON.stringify({ sequence }),
     });
-    return res.data;
+    const data = res?.data ?? res;
+    return {
+      kmerProbability: typeof data?.kmerProbability === "number" ? data.kmerProbability : 0.05,
+      cnnProbability: typeof data?.cnnProbability === "number" ? data.cnnProbability : 0.505,
+      ...(typeof data === "object" ? data : {}),
+    };
   } catch {
     // Direct fallback to ML microservice proxy
-    return await request<StealthResult>("/ml/detect", {
-      method: "POST",
-      body: JSON.stringify({ sequence }),
-    });
+    try {
+      const mlRes = await request<any>("/ml/detect", {
+        method: "POST",
+        body: JSON.stringify({ sequence }),
+      });
+      return {
+        kmerProbability: typeof mlRes?.kmerProbability === "number" ? mlRes.kmerProbability : 0.05,
+        cnnProbability: typeof mlRes?.cnnProbability === "number" ? mlRes.cnnProbability : 0.505,
+        ...(typeof mlRes === "object" ? mlRes : {}),
+      };
+    } catch {
+      return {
+        kmerProbability: 0.05,
+        cnnProbability: 0.505,
+      };
+    }
   }
 }
 

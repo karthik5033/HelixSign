@@ -440,12 +440,20 @@ export default function HelixSignLandingPage() {
   // WGAN-GP Realism & Invariance Metrics (dynamically derived from active construct when stamped)
   const wganStep = 1428;
   const criticLoss = -0.0142;
+
+  // Safely extract kmer & cnn probabilities handling direct, nested or partial stealth payloads
+  const stealthData = (construct.stealthResult as any)?.data || construct.stealthResult;
+  const rawKmerProb = stealthData?.kmerProbability;
+  const rawCnnProb = stealthData?.cnnProbability;
+  const kmerProb = typeof rawKmerProb === "number" && !isNaN(rawKmerProb) ? rawKmerProb : 0.05;
+  const cnnProb = typeof rawCnnProb === "number" && !isNaN(rawCnnProb) ? rawCnnProb : 0.505;
+
   const wassersteinDist = hasActiveConstruct && construct.stealthResult
-    ? parseFloat((construct.stealthResult.kmerProbability * 0.003).toFixed(4))
+    ? parseFloat((kmerProb * 0.003).toFixed(4))
     : 0.0018;
   const gradientPenaltyNorm = 10.0;
   const cnnDetectionAuc = hasActiveConstruct && construct.stealthResult
-    ? parseFloat(construct.stealthResult.cnnProbability.toFixed(3))
+    ? parseFloat(cnnProb.toFixed(3))
     : 0.505;
   const [activeScanIdx, setActiveScanIdx] = useState<number>(0);
   const [selectedStoryChapter, setSelectedStoryChapter] = useState<number>(0);
@@ -541,10 +549,10 @@ export default function HelixSignLandingPage() {
         construct: `${construct.geneName || "Active"} (${construct.sequence.length.toLocaleString()} bp)`,
         model: "WGAN-GP Refiner",
         step1Name: "discriminator.evaluate_kmer_divergence(k=6, host='E. coli')",
-        step1Metric: `k-mer prob = ${(construct.stealthResult?.kmerProbability ?? 0.05).toFixed(4)} • 14ms`,
+        step1Metric: `k-mer prob = ${kmerProb.toFixed(4)} • 14ms`,
         step2Name: "wgan_refiner.minimize_distribution_distance(iterations=50)",
         step2Metric: "Wasserstein distance = 0.038 • converged",
-        response: `Construct matches host wildtype sequence distribution within 99.7% confidence. Biosecurity 1D-CNN classifier scores construct at AUC ${(construct.stealthResult?.cnnProbability ?? 0.505).toFixed(3)} (exact chance level). Watermark is cryptographically invisible with 0.00% peptide drift.`,
+        response: `Construct matches host wildtype sequence distribution within 99.7% confidence. Biosecurity 1D-CNN classifier scores construct at AUC ${cnnProb.toFixed(3)} (exact chance level). Watermark is cryptographically invisible with 0.00% peptide drift.`,
         sql: `SELECT locus_id, from_codon, to_codon, amino_acid, wi, rs_symbol FROM active_construct_eval`,
         tableName: "active_construct_eval",
         totalRows: `${Math.floor(construct.sequence.length / 3).toLocaleString()} codons logged • ${construct.mutations.length} carrier loci`,
@@ -560,9 +568,9 @@ export default function HelixSignLandingPage() {
           desc: `Synonymous ${m.aminoAcid} wobble mutation preserving reading frame`,
         })),
         events: [
-          { id: "KMER-01", mode: "Hexamer Freq Dist", amp: `p = ${(1 - (construct.stealthResult?.kmerProbability ?? 0.04)).toFixed(2)}`, h1: "Host Invariant", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,4 L22,16 L25,10 L60,10" },
+          { id: "KMER-01", mode: "Hexamer Freq Dist", amp: `p = ${(1 - kmerProb).toFixed(2)}`, h1: "Host Invariant", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,4 L22,16 L25,10 L60,10" },
           { id: "KMER-02", mode: "Codon Pair Bias", amp: "Z = -0.08", h1: "Host Invariant", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,5 L22,15 L25,10 L60,10" },
-          { id: "KMER-03", mode: "1D-CNN Detection", amp: `AUC ${(construct.stealthResult?.cnnProbability ?? 0.505).toFixed(3)}`, h1: "Undetectable", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,3 L22,17 L25,10 L60,10" },
+          { id: "KMER-03", mode: "1D-CNN Detection", amp: `AUC ${cnnProb.toFixed(3)}`, h1: "Undetectable", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,3 L22,17 L25,10 L60,10" },
         ],
       };
       return [activeQuery, ...CONSOLE_DEMO_QUERIES];

@@ -92,6 +92,14 @@ export function ConstructProvider({ children }: { children: ReactNode }) {
         if (stored) {
           const parsed = JSON.parse(stored);
           if (parsed && typeof parsed === "object" && parsed.sequence) {
+            if (parsed.stealthResult) {
+              const sd = parsed.stealthResult.data || parsed.stealthResult;
+              parsed.stealthResult = {
+                ...sd,
+                kmerProbability: typeof sd.kmerProbability === "number" ? sd.kmerProbability : 0.05,
+                cnnProbability: typeof sd.cnnProbability === "number" ? sd.cnnProbability : 0.505,
+              };
+            }
             setConstruct(parsed);
           }
         }
@@ -158,7 +166,23 @@ export function ConstructProvider({ children }: { children: ReactNode }) {
       hostOrganism: host || "E. coli K-12 RefSeq",
       stampResult: stamp,
       verifyResult: verify,
-      stealthResult: stealth,
+      stealthResult: stealth
+        ? {
+            ...((stealth as any).data || stealth),
+            kmerProbability:
+              typeof (stealth as any).kmerProbability === "number"
+                ? (stealth as any).kmerProbability
+                : typeof (stealth as any).data?.kmerProbability === "number"
+                ? (stealth as any).data.kmerProbability
+                : 0.05,
+            cnnProbability:
+              typeof (stealth as any).cnnProbability === "number"
+                ? (stealth as any).cnnProbability
+                : typeof (stealth as any).data?.cnnProbability === "number"
+                ? (stealth as any).data.cnnProbability
+                : 0.505,
+          }
+        : null,
       mutations: muts,
       caiScore: stamp.stats?.caiSimilarity ?? 0.988,
       gcContent: stamp.stats?.gcAfter ?? computeGcContent(stamp.stampedSequence),

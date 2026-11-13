@@ -375,7 +375,7 @@ export function DnaHelix3DShowcase() {
   const { construct, hasActiveConstruct } = useConstruct();
   const [activeTab, setActiveTab] = useState<"3d" | "matrix" | "stress">("3d");
   const [selectedConstruct, setSelectedConstruct] = useState<ConstructPreset>(PRESET_CONSTRUCTS[0]);
-  const [isAutoRotate, setIsAutoRotate] = useState(false);
+  const [isAutoRotate, setIsAutoRotate] = useState(true);
   const [rotationAngle, setRotationAngle] = useState(0);
   const [tiltX, setTiltX] = useState(DEFAULT_TILT_X);
   const [hoveredBasePair, setHoveredBasePair] = useState<BasePair | null>(null);
@@ -453,10 +453,20 @@ export function DnaHelix3DShowcase() {
 
       if (!isDraggingRef.current) {
         if (isAutoRotate) {
-          // Calm, measured biological orbit: 0.38 rad/s (~16.5 sec per full 360 deg turn)
-          setRotationAngle((prev) => (prev + dt * 0.38) % (Math.PI * 2));
+          // If there is lingering drag momentum, blend it smoothly with continuous orbit
+          if (Math.abs(dragVelocityRef.current.x) > 0.0001) {
+            setRotationAngle((prev) => (prev + dragVelocityRef.current.x + dt * 0.38) % (Math.PI * 2));
+            dragVelocityRef.current.x *= 0.92;
+          } else {
+            // Calm, continuous biological orbit: 0.38 rad/s (~16.5 sec per full 360 deg turn)
+            setRotationAngle((prev) => (prev + dt * 0.38) % (Math.PI * 2));
+          }
+          if (Math.abs(dragVelocityRef.current.y) > 0.0001) {
+            setTiltX((prev) => Math.max(-0.4, Math.min(0.4, prev + dragVelocityRef.current.y)));
+            dragVelocityRef.current.y *= 0.92;
+          }
         } else if (Math.abs(dragVelocityRef.current.x) > 0.0001 || Math.abs(dragVelocityRef.current.y) > 0.0001) {
-          // Friction decay on drag release
+          // Friction decay on drag release when manually paused
           setRotationAngle((prev) => (prev + dragVelocityRef.current.x) % (Math.PI * 2));
           setTiltX((prev) => Math.max(-0.4, Math.min(0.4, prev + dragVelocityRef.current.y)));
           dragVelocityRef.current.x *= 0.92;
@@ -807,7 +817,7 @@ export function DnaHelix3DShowcase() {
         ctx.fillStyle = "rgba(203, 213, 225, 0.8)";
         const subText = hoveredBasePair.isCarrier
           ? `${hoveredBasePair.wildtypeCodon} → ${hoveredBasePair.stampedCodon} [${hoveredBasePair.rsSymbol}]`
-          : `Invariant • CAI: ${hoveredBasePair.caiScore.toFixed(3)}`;
+          : `Invariant • CAI: ${(hoveredBasePair.caiScore ?? 1.0).toFixed(3)}`;
         ctx.fillText(subText, tooltipX + 8, tooltipY + 26);
       }
     }
@@ -852,7 +862,6 @@ export function DnaHelix3DShowcase() {
     dragStartPosRef.current = { x: e.clientX, y: e.clientY };
     lastMousePosRef.current = { x: e.clientX, y: e.clientY };
     dragVelocityRef.current = { x: 0, y: 0 };
-    setIsAutoRotate(false);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -896,10 +905,9 @@ export function DnaHelix3DShowcase() {
     const targetPair = basePairs[locusIdx];
     if (targetPair) {
       setSelectedBasePair(targetPair);
-      // Rotate helix so target angle faces directly forward: angle + rotation = 0
+      // Align helix toward target locus while preserving smooth continuous orbit
       const targetAngle = (Math.PI * 2 - (targetPair.angle % (Math.PI * 2))) % (Math.PI * 2);
       setRotationAngle(targetAngle);
-      setIsAutoRotate(false);
     }
   };
 
@@ -1080,7 +1088,10 @@ export function DnaHelix3DShowcase() {
                 <div className="p-2.5 rounded-lg border border-border bg-[#16171d]">
                   <span className="text-[10px] text-muted-foreground block">WGAN-GP CRITIC AUC</span>
                   <span className="text-sm font-semibold text-zinc-100 mt-0.5 block">
-                    {hasActiveConstruct && construct.stealthResult ? construct.stealthResult.cnnProbability.toFixed(3) : "0.500"}
+                    {(() => {
+                      const prob = (construct.stealthResult as any)?.cnnProbability ?? (construct.stealthResult as any)?.data?.cnnProbability;
+                      return hasActiveConstruct && typeof prob === "number" && !isNaN(prob) ? prob.toFixed(3) : "0.505";
+                    })()}
                   </span>
                   <span className="text-[9px] text-zinc-400 mt-0.5 block">
                     {hasActiveConstruct ? "Classifier Invariant" : "Baseline Chance"}
@@ -1113,7 +1124,7 @@ export function DnaHelix3DShowcase() {
                     )}
                   </span>
                   <span className="text-emerald-400/90 font-medium">
-                    {hasActiveConstruct && activeLocus.isCarrier ? `Synonymous (w_i = ${activeLocus.caiScore.toFixed(3)})` : "100.0% Invariance"}
+                    {hasActiveConstruct && activeLocus.isCarrier ? `Synonymous (w_i = ${(activeLocus.caiScore ?? 0.988).toFixed(3)})` : "100.0% Invariance"}
                   </span>
                 </div>
                 <p className="text-[10px] text-zinc-400 leading-normal">
