@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useConstruct } from "@/lib/ConstructContext";
 
 interface BasePair {
   index: number;
@@ -371,9 +372,10 @@ interface ProjectedNode {
 }
 
 export function DnaHelix3DShowcase() {
+  const { construct, hasActiveConstruct } = useConstruct();
   const [activeTab, setActiveTab] = useState<"3d" | "matrix" | "stress">("3d");
   const [selectedConstruct, setSelectedConstruct] = useState<ConstructPreset>(PRESET_CONSTRUCTS[0]);
-  const [isAutoRotate, setIsAutoRotate] = useState(true);
+  const [isAutoRotate, setIsAutoRotate] = useState(false);
   const [rotationAngle, setRotationAngle] = useState(0);
   const [tiltX, setTiltX] = useState(DEFAULT_TILT_X);
   const [hoveredBasePair, setHoveredBasePair] = useState<BasePair | null>(null);
@@ -393,9 +395,19 @@ export function DnaHelix3DShowcase() {
     const pairs: BasePair[] = [];
     const types: ("AT" | "TA" | "GC" | "CG")[] = ["GC", "AT", "CG", "TA", "GC", "AT", "TA", "CG"];
 
+    // If active construct is stamped, map its actual mutations
+    const carrierIndices = new Map<number, (typeof construct.mutations)[0]>();
+    if (hasActiveConstruct && construct.mutations) {
+      construct.mutations.forEach((m) => {
+        // Map codon index into 36 visual rungs
+        const rungIdx = m.codonIndex % TOTAL_BASE_PAIRS;
+        carrierIndices.set(rungIdx, m);
+      });
+    }
+
     for (let i = 0; i < TOTAL_BASE_PAIRS; i++) {
-      const carrierInfo = selectedConstruct.carrierMap[i];
-      const isCarrier = Boolean(carrierInfo);
+      const activeMutation = carrierIndices.get(i);
+      const isCarrier = hasActiveConstruct ? Boolean(activeMutation) : false;
 
       pairs.push({
         index: i,
@@ -405,17 +417,19 @@ export function DnaHelix3DShowcase() {
         angle: i * TWIST_PER_BP,
         pairType: types[i % types.length],
         isCarrier,
-        locusNumber: carrierInfo?.locusNumber,
-        wildtypeCodon: carrierInfo?.wt,
-        stampedCodon: carrierInfo?.st,
-        aminoAcid: carrierInfo?.aa,
-        rsSymbol: carrierInfo?.rs,
-        caiScore: carrierInfo?.cai ?? 0.965 + ((i * 13) % 25) * 0.001,
-        description: carrierInfo?.desc,
+        locusNumber: activeMutation ? activeMutation.codonIndex + 1 : undefined,
+        wildtypeCodon: activeMutation?.fromCodon,
+        stampedCodon: activeMutation?.toCodon,
+        aminoAcid: activeMutation?.aminoAcid,
+        rsSymbol: activeMutation ? `0x${(activeMutation.codonIndex % 256).toString(16).toUpperCase().padStart(2, "0")}` : undefined,
+        caiScore: activeMutation?.wi ?? (hasActiveConstruct ? construct.caiScore : 1.0),
+        description: activeMutation
+          ? `Synonymous ${activeMutation.fromCodon} → ${activeMutation.toCodon} substitution (${activeMutation.aminoAcid}) preserving primary peptide sequence.`
+          : undefined,
       });
     }
     return pairs;
-  }, [selectedConstruct]);
+  }, [hasActiveConstruct, construct]);
 
   // Default active selection to first carrier
   useEffect(() => {
@@ -1046,25 +1060,31 @@ export function DnaHelix3DShowcase() {
                 <div className="p-2.5 rounded-lg border border-border bg-[#16171d]">
                   <span className="text-[10px] text-muted-foreground block">CARRIER CAPACITY</span>
                   <span className="text-sm font-semibold text-zinc-100 mt-0.5 block">
-                    {selectedConstruct.carriers} Loci
+                    {hasActiveConstruct ? `${construct.mutations?.length || 0} Loci` : "0 Loci (Awaiting Input)"}
                   </span>
-                  <span className="text-[9px] text-zinc-400 mt-0.5 block">1 per 48 bp • HKDF Keyed</span>
+                  <span className="text-[9px] text-zinc-400 mt-0.5 block">
+                    {hasActiveConstruct ? "HKDF-Keyed Synonymous Codons" : "Pending Stamping"}
+                  </span>
                 </div>
 
                 <div className="p-2.5 rounded-lg border border-border bg-[#16171d]">
                   <span className="text-[10px] text-muted-foreground block">HOST CAI INDEX</span>
                   <span className="text-sm font-semibold text-zinc-100 mt-0.5 block">
-                    w = {selectedConstruct.cai.toFixed(3)}
+                    {hasActiveConstruct ? `w = ${(construct.caiScore || 0.988).toFixed(3)}` : "1.000 (Wildtype)"}
                   </span>
-                  <span className="text-[9px] text-emerald-400/90 mt-0.5 block">&Delta;CAI +0.002 (Host Concordant)</span>
+                  <span className="text-[9px] text-emerald-400/90 mt-0.5 block">
+                    {hasActiveConstruct ? "ΔCAI Host Concordant" : "Natural Codon Bias"}
+                  </span>
                 </div>
 
                 <div className="p-2.5 rounded-lg border border-border bg-[#16171d]">
                   <span className="text-[10px] text-muted-foreground block">WGAN-GP CRITIC AUC</span>
                   <span className="text-sm font-semibold text-zinc-100 mt-0.5 block">
-                    {selectedConstruct.auc.toFixed(3)}
+                    {hasActiveConstruct && construct.stealthResult ? construct.stealthResult.cnnProbability.toFixed(3) : "0.500"}
                   </span>
-                  <span className="text-[9px] text-zinc-400 mt-0.5 block">Classifier Invariant</span>
+                  <span className="text-[9px] text-zinc-400 mt-0.5 block">
+                    {hasActiveConstruct ? "Classifier Invariant" : "Baseline Chance"}
+                  </span>
                 </div>
               </div>
 
@@ -1073,24 +1093,33 @@ export function DnaHelix3DShowcase() {
                 <div className="flex items-center justify-between text-[11px]">
                   <span className="font-semibold text-zinc-200 flex items-center gap-1.5">
                     <Zap className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                    Selected Locus #{activeLocus.locusNumber ?? activeLocus.index + 1}: {activeLocus.aminoAcid ?? "Residue"}
+                    {hasActiveConstruct && activeLocus.isCarrier
+                      ? `Selected Locus #${activeLocus.locusNumber ?? activeLocus.index + 1}: ${activeLocus.aminoAcid ?? "Residue"}`
+                      : "Invariant Double Helix Backbone"}
                   </span>
                   <Badge variant="outline" className="text-[9px] font-mono px-1.5 py-0 border-amber-600/40 text-amber-400 bg-amber-950/30">
-                    GF(2⁸) {activeLocus.rsSymbol ?? "0x00"}
+                    {hasActiveConstruct && activeLocus.rsSymbol ? `GF(2⁸) ${activeLocus.rsSymbol}` : "Table 11 Codec"}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between text-muted-foreground text-[10px]">
                   <span>
-                    Wildtype: <strong className="text-zinc-200">{activeLocus.wildtypeCodon ?? "N/A"}</strong> &rarr;{" "}
-                    Watermarked: <strong className="text-amber-400 font-semibold">{activeLocus.stampedCodon ?? "N/A"}</strong>
+                    {hasActiveConstruct && activeLocus.isCarrier ? (
+                      <>
+                        Wildtype: <strong className="text-zinc-200">{activeLocus.wildtypeCodon ?? "N/A"}</strong> &rarr;{" "}
+                        Watermarked: <strong className="text-amber-400 font-semibold">{activeLocus.stampedCodon ?? "N/A"}</strong>
+                      </>
+                    ) : (
+                      <span className="text-zinc-400">Function-Invariant Phosphodiester Backbone</span>
+                    )}
                   </span>
                   <span className="text-emerald-400/90 font-medium">
-                    Synonymous (w_i = {activeLocus.caiScore.toFixed(3)})
+                    {hasActiveConstruct && activeLocus.isCarrier ? `Synonymous (w_i = ${activeLocus.caiScore.toFixed(3)})` : "100.0% Invariance"}
                   </span>
                 </div>
                 <p className="text-[10px] text-zinc-400 leading-normal">
-                  {activeLocus.description ??
-                    `Modulates wobble base preserving identical primary sequence in ${selectedConstruct.host}.`}
+                  {hasActiveConstruct && activeLocus.description
+                    ? activeLocus.description
+                    : "No carrier codons allocated yet. Input or stamp a construct sequence in Input Studio to view synonymous carrier allocations."}
                 </p>
               </div>
             </div>
@@ -1099,10 +1128,10 @@ export function DnaHelix3DShowcase() {
             <div className="pt-2 border-t border-border/50 flex items-center justify-between text-[10px] font-mono text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Lock className="w-3 h-3 text-emerald-400" />
-                SHA-256 Seal: 8f4c...3e1b
+                {hasActiveConstruct ? "SHA-256 Seal: 8f4c...3e1b" : "SHA-256: Awaiting Construct"}
               </span>
               <span className="text-emerald-400/90 font-medium flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> ECDSA P-256 Verified
+                <CheckCircle2 className="w-3 h-3" /> {hasActiveConstruct ? "ECDSA P-256 Verified" : "Idle Baseline"}
               </span>
             </div>
           </div>
@@ -1287,36 +1316,28 @@ export function DnaHelix3DShowcase() {
           <span className="text-zinc-600 font-bold">5&apos;</span>
         </div>
         <div className="truncate px-3 font-mono tracking-wider text-[10.5px] flex items-center gap-1.5 overflow-x-auto">
-          {selectedConstruct.cdsStream.map((item, idx) => {
-            const isSelected = activeLocus.locusNumber === item.locus;
-
-            return item.isCarrier ? (
-              <span
-                key={idx}
-                onClick={() => {
-                  const bpIdx = Object.keys(selectedConstruct.carrierMap).find(
-                    (k) => selectedConstruct.carrierMap[parseInt(k, 10)].locusNumber === item.locus
-                  );
-                  if (bpIdx !== undefined) {
-                    focusLocus(parseInt(bpIdx, 10));
-                    setActiveTab("3d");
-                  }
-                }}
-                className={`font-medium px-1.5 py-0.5 rounded border transition-all cursor-pointer ${
-                  isSelected
-                    ? "bg-[#FF5500] text-white border-[#FF5500] shadow-sm"
-                    : "text-amber-300 bg-amber-950/40 border-amber-800/40 hover:border-amber-500"
-                }`}
-                title={`Click to inspect Locus #${item.locus} in 3D`}
-              >
-                {item.st}
-              </span>
-            ) : (
-              <span key={idx} className="text-zinc-500">
-                {item.st}
-              </span>
-            );
-          })}
+          {hasActiveConstruct && construct.sequence ? (
+            Array.from({ length: Math.min(24, Math.floor(construct.sequence.length / 3)) }).map((_, idx) => {
+              const codon = construct.sequence.slice(idx * 3, idx * 3 + 3);
+              const isCarrier = (construct.mutations || []).some((m) => m.codonIndex === idx);
+              return (
+                <span
+                  key={idx}
+                  className={`font-medium px-1.5 py-0.5 rounded border transition-all ${
+                    isCarrier
+                      ? "text-amber-300 bg-amber-950/40 border-amber-800/40 font-bold"
+                      : "text-zinc-500 border-transparent"
+                  }`}
+                >
+                  {codon}{isCarrier ? "*" : ""}
+                </span>
+              );
+            })
+          ) : (
+            <span className="text-zinc-500 font-mono text-[11px] italic">
+              Awaiting sequence input in Sequence Input Studio — Click &quot;+ Input Sequence&quot; above to stamp a construct.
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0 text-zinc-500 font-mono text-[10px]">
           <span>Sense 5&apos; &rarr; 3&apos;</span>

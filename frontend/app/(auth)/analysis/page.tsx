@@ -27,6 +27,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
+import { EmptyConstructState } from "@/components/shared/EmptyConstructState";
+import { useConstruct } from "@/lib/ConstructContext";
+import { getCodonAdaptiveness, TABLE_11_CODON_MAP } from "@/lib/codonMetrics";
 import {
   Table,
   TableBody,
@@ -51,6 +54,7 @@ type TabKey =
   | "invariant_proof";
 
 export default function AnalysisPage() {
+  const { construct, hasActiveConstruct } = useConstruct();
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [selectedRecord, setSelectedRecord] = useState<AnalysisRecord>(RECENT_ANALYSES[0]);
 
@@ -79,36 +83,74 @@ export default function AnalysisPage() {
     }
   }, []);
 
-  // 120-point Codon Relative Adaptiveness (w_i) data along the gene (1,025 codons)
+  // Real Codon Relative Adaptiveness (w_i) calculated dynamically across the active construct
   const codonProfileData = useMemo(() => {
+    const seq = hasActiveConstruct && construct.sequence ? construct.sequence : "";
+    if (!seq || seq.length < 3) return [];
+
+    const totalCodons = Math.floor(seq.length / 3);
+    const sampleStep = Math.max(1, Math.floor(totalCodons / 100));
     const pts = [];
-    for (let i = 0; i < 120; i++) {
-      const baseW = 0.94 + 0.05 * Math.sin(i * 0.16) + (Math.cos(i * 0.32) * 0.02);
-      const wi = Math.max(0.78, Math.min(1.0, baseW));
-      const isCarrier = i % 4 === 2;
+    const carrierIndices = new Set((construct.mutations || []).map((m) => m.codonIndex));
+
+    for (let i = 0; i < totalCodons; i += sampleStep) {
+      const codon = seq.slice(i * 3, i * 3 + 3);
+      const aa = TABLE_11_CODON_MAP[codon] || "X";
+      const wi = getCodonAdaptiveness(codon, aa);
+      const isCarrier = carrierIndices.has(i);
+      const codonGc = ((codon.replace(/[^GC]/g, "").length) / 3) * 100;
       pts.push({
-        codonIdx: Math.floor((i / 119) * 1025),
-        wi,
+        codonIdx: i,
+        wi: parseFloat(wi.toFixed(3)),
         isCarrier,
-        gc: 50.8 + 2.5 * Math.sin(i * 0.22),
+        gc: parseFloat(codonGc.toFixed(1)),
       });
     }
     return pts;
-  }, []);
+  }, [construct.sequence, construct.mutations, hasActiveConstruct]);
 
   const handleExportCodonLedger = () => {
-    const exportData = [
-      { locus: "LOC-01", codonIdx: 14, bp: 42, aa: "Glu (E)", wtCodon: "GAG", stampCodon: "GAA", wi: 0.988, status: "Invariant" },
-      { locus: "LOC-02", codonIdx: 28, bp: 84, aa: "Leu (L)", wtCodon: "CTG", stampCodon: "CTA", wi: 0.965, status: "Invariant" },
-      { locus: "LOC-03", codonIdx: 42, bp: 126, aa: "Val (V)", wtCodon: "GTG", stampCodon: "GTA", wi: 0.972, status: "Invariant" },
-      { locus: "LOC-04", codonIdx: 58, bp: 174, aa: "Ala (A)", wtCodon: "GCG", stampCodon: "GCA", wi: 0.981, status: "Invariant" },
-      { locus: "LOC-05", codonIdx: 74, bp: 222, aa: "Thr (T)", wtCodon: "ACC", stampCodon: "ACA", wi: 0.954, status: "Invariant" },
-      { locus: "LOC-06", codonIdx: 92, bp: 276, aa: "Arg (R)", wtCodon: "CGT", stampCodon: "CGC", wi: 0.992, status: "Invariant" },
-      { locus: "LOC-07", codonIdx: 110, bp: 330, aa: "Asp (D)", wtCodon: "GAT", stampCodon: "GAC", wi: 0.985, status: "Invariant" },
-      { locus: "LOC-08", codonIdx: 128, bp: 384, aa: "Phe (F)", wtCodon: "TTT", stampCodon: "TTC", wi: 0.978, status: "Invariant" },
-    ];
+    if (!hasActiveConstruct || !construct.mutations.length) {
+      return;
+    }
+    const exportData = construct.mutations.map((m, idx) => ({
+      locus: `LOC-${(idx + 1).toString().padStart(2, "0")}`,
+      codonIdx: m.codonIndex,
+      bp: m.codonIndex * 3,
+      aa: m.aminoAcid,
+      wtCodon: m.fromCodon,
+      stampCodon: m.toCodon,
+      wi: m.wi,
+      status: "Invariant",
+    }));
     downloadDataAsCsv("helixsign_carrier_codon_ledger.csv", exportData);
   };
+
+  if (!hasActiveConstruct) {
+    return (
+      <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full select-none">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-3 border-b border-border/60">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+                <Activity className="h-6 w-6 text-[#FF5500]" />
+                Steganographic Pipeline Explorer
+              </h1>
+              <MlPipelineStatusBadge />
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Stage-by-stage cryptographic steganography, host codon adaptation, and function-invariant verification
+            </p>
+          </div>
+        </div>
+        <EmptyConstructState
+          title="Steganographic Pipeline Explorer Offline"
+          description="Pipeline analysis requires an engineered synthetic construct to inspect cryptographic carrier allocations, Reed-Solomon codewords, and true codon relative adaptiveness."
+          icon={Activity}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full select-none">

@@ -53,6 +53,7 @@ import {
 } from "@/lib/echosenseData";
 import { downloadDataAsCsv } from "@/lib/utils";
 import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
+import { useConstruct } from "@/lib/ConstructContext";
 import { fetchRegistry, type RegistryItem } from "@/lib/mlPipelineClient";
 import {
   ResponsiveContainer,
@@ -261,12 +262,13 @@ export default function DashboardPage() {
   const [filterClass, setFilterClass] = useState<string>("ALL");
   const [tableSearchQuery, setTableSearchQuery] = useState("");
   const [selectedRegime, setSelectedRegime] = useState<LoadingRegime>("evolutionary");
+  const { construct, hasActiveConstruct } = useConstruct();
   const [selectedConstructId, setSelectedConstructId] = useState<string>("lacz");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Automated resilience sweeping state
-  const [isAutoSweeping, setIsAutoSweeping] = useState(true);
+  // Automated resilience sweeping state (defaults to false so graphs are not randomly animating)
+  const [isAutoSweeping, setIsAutoSweeping] = useState(false);
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [monitoredConstructs, setMonitoredConstructs] = useState<MonitoredConstruct[]>(MONITORED_CONSTRUCTS);
 
@@ -437,6 +439,62 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
+
+      {/* Active Construct Banner or Awaiting Input Callout */}
+      {!hasActiveConstruct ? (
+        <div className="p-4 rounded-xl border border-dashed border-primary/40 bg-primary/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-foreground">No Active Synthetic Construct Stamped</h2>
+              <p className="text-xs text-muted-foreground">
+                Input a synthetic CDS or select a reference benchmark in the Input Studio to generate real-time biosecurity telemetry, codon manifold topology, and provenance verification.
+              </p>
+            </div>
+          </div>
+          <Link href="/input">
+            <Button size="sm" className="bg-[#FF5500] hover:bg-[#e04b00] text-white font-semibold text-xs gap-1.5 h-8 px-3 shrink-0 cursor-pointer shadow-sm">
+              <Sparkles className="w-3.5 h-3.5" />
+              Open Input Studio
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-foreground text-sm">Active Construct: {construct.geneName || "Synthetic CDS"}</span>
+                <Badge variant="outline" className="text-[10px] bg-background text-emerald-400 border-emerald-500/40">
+                  Stamped via ML Microservice
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Owner: <strong className="text-foreground">{construct.owner}</strong> &bull; Batch: <strong className="text-foreground">{construct.batchId}</strong> &bull; {construct.mutations.length} Carrier Codons &bull; CAI Match: <strong className="text-foreground">{construct.caiScore.toFixed(3)}</strong>
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link href="/topology-engine">
+              <Button size="sm" variant="outline" className="text-xs font-mono h-8 gap-1.5">
+                <Cpu className="w-3.5 h-3.5" />
+                Codon Manifold
+              </Button>
+            </Link>
+            <Link href="/monitor">
+              <Button size="sm" variant="outline" className="text-xs font-mono h-8 gap-1.5">
+                <Radio className="w-3.5 h-3.5" />
+                Stress Lab
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* 4 Key Summary Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

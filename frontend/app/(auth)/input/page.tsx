@@ -29,6 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
+import { useConstruct } from "@/lib/ConstructContext";
 import {
   stampConstruct,
   verifyConstruct,
@@ -49,6 +50,8 @@ import {
 } from "@/lib/codonMetrics";
 
 export default function InputStudioPage() {
+  const { construct: sharedConstruct, setStampedData } = useConstruct();
+
   // Preset Selection
   const [selectedPresetId, setSelectedPresetId] = useState<string>("lacz-ecoli");
   const currentPreset = useMemo(
@@ -245,6 +248,19 @@ export default function InputStudioPage() {
         if (stealthRes.status === "fulfilled") {
           setLiveStealthData(stealthRes.value);
         }
+
+        // 3. Persist to shared construct context
+        setStampedData({
+          stamp: res.data,
+          original: inputClean,
+          gene: geneName || "construct",
+          owner: owner || "ApexBio Laboratory",
+          project: project || "Project Helios",
+          batch: batchId || "B-2026-X1",
+          host: hostOrganism,
+          verify: verifyRes.status === "fulfilled" ? verifyRes.value : null,
+          stealth: stealthRes.status === "fulfilled" ? stealthRes.value : null,
+        });
       } else {
         throw new Error("No data returned from stamping service.");
       }
@@ -648,24 +664,55 @@ export default function InputStudioPage() {
             </CardHeader>
 
             <CardContent className="pt-4 space-y-4">
-              {/* Live Stamp Banner */}
-              {liveStampData && (
-                <div className="p-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-xs font-mono text-emerald-300 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold flex items-center gap-1.5 text-emerald-400">
-                      <CheckCircle2 className="w-4 h-4" />
-                      Construct Stamped via ML Embedder
-                    </span>
-                    <span className="text-[10px] text-emerald-400/80">ID: {liveStampData.stampId.slice(0, 14)}...</span>
+              {!liveStampData ? (
+                <div className="py-16 px-6 text-center border border-dashed border-border/80 rounded-xl bg-muted/10 space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary shadow-sm">
+                    <Sparkles className="w-7 h-7 text-primary" />
                   </div>
-                  <div className="text-[11px] opacity-90 text-emerald-200/90 flex flex-wrap gap-x-4 gap-y-1 pt-0.5">
-                    <span>Peptide Identity: <strong>{liveStampData.proteinIdentityPercent}%</strong></span>
-                    <span>Carrier Codons: <strong>{liveStampData.mutations.length}</strong></span>
-                    <span>GC Content: <strong>{liveStampData.stats.gcBefore}% &rarr; {liveStampData.stats.gcAfter}%</strong></span>
-                    <span>CAI Match: <strong>{liveStampData.stats.caiSimilarity.toFixed(3)}</strong></span>
+                  <div className="space-y-1.5 max-w-md mx-auto">
+                    <h3 className="text-base font-bold text-foreground">Awaiting Construct Stamping</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Enter or paste your synthetic CDS on the left and click <strong className="text-foreground">&quot;Stamp Construct via ML Pipeline&quot;</strong>. The neural stego-embedder will allocate synonymous carrier codons, enforce biophysical constraints, and run WGAN-GP biosecurity detection.
+                    </p>
+                  </div>
+                  <div className="pt-2">
+                    <Button
+                      onClick={handleExecuteStamp}
+                      disabled={isStamping || !validation.isValid}
+                      className="bg-[#FF5500] hover:bg-[#e04b00] text-white font-semibold text-xs gap-2 h-9 px-4 shadow-sm cursor-pointer"
+                    >
+                      {isStamping ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          Executing Neural Embedder...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5" />
+                          Stamp Construct Now
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
-              )}
+              ) : (
+                <>
+                  {/* Live Stamp Banner */}
+                  <div className="p-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-xs font-mono text-emerald-300 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold flex items-center gap-1.5 text-emerald-400">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Construct Stamped via ML Embedder
+                      </span>
+                      <span className="text-[10px] text-emerald-400/80">ID: {liveStampData.stampId.slice(0, 14)}...</span>
+                    </div>
+                    <div className="text-[11px] opacity-90 text-emerald-200/90 flex flex-wrap gap-x-4 gap-y-1 pt-0.5">
+                      <span>Peptide Identity: <strong>{liveStampData.proteinIdentityPercent}%</strong></span>
+                      <span>Carrier Codons: <strong>{liveStampData.mutations.length}</strong></span>
+                      <span>GC Content: <strong>{liveStampData.stats.gcBefore}% &rarr; {liveStampData.stats.gcAfter}%</strong></span>
+                      <span>CAI Match: <strong>{liveStampData.stats.caiSimilarity.toFixed(3)}</strong></span>
+                    </div>
+                  </div>
 
               {/* Stealth & Biosecurity Critic Telemetry Card */}
               {liveStealthData && (
@@ -906,7 +953,9 @@ export default function InputStudioPage() {
                   </Link>
                 </div>
               </div>
-            </CardContent>
+            </>
+          )}
+        </CardContent>
           </Card>
         </div>
       </div>

@@ -32,6 +32,7 @@ import {
   type StealthResult,
 } from "@/lib/mlPipelineClient";
 import { getCodonAdaptiveness } from "@/lib/codonMetrics";
+import { useConstruct } from "@/lib/ConstructContext";
 
 // Authentic DNA Presets from E. coli K-12 RefSeq & Standard Synthetic Cassettes
 interface ConstructPreset {
@@ -43,13 +44,6 @@ interface ConstructPreset {
   description: string;
   sequence: string;
   wildtypePeptide: string;
-  mutations: {
-    codonIndex: number;
-    fromCodon: string;
-    toCodon: string;
-    aminoAcid: string;
-    wi: number;
-  }[];
 }
 
 const PRESET_CONSTRUCTS: ConstructPreset[] = [
@@ -64,16 +58,6 @@ const PRESET_CONSTRUCTS: ConstructPreset[] = [
       "ATGACCATGATTACGGATTCACTGGCCGTCGTTTTACAACGTCGTGACTGGGAAAACCCTGGCGTTACCCAACTTAATCGCCTTGCAGCACATCCCCCTTTCGCCAGCTGGCGTAATAGCGAAGAGGCCCGCACCGATCGCCCTTCCCAACAGTTGCGCAGCCTGAATGGCGAATGGCGCTTTGCCTGGTTTCCGGCACCAGAAGCGGTGCCGGAAAGCTGGCTGGAGTGCGATCTTCCTGAGGCCGATACTGTCGTCGTCCCCTCAAACTGGCAGATGCACGGTTACGATGCGCCCATCTACACCAACGTGACCTATCCCATTACGGTCAATCCGCCGTTTGTTCCCACGGAGAATCCGACGGGTTGTTACTCGCTCACATTTAATGTTGATGAAAGCTGGCTACAGGAAGGCCAGACGCGAATTATTTTTGATGGCGTTAACTCGGCGTTTCATCTGTGGTGCAACGGGCGCTGGGTCGGTTACGGCCAGGACAGTCGTTTGCCGTCTGAATTTGACCTGAGCGCATTTTTACGCGCCGGAGAAAACCGCCTCGCGGTGATGGTGCTGCGCTGGAGTGACGGCAGTTATCTGGAAGATCAGGATATGTGGCGGATGAGCGGCATTTTCCGTGACGTCTCGTTGCTGCATAAACCGACTACACAAATCAGCGATTTCCATGTTGCCACTCGCTTTAATGATGATTTCAGCCGCGCTGTACTGGAGGCTGAAGTTCAGATGTGCGGCGAGTTGCGTGACTACCTACGGGTAACAGTTTCTTTATGGCAGGGTGAAACGCAGGTCGCCAGCGGCACCGCGCCTTTCGGCGGTGAAATTATCGATGAGCGTGGTGGTTATGCCGATCGCGTCACACTACGTCTGAACGTCGAAAACCCGAAACTGTGGAGCGCCGAAATCCCGAATCTCTATCGTGCGGTGGTTGAACTGCACACCGCCGACGGCACGCTGATTGAAGCAGAAGCCTGCGATGTCGGTTTCCGCGAGGTGCGGATTGAAAATGGTCTGCTGCTGCTGAACGGCAAGCCGTTGCTGATTCGAGGCGTTAACCGTCACGAGCATCATCCTCTGCATGGTCAGGTCATGGATGAGCAGACGATGGTGCAGGATATCCTGCTGATGAAGCAGAACAACTTTAACGCCGTGCGCTGTTCGCATTATCCGAACCATCCGCTGTGGTACACGCTGTGCGACCGCTACGGCCTGTATGTGGTGGATGAAGCCAATATTGAAACCCACGGCATGGTGCCAATGAATCGTCTGACCGATGATCCGCGCTGGCTACCGGCGATGAGCGAACGCGTAACGCGAATGGTGCAGCGCGATCGTAATCACCCGAGTGTGATCATCTGGTCGCTGGGGAATGAATCAGGCCACGGCGCTAATCACGACGCGCTGTATCGCTGGATCAAATCTGTCGATCCTTCCCGCCCGGTGCAGTATGAAGGCGGCGGAGCCGACACCACGGCCACCGATATTATTTGCCCGATGTACGCGCGCGTGGATGAAGACCAGCCCTTCCCGGCTGTGCCGAAATGGTCCATCAAAAAATGGCTTTCGCTACCTGGAGAGACGCGCCCGCTGATCCTTTGCGAATACGCCCACGCGATGGGTAACAGTCTTGGCGGTTTCGCTAAATACTGGCAGGCGTTTCGTCAGTATCCCCGTTTACAGGGCGGCTTCGTCTGGGACTGGGTGGATCAGTCGCTGATTAAATATGATGAAAACGGCAACCCGTGGTCGGCTTACGGCGGTGATTTTGGCGATACGCCGAACGATCGCCAGTTCTGTATGAACGGTCTGGTCTTTGCCGACCGCACGCCGCATCCAGCGCTGACGGAAGCAAAACACCAGCAGCAGTTTTTCCAGTTCCGTTTATCCGGGCAAACCATCGAAGTGACCAGCGAATACCTGTTCCGTCATAGCGATAACGAGCTCCTGCACTGGATGGTGGCGCTGGATGGTAAGCCGCTGGCAAGCGGTGAAGTGCCTCTGGATGTCGCTCCACAAGGTAAACAGTTGATTGAACTGCCTGAACTACCGCAGCCGGAGAGCGCCGGGCAACTCTGGCTCACAGTACGCGTAGTGCAACCGAACGCGACCGCATGGTCAGAAGCCGGGCACATCAGCGCCTGGCAGCAGTGGCGTCTGGCGGAAAACCTCAGTGTGACGCTCCCCGCCGCGTCCCACGCCATCCCGCATCTGACCACCAGCGAAATGGATTTTTGCATCGAGCTGGGTAATAAGCGTTGGCAATTTAACCGCCAGTCAGGCTTTCTTTCACAGATGTGGATTGGCGATAAAAAACAACTGCTGACGCCGCTGCGCGATCAGTTCACCCGTGCACCGCTGGATAACGACATTGGCGTAAGTGAAGCGACCCGCATTGACCCTAACGCCTGGGTCGAACGCTGGAAGGCGGCGGGCCATTACCAGGCCGAAGCAGCGTTGTTGCAGTGCACGGCAGATACACTTGCTGATGCGGTGCTGATTACGACCGCTCACGCGTGGCAGCATCAGGGGAAAACCTTATTTATCAGCCGGAAAACCTACCGGATTGATGGTAGTGGTCAAATGGCGATTACCGTTGATGTTGAAGTGGCGAGCGATACACCGCATCCGGCGCGGATTGGCCTGAACTGCCAGCTGGCGCAGGTAGCAGAGCGGGTAAACTGGCTCGGATTAGGGCCGCAAGAAAACTATCCCGACCGCCTTACTGCCGCCTGTTTTGACCGCTGGGATCTGCCATTGTCAGACATGTATACCCCGTACGTCTTCCCGAGCGAAAACGGTCTGCGCTGCGGGACGCGCGAATTGAATTATGGCCCACACCAGTGGCGCGGCGACTTCCAGTTCAACATCAGCCGCTACAGTCAACAGCAACTGATGGAAACCAGCCATCGCCATCTGCTGCACGCGGAAGAAGGCACATGGCTGAATATCGACGGTTTCCATATGGGGATTGGTGGCGACGACTCCTGGAGCCCGTCAGTATCGGCGGAATTCCAGCTGAGCGCCGGTCGCTACCATTACCAGTTGGTCTGGTGTCAAAAATAA",
     wildtypePeptide:
       "MTMITDSLAVVLQRRDWENPGVTQLNRLAAHPPFASWRNSEEARTDRPSQQLRSLNGEWRFAWFPAPEAVPESWLECDLPEADTVVVPSNWQMHGYDAPIYTNVTYPITVNPPFVPTENPTGCYSLTFNVDESWLQEGQTRIIFDGVNSAFHLWCNGRWVGYGQDSRLPSEFDLSAFLRAGENRLAVMVLRWSDGSYLEDQDMWRMSGIFRDVSLLHKPTTQISDFHVATRFNDDFSRAVLEAEVQMCGELRDYLRVTVSLWQGETQVASGTAPFGGEIIDERGGYADRVTLRLNVENPKLWSAEIPNLYRAVVELHTADGTLIEAEACDVGFREVRIENGLLLLNGKPLLIRGVNRHEHHPLHGQVMDEQTMVQDILLMKQNNFNAVRCSHYPNHPLWYTLCDRYGLYVVDEANIETHGMVPMNRLTDDPRWLPAMSERVTRMVQRDRNHPSVIIWSLGNESGHGANHDALYRWIKSVDPSRPVQYEGGGADTTATDIICPMYARVDEDQPFPAVPKWSIKKWLSLPGETRPLILCEYAHAMGNSLGGFAKYWQAFRQYPRLQGGFVWDWVDQSLIKYDENKNPWSAYGGDFGDTPNDRQFCMNGLVFADRTPHPALTEAKHQQQFFQFRLSGQTIEVTSEYLFRHSDNELLHWMVALDGKPLASGEVPLDVAPQGKQLIELPELPQPESAGQLWLTVRVVQPNATAWSEAGHISAWQQWRLAENLSVTLPAASHAIPHLTTSEMDFCIELGNKRWQFNRQSGFLSQMWIGDKKQLLTPLRDQFTRAPLDNDIGVSEATRIDPNAWVERWKAAGHYQAEAALLQCTADTLADAVLITTAHAWQHQGKTLFISRKTYRIDGSGQMAITVDVEVASDTPHPARIGLNCQLAQVAERVNWLGLGPQENYPDRLTAACFDRWDLPLSDMYTPYVFPSENGLRCGTRELNYGPHQWRGDFQFNISRYSQQQLMETSHRHLLHAEEGTWLNIDGFHMGIGGDDSWSPSVSAEFQLSAGRYHYQLVWCQK*",
-    mutations: [
-      { codonIndex: 14, fromCodon: "GAG", toCodon: "GAA", aminoAcid: "E", wi: 0.988 },
-      { codonIndex: 28, fromCodon: "CTG", toCodon: "CTA", aminoAcid: "L", wi: 0.965 },
-      { codonIndex: 42, fromCodon: "GTG", toCodon: "GTA", aminoAcid: "V", wi: 0.972 },
-      { codonIndex: 58, fromCodon: "GCG", toCodon: "GCA", aminoAcid: "A", wi: 0.981 },
-      { codonIndex: 74, fromCodon: "ACC", toCodon: "ACA", aminoAcid: "T", wi: 0.954 },
-      { codonIndex: 92, fromCodon: "CGT", toCodon: "CGC", aminoAcid: "R", wi: 0.992 },
-      { codonIndex: 110, fromCodon: "GAT", toCodon: "GAC", aminoAcid: "D", wi: 0.985 },
-      { codonIndex: 128, fromCodon: "TTT", toCodon: "TTC", aminoAcid: "F", wi: 0.978 },
-    ],
   },
   {
     id: "sfgfp-cassette",
@@ -86,12 +70,6 @@ const PRESET_CONSTRUCTS: ConstructPreset[] = [
       "ATGAGCAAAGGAGAAGAACTTTTCACTGGAGTTGTCCCAATTCTTGTTGAATTAGATGGTGATGTTAATGGGCACAAATTTTCTGTCAGTGGAGAGGGTGAAGGTGATGCAACATACGGAAAACTTACCCTTAAATTTATTTGCACTACTGGAAAACTACCTGTTCCATGGCCAACACTTGTCACTACTTTCACTTATGGTGTTCAATGCTTTTCAAGATACCCAGATCATATGAAACGGCATGACTTTTTCAAGAGTGCCATGCCCGAAGGTTATGTACAGGAAAGAACTATATTTTTCAAAGATGACGGGAACTACAAGACACGTGCTGAAGTCAAGTTTGAAGGTGATACCCTTGTTAATAGAATCGAGTTAAAAGGTATTGATTTTAAAGAAGATGGAAACATTCTTGGACACAAATTGGAATACAACTATAACTCACACAATGTATACATCATGGCAGACAAACAAAAGAATGGAATCAAAGTTAACTTCAAAATTAGACACAACATTGAAGATGGAAGCGTTCAACTAGCAGACCATTATCAACAAAATACTCCAATTGGCGATGGCCCTGTCCTTTTACCAGACAACCATTACCTGTCCACACAATCTGCCCTTTCGAAAGATCCCAACGAAAAGAGAGACCACATGGTCCTTCTTGAGTTTGTAACAGCTGCTGGGATTACACATGGCATGGATGAACTATACAAATAA",
     wildtypePeptide:
       "MSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFTYGVQCFSRYPDHMKRHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK*",
-    mutations: [
-      { codonIndex: 12, fromCodon: "GTT", toCodon: "GTC", aminoAcid: "V", wi: 0.978 },
-      { codonIndex: 24, fromCodon: "GGT", toCodon: "GGC", aminoAcid: "G", wi: 0.985 },
-      { codonIndex: 38, fromCodon: "ACT", toCodon: "ACC", aminoAcid: "T", wi: 0.972 },
-      { codonIndex: 52, fromCodon: "GAA", toCodon: "GAG", aminoAcid: "E", wi: 0.988 },
-    ],
   },
   {
     id: "spcas9-core",
@@ -104,14 +82,6 @@ const PRESET_CONSTRUCTS: ConstructPreset[] = [
       "ATGGATAAGAAATACTCAATAGGCTTAGATATCGGCACAAATAGCGTCGGATGGGCGGTGATCACTGATGAATATAAGGTTCCGTCTAAAAAGTTCAAGGTTCTGGGAAATACAGACCGCCACAGTATCAAAAAAAATCTTATAGGGGCTCTTTTATTTGACAGTGGAGAGACAGCGGAAGCGACTCGTCTCAAACGGACAGCTCGTAGAAGGTATACACGTCGGAAGAATCGTATTTGTTATCTACAGGAGATTTTTTCAAATGAGATGGCGAAAGTAGATGATAGTTTCTTTCATCGACTTGAAGAGTCTTTTTTGGTGGAAGAAGACAAGAAGCATGAACGTCATCCTATTTTTGGAAATATAGTAGATGAAGTTGCTTATCATGAGAAATATCCAACTATCTATCATCTGCGAAAAAAATTGGTAGATTCTACTGATAAAGCGGATTTGCGCTTAATCTATTTGGCCTTAGCGCATATGATTAAGTTTCGTGGTCATTTTTTGATTGAGGGAGATTTAAATCCTGATAATAGTGATGTGGACAAACTATTTATCCAGTTGGTACAAACCTACAATCAATTATTTGAAGAAAACCCTATTAACGCAAGTGGAGTAGATGCTAAAGCGATTCTTTCTGCACGATTGAGTAAATCAAGACGATTAGAAAATCTCATTGCTCAGCTCCCCGGTGAGAAGAAAAATGGCTTATTTGGGAATCTCATTGCTTTGTCATTGGGTTTGACCCCTAATTTTAAATCAAATTTTGATTTGGCAGAAGATGCTAAATTACAGCTTTCAAAAGATACTTACGATGATGATTTAGATAATTTATTGGCGCAAATTGGAGATCAATATGCTGATTTGTTTTTGGCAGCTAAGAATTTATCAGATGCTATTTTACTTTCAGATATCCTAAGAGTAAATACTGAAATAACTAAGGCTCCCCTATCAGCTTCAATGATTAAACGCTACGATGAACATCATCAAGACTTGACTCTTTTAAAAGCTTTAGTTCGACAACAACTTCCAGAAAAGTATAAAGAAATCTTTTTTGATCAATCAAAAAACGGATATGCAGGTTATATTGATGGGGGAGCTAGCCAAGAAGAATTTTATAAATTTATCAAACCAATTTTAGAAAAAATGGATGGTACTGAGGAATTATTGGTGAAACTAAATCGTGAAGATTTGCTGCGCAAGCAACGGACCTTTGACAACGGCTCTATTCCCCATCAAATTCACTTGGGTGAGCTGCATGCTATTTTGAGAAGACAAGAAGACTTTTATCCATTTTTAAAAGACAATCGTGAGAAGATTGAAAAAATCTTGACTTTTCGAATTCCTTATTATGTTGGTCCATTGGCGCGTGGCAATAGTCGTTTTGCATGGATGACTCGGAAGTCTGAAGAAACAATTACCCCATGGAATTTTGAAGAAGTTGTCGATAAAGGTGCTTCAGCTCAATCATTTATTGAACGCATGACAAACTTTGATAAAAATCTTCCAAATGAAAAAGTACTACCAAAACATAGTTTGCTTTATGAGTATTTTACGGTTTATAACGAATTGACAAAGGTCAAATATGTTACTGAAGGAATGCGAAAACCAGCATTTCTTTCAGGTGAACAGAAGAAAGCCATTGTTGATTTACTCTTCAAAACAAATCGAAAAGTAACCGTTAAGCAATTAAAAGAAGATTATTTCAAAAAAATAGAATGTTTTGATAGTGTTGAAATTTCAGGAGTTGAAGATAGATTTAATGCTTCATTAGGTACCTACCATGATTTGCTAAAAATTATTAAAGATAAAGATTTTTTGGATAATGAAGAAAATGAAGATATCTTAGAGGATATTGTTTTAACATTGACCTTATTTGAAGATAGGGAGATGATTGAGGAAAGACTTAAAACATATGCTCACCTCTTTGATGATAAGGTGATGAAACAGCTTAAACGTCGCCGTTATACTGGTTGGGGACGTTTGTCTCGAAAATTGATTAATGGTATTAGGGATAAGCAATCTGGCAAAACAATATTAGATTTTTTGAAATCAGATGGTTTTGCCAATCGCAATTTTATGCAGCTGATCCATGATGATAGTTTGACATTTAAAGAAGACATTCAAAAAGCACAAGTGTCTGGACAAGGCGATAGTTTACATGAACATATTGCAAATTTAGCTGGTAGCCCTGCTATTAAAAAAGGTATTTTACAGACTGTAAAAATTGTTGATGAACTGGTCAAAGTAATGGGGCGGCATAAGCCAGAAAATATCGTTATTGAAATGGCACGTGAAAATCAGACAACTCAAAAGGGCCAGAAAAATTCGCGAGAGCGTATGAAACGAATCGAAGAAGGTATCAAAGAATTAGGAAGTCAGATTCTTAAAGAGCATCCTGTTGAAAATACTCAATTGCAAAATGAAAAGCTCTATCTCTATTATCTACAAAATGGAAGAGACATGTATGTGGACCAAGAATTAGATATTAATCGTTTAAGTGATTATGATGTCGATCACATTGTTCCACAAAGTTTCCTTAAAGACGATTCAATAGACAATAAGGTCTTAACGCGTTCTGATAAAAATCGTGGTAAATCGGATAACGTTCCAAGTGAAGAAGTAGTCAAAAAGATGAAAAACTATTGGAGACAACTTCTAAACGCCAAGTTAATCACTCAACGTAAGTTTGATAATTTAACGAAAGCTGAACGTGGAGGTTTGAGTGAACTTGATAAAGCTGGTTTTATCAAACGCCAATTGGTTGAAACTCGCCAAATCACTAAGCATGTGGCACAAATTTTGGATAGTCGCATGAATACTAAATACGATGAAAATGATAAACTTATTCGAGAGGTTAAAGTGATTACCTTAAAATCTAAATTAGTTTCTGACTTCCGAAAAGATTTCCAATTCTATAAAGTACGTGAGATTAACAATTACCATCATGCCCATGATGCGTATCTAAATGCCGTCGTTGGAACTGCTTTGATTAAGAAATATCCAAAACTTGAATCGGAGTTTGTCTATGGTGATTATAAAGTTTATGATGTTCGTAAAATGATTGCTAAGTCTGAGCAAGAAATAGGCAAAGCAACCGCAAAATATTTCTTTTACTCTAATATCATGAACTTCTTCAAAACAGAAATTACACTTGCAAATGGAGAGATTCGCAAACGCCCTCTAATCGAAACTAATGGGGAAACTGGAGAAATTGTCTGGGATAAAGGGCGAGATTTTGCCACAGTGCGCAAAGTATTGTCCATGCCCCAAGTCAATATTGTCAAGAAAACAGAAGTACAGACAGGCGGATTCTCCAAGGAGTCAATTTTACCAAAAAGAAATTCGGACAAGCTTATTGCTCGTAAAAAAGACTGGGATCCAAAAAAATATGGTGGTTTTGATAGTCCAACGGTAGCTTATTCAGTCCTAGTGGTTGCTAAGGTGGAAAAAGGGAAATCGAAGAAGTTAAAATCCGTTAAAGAGTTACTAGGGATCACAATTATGGAAAGAAGTTCCTTTGAAAAAAATCCGATTGACTTTTTAGAAGCTAAAGGATATAAGGAAGTTAAAAAAGACTTAATCATTAAACTACCTAAATATAGTCTTTTTGAGTTAGAAAACGGTCGTAAACGGATGCTGGCTAGTGCCGGAGAATTACAAAAAGGAAATGAGCTGGCTCTGCCAAGCAAATATGTGAATTTTTTATATTTAGCTAGTCATTATGAAAAGTTGAAGGGTAGTCCAGAAGATAACGAACAAAAACAATTGTTTGTGGAGCAGCATAAGCATTATTTAGATGAGATTATTGAGCAAATCAGTGAATTTTCTAAGCGTGTTATTTTAGCAGATGCCAATTTAGATAAAGTTCTTAGTGCATATAACAAACATAGAGACAAACCAATACGTGAACAAGCAGAAAATATTATTCATTTATTTACGTTGACGAATCTTGGAGCTCCCGCTGCTTTTAAATATTTTGATACAACAATTGATCGTAAACGATATACGTCTACAAAAGAAGTTTTAGATGCCACTCTTATCCATCAATCCATCACTGGTCTTTATGAAACACGCATTGATTTGAGTCAGCTAGGAGGTGACTGA",
     wildtypePeptide:
       "MDKKYSIGLDIGTNSVGWAVITDEYKVPSKKFKVLGNTDRHSIKKNLIGALLFDSGETAEATRLKRTARRRYTRRKNRICYLQEIFSNEMAKVDDSFFHRLEESFLVEEDKKHERHPIFGNIVDEVAYHEKYPTIYHLRKKLVDSTDKADLRLIYLALAHMIKFRGHFLIEGDLNPDNSDVDKLFIQLVQTYNQLFEENPINASGVDAKAILSARLSKSRRLENLIAQLPGEKKNGLFGNLIALSLGLTPNFKSNFDLAKDAKLQLSKDTYDDDLDNLLAQIGDQYADLFLAAKNLSDAILLSDILRVNTEITKAPLSASMIKRYDEHHQDLTLLKALVRQQLPEKYKEIFFDQSKNGYAGYIDGGASQEEFYKFIKPILEKMDGTEELLVKLNREDLLRKQRTFDNGSIPHQIHLGELHAILRRQEDFYPFLKDNREKIEKILTFRIPYYVGPLARGNSRFAWMTRKSEETITPWNFEEVVDKGASAQSFIERMTNFDKNLPNEKVLPKHSLLYEYFTVYNELTKVKYVTEGMRKPAFLSGEQKKAIVDLLFKTNRKVTVKQLKEDYFKKIECFDSVEISGVEDRFNASLGTYHDLLKIIKDKDFLDNEENEDILEDIVLTLTLFEDREMIEERLKTYAHLFDDKVMKQLKRRRYTGWGRLSRKLINGIRDKQSGKTILDFLKSDGFANRNFMQLIHDDSLTFKEDIQKAQVSGQGDSLHEHIANLAGSPAIKKGILQTVKIVDELVKVMGRHKPENIVIEMARENQTTQKGQKNSRERMKRIEEGIKELGSQILKEHPVENTQLQNEKLYLYYLQNGRDMYVDQELDINRLSDYDVDHIVPQSFLKDDSIDNKVLTRSDKNRGKSDNVPSEEVVKKMKNYWRQLLNAKLITQRKFDNLTKAERGGLSELDKAGFIKRQLVETRQITKHVAQILDSRMNTKYDENDKLIREVKVITLKSKLVSDFRKDFQFYKVREINNYHHAHDAYLNAVVGTALIKKYPKLESEFVYGDYKVYDVRKMIAKSEQEIGKATAKYFFYSNIMNFFKTEITLANGEIRKRPLIETNGETGEIVWDKGRDFATVRKVLSMPQVNIVKKTEVQTGGFSKESILPKRNSDKLIARKKDWDPKKYGGFDSPTVAYSVLVVAKVEKGKSKKLKSVKELLGITIMERSSFEKNPIDFLEAKGYKEVKKDLIIKLPKYSLFELENGRKRMLASAGELQKGNELALPSKYVNFLYLASHYEKLKGSPEDNEQKQLFVEQHKHYLDEIIEQISEFSKRVILADANLDKVLSAYNKHRDKPIREQAENIIHLFTLTNLGAPAAFKYFDTTIDRKRYTSTKEVLDATLIHQSITGLYETRIDLSQLGGD*",
-    mutations: [
-      { codonIndex: 18, fromCodon: "GTG", toCodon: "GTA", aminoAcid: "V", wi: 0.972 },
-      { codonIndex: 34, fromCodon: "AAG", toCodon: "AAA", aminoAcid: "K", wi: 0.985 },
-      { codonIndex: 56, fromCodon: "CTG", toCodon: "TTA", aminoAcid: "L", wi: 0.965 },
-      { codonIndex: 78, fromCodon: "GCG", toCodon: "GCT", aminoAcid: "A", wi: 0.981 },
-      { codonIndex: 112, fromCodon: "GAA", toCodon: "GAG", aminoAcid: "E", wi: 0.988 },
-      { codonIndex: 145, fromCodon: "ACC", toCodon: "ACG", aminoAcid: "T", wi: 0.962 },
-    ],
   },
 ];
 
@@ -155,8 +125,10 @@ export default function StampStudioPage() {
   const [sequenceInput, setSequenceInput] = useState(currentPreset.sequence);
   const [isCopied, setIsCopied] = useState(false);
 
+  const { construct, setStampedData } = useConstruct();
+
   // Stamping State
-  const [isStamped, setIsStamped] = useState(true);
+  const [isStamped, setIsStamped] = useState(false);
   const [isStamping, setIsStamping] = useState(false);
   const [activeDiffCodon, setActiveDiffCodon] = useState<number | null>(null);
 
@@ -166,7 +138,7 @@ export default function StampStudioPage() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [visibleMutationCount, setVisibleMutationCount] = useState(16);
 
-  // Dynamic Codon Mutations: populated from live ML embedder when stamped, or preset
+  // Dynamic Codon Mutations: populated from live ML embedder when stamped, or active construct
   const displayMutations = useMemo(() => {
     if (liveStampData && liveStampData.mutations && liveStampData.mutations.length > 0) {
       return liveStampData.mutations.map((m) => ({
@@ -177,24 +149,32 @@ export default function StampStudioPage() {
         wi: getCodonAdaptiveness(m.toCodon, m.aminoAcid),
       }));
     }
-    return currentPreset.mutations;
-  }, [liveStampData, currentPreset]);
+    if (construct.isStamped && construct.mutations && construct.mutations.length > 0) {
+      return construct.mutations;
+    }
+    return [];
+  }, [liveStampData, construct]);
+
+  const isStampedState = isStamped || (construct.isStamped && construct.sequence.length > 0);
 
   // Carrier wave pulse animation
   const [pulseCodonIdx, setPulseCodonIdx] = useState(0);
   useEffect(() => {
-    const count = displayMutations?.length || currentPreset.mutations.length || 1;
+    const count = displayMutations.length || 1;
     const interval = setInterval(() => {
       setPulseCodonIdx((prev) => (prev + 1) % count);
     }, 1400);
     return () => clearInterval(interval);
-  }, [displayMutations?.length, currentPreset.mutations.length]);
+  }, [displayMutations.length]);
 
   // Handle Preset Selection
   const handleSelectPreset = (preset: ConstructPreset) => {
     setSelectedPresetId(preset.id);
     setSequenceInput(preset.sequence);
-    setIsStamped(true);
+    setIsStamped(false);
+    setLiveStampData(null);
+    setLiveVerifyData(null);
+    setLiveStealthData(null);
   };
 
   // Real-Time Sequence Validation
@@ -266,9 +246,9 @@ export default function StampStudioPage() {
     const peptideMatch = wtPep.length > 0 ? Math.max(0, 100 - (alterations / wtPep.length) * 100) : 100.0;
 
     // 3. Dynamic Host CAI Calculation across carrier substitutions
-    const muts = currentPreset.mutations;
-    const sumLogW = muts.reduce((acc, m) => acc + Math.log(m.wi), 0);
-    const geomMeanCai = muts.length > 0 ? Math.exp(sumLogW / muts.length) : 0.988;
+    const muts = displayMutations;
+    const sumLogW = muts.reduce((acc, m) => acc + Math.log(m.wi || 0.98), 0);
+    const geomMeanCai = muts.length > 0 ? Math.exp(sumLogW / muts.length) : (isStampedState ? 0.988 : 0);
 
     // 4. Max Homopolymer Length (longest contiguous identical nucleotide run)
     let maxH = 1;
@@ -320,10 +300,22 @@ export default function StampStudioPage() {
 
         if (verRes.status === "fulfilled") setLiveVerifyData(verRes.value);
         if (stealthRes.status === "fulfilled") setLiveStealthData(stealthRes.value);
+
+        setStampedData({
+          stamp: res.data,
+          original: cleaned,
+          gene: currentPreset.gene,
+          owner: owner || "ApexBio Lab",
+          project: project || "Project Helios",
+          batch: batchId || "B-2026-X1",
+          host: hostOrganism,
+          verify: verRes.status === "fulfilled" ? verRes.value : null,
+          stealth: stealthRes.status === "fulfilled" ? stealthRes.value : null,
+        });
       }
     } catch (err) {
-      console.warn("Live ML stamping fallback to internal codec:", err);
-      setIsStamped(true);
+      console.error("Live ML stamping error:", err);
+      setIsStamped(false);
     } finally {
       setIsStamping(false);
     }
@@ -688,84 +680,100 @@ export default function StampStudioPage() {
                   </span>
                   <span className="text-xs font-mono px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                    {displayMutations.length} Carrier Codons Verified
+                    {isStampedState && displayMutations.length > 0 ? `${displayMutations.length} Carrier Codons Verified` : "Awaiting Stamping"}
                   </span>
                 </div>
 
-                {liveStealthData && (
-                  <div className="p-2.5 rounded-xl border border-primary/30 bg-primary/10 text-xs font-mono flex items-center justify-between text-zinc-300">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <span>Biosecurity ML Screening:</span>
+                {!isStampedState || displayMutations.length === 0 ? (
+                  <div className="py-12 px-6 text-center border border-dashed border-border/80 rounded-xl bg-[#14141A] space-y-3">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary">
+                      <Sparkles className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] text-zinc-200">
-                      1D-CNN: <strong className="text-white">{(liveStealthData.cnnProbability * 100).toFixed(1)}%</strong> | k-mer: <strong className="text-white">{(liveStealthData.kmerProbability * 100).toFixed(2)}%</strong> (WGAN-GP AUC ~0.505)
-                    </span>
+                    <div className="space-y-1 max-w-sm mx-auto">
+                      <h3 className="text-sm font-bold text-white">Awaiting Construct Stamping</h3>
+                      <p className="text-xs text-zinc-400">
+                        Click <strong className="text-white">&quot;Stamp Construct via ML Pipeline&quot;</strong> on the left to allocate synonymous carrier codons, enforce biophysical neutrality, and evaluate stealth.
+                      </p>
+                    </div>
                   </div>
-                )}
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {displayMutations.slice(0, visibleMutationCount).map((mut, mIdx) => {
-                    const isPulse = mIdx === pulseCodonIdx;
-                    const isHovered = activeDiffCodon === mut.codonIndex;
-                    return (
-                      <div
-                        key={`${mut.codonIndex}-${mut.fromCodon}-${mut.toCodon}`}
-                        onMouseEnter={() => setActiveDiffCodon(mut.codonIndex)}
-                        onMouseLeave={() => setActiveDiffCodon(null)}
-                        className={`p-3 rounded-xl border transition-all font-mono cursor-pointer relative overflow-hidden ${
-                          isHovered
-                            ? "border-[#FF5500] bg-[#FF5500]/20 shadow-[0_0_12px_rgba(255,85,0,0.25)] scale-102"
-                            : isPulse
-                            ? "border-[#FF5500]/70 bg-[#FF5500]/10 shadow-[0_0_8px_rgba(255,85,0,0.15)]"
-                            : "border-border/80 bg-[#15151c] hover:border-zinc-500"
-                        }`}
-                      >
-                        {isPulse && (
-                          <div className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-ping m-1.5" />
-                        )}
-                        <div className="flex items-center justify-between text-xs text-zinc-300 mb-1.5">
-                          <span className={`font-semibold ${isHovered || isPulse ? "text-[#FF5500]" : "text-zinc-300"}`}>
-                            Locus #{mut.codonIndex}
-                          </span>
-                          <span className="px-1.5 py-0.5 rounded bg-[#20202C] border border-[#303042] text-xs font-bold text-white">
-                            {mut.aminoAcid}
-                          </span>
+                ) : (
+                  <>
+                    {liveStealthData && (
+                      <div className="p-2.5 rounded-xl border border-primary/30 bg-primary/10 text-xs font-mono flex items-center justify-between text-zinc-300">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-primary" />
+                          <span>Biosecurity ML Screening:</span>
                         </div>
-                        <div className="flex items-center justify-between py-1 text-sm font-bold">
-                          <span className="text-zinc-400 line-through text-xs font-mono">{mut.fromCodon}</span>
-                          <span className="text-primary text-sm font-bold px-1">&rarr;</span>
-                          <span className="text-white bg-[#FF5500]/25 border border-[#FF5500]/40 px-2 py-0.5 rounded text-xs font-bold font-mono tracking-wider">
-                            {mut.toCodon}
-                          </span>
-                        </div>
-                        <div className="mt-1 text-xs text-zinc-400 font-mono flex items-center justify-between">
-                          <span>w_i = <strong className="text-zinc-200">{(mut.wi ?? 0.988).toFixed(3)}</strong></span>
-                        </div>
+                        <span className="text-[11px] text-zinc-200">
+                          1D-CNN: <strong className="text-white">{(liveStealthData.cnnProbability * 100).toFixed(1)}%</strong> | k-mer: <strong className="text-white">{(liveStealthData.kmerProbability * 100).toFixed(2)}%</strong> (WGAN-GP AUC ~0.505)
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
+                    )}
 
-                {displayMutations.length > visibleMutationCount && (
-                  <div className="text-center pt-1 flex items-center justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setVisibleMutationCount((prev) => Math.min(displayMutations.length, prev + 16))}
-                      className="text-xs font-mono h-7"
-                    >
-                      Show More ({visibleMutationCount} of {displayMutations.length})
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setVisibleMutationCount(displayMutations.length)}
-                      className="text-xs font-mono h-7 text-zinc-400"
-                    >
-                      Show All
-                    </Button>
-                  </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      {displayMutations.slice(0, visibleMutationCount).map((mut, mIdx) => {
+                        const isPulse = mIdx === pulseCodonIdx;
+                        const isHovered = activeDiffCodon === mut.codonIndex;
+                        return (
+                          <div
+                            key={`${mut.codonIndex}-${mut.fromCodon}-${mut.toCodon}`}
+                            onMouseEnter={() => setActiveDiffCodon(mut.codonIndex)}
+                            onMouseLeave={() => setActiveDiffCodon(null)}
+                            className={`p-3 rounded-xl border transition-all font-mono cursor-pointer relative overflow-hidden ${
+                              isHovered
+                                ? "border-[#FF5500] bg-[#FF5500]/20 shadow-[0_0_12px_rgba(255,85,0,0.25)] scale-102"
+                                : isPulse
+                                ? "border-[#FF5500]/70 bg-[#FF5500]/10 shadow-[0_0_8px_rgba(255,85,0,0.15)]"
+                                : "border-border/80 bg-[#15151c] hover:border-zinc-500"
+                            }`}
+                          >
+                            {isPulse && (
+                              <div className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-ping m-1.5" />
+                            )}
+                            <div className="flex items-center justify-between text-xs text-zinc-300 mb-1.5">
+                              <span className={`font-semibold ${isHovered || isPulse ? "text-[#FF5500]" : "text-zinc-300"}`}>
+                                Locus #{mut.codonIndex}
+                              </span>
+                              <span className="px-1.5 py-0.5 rounded bg-[#20202C] border border-[#303042] text-xs font-bold text-white">
+                                {mut.aminoAcid}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between py-1 text-sm font-bold">
+                              <span className="text-zinc-400 line-through text-xs font-mono">{mut.fromCodon}</span>
+                              <span className="text-primary text-sm font-bold px-1">&rarr;</span>
+                              <span className="text-white bg-[#FF5500]/25 border border-[#FF5500]/40 px-2 py-0.5 rounded text-xs font-bold font-mono tracking-wider">
+                                {mut.toCodon}
+                              </span>
+                            </div>
+                            <div className="mt-1 text-xs text-zinc-400 font-mono flex items-center justify-between">
+                              <span>w_i = <strong className="text-zinc-200">{(mut.wi ?? 0.988).toFixed(3)}</strong></span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {displayMutations.length > visibleMutationCount && (
+                      <div className="text-center pt-1 flex items-center justify-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setVisibleMutationCount((prev) => Math.min(displayMutations.length, prev + 16))}
+                          className="text-xs font-mono h-7"
+                        >
+                          Show More ({visibleMutationCount} of {displayMutations.length})
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setVisibleMutationCount(displayMutations.length)}
+                          className="text-xs font-mono h-7 text-zinc-400"
+                        >
+                          Show All
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 

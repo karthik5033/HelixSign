@@ -20,6 +20,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
+import { EmptyConstructState } from "@/components/shared/EmptyConstructState";
+import { useConstruct } from "@/lib/ConstructContext";
+import { getCodonAdaptiveness, computeGcContent } from "@/lib/codonMetrics";
 
 // NCBI Table 11 Codon Codec & Degenerate Bit-Pairs (Rank 1 vs Rank 2 in E. coli K-12)
 interface CodonBitPair {
@@ -338,23 +341,83 @@ const CAPACITY_CURVE = [
 ];
 
 export default function CarrierLocusMapping() {
+  const { construct, hasActiveConstruct } = useConstruct();
   const [activeTab, setActiveTab] = useState<"architecture" | "heatmap" | "capacity">("architecture");
   const [selectedPresetId, setSelectedPresetId] = useState("LOC-LACZ");
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null);
-  const [selectedCarrierIndex, setSelectedCarrierIndex] = useState<number>(31);
-  const [isPlayingScan, setIsPlayingScan] = useState(true);
+  const [selectedCarrierIndex, setSelectedCarrierIndex] = useState<number>(0);
+  const [isPlayingScan, setIsPlayingScan] = useState(false);
   const [autoFollowBeam, setAutoFollowBeam] = useState(false);
   const [scanTick, setScanTick] = useState(0);
   const [filterMode, setFilterMode] = useState<"all" | "carriers" | "high_cai">("all");
 
   const currentConstruct = useMemo(() => {
+    if (hasActiveConstruct && construct.sequence) {
+      return {
+        id: "LOC-ACTIVE",
+        name: `${construct.geneName || "Active Stamped Construct"} (${construct.sequence.length.toLocaleString()} bp)`,
+        gene: construct.geneName || "custom",
+        organism: construct.hostOrganism || "E. coli K-12",
+        totalLengthBp: construct.sequence.length,
+        baseCai: construct.caiScore || 0.988,
+        gcContent: construct.gcContent || 50.0,
+        eccTiles: Math.max(1, Math.floor(construct.sequence.length / 1024)),
+        preferredCarrierIndex: 0,
+      };
+    }
     return PRESET_CONSTRUCTS.find((p) => p.id === selectedPresetId) || PRESET_CONSTRUCTS[0];
-  }, [selectedPresetId]);
+  }, [hasActiveConstruct, construct, selectedPresetId]);
 
-  // Dynamically compute exact 64 carrier loci for current construct
+  // Dynamically compute exact carrier loci for current construct
   const carrierLoci = useMemo(() => {
+    if (hasActiveConstruct && construct.mutations && construct.mutations.length > 0) {
+      const seg1End = Math.floor(currentConstruct.totalLengthBp * 0.25);
+      const seg2End = Math.floor(currentConstruct.totalLengthBp * 0.50);
+      const seg3End = Math.floor(currentConstruct.totalLengthBp * 0.75);
+
+      const realLoci: CarrierLocus[] = construct.mutations.map((m, idx) => {
+        const bp = m.codonIndex * 3;
+        const symbolByteIndex = Math.floor(idx / 8);
+        const bitIndex = idx % 8;
+        const bitValue = idx % 2;
+
+        let segmentId: "SEG-01" | "SEG-02" | "SEG-03" | "SEG-04";
+        if (bp < seg1End) segmentId = "SEG-01";
+        else if (bp < seg2End) segmentId = "SEG-02";
+        else if (bp < seg3End) segmentId = "SEG-03";
+        else segmentId = "SEG-04";
+
+        const wtAdapt = getCodonAdaptiveness(m.fromCodon, m.aminoAcid);
+        const caiDelta = parseFloat((m.wi - wtAdapt).toFixed(4));
+        const gcDelta = parseFloat((computeGcContent(m.toCodon) - computeGcContent(m.fromCodon)).toFixed(1));
+
+        return {
+          id: `LOC-${idx.toString().padStart(3, "0")}`,
+          index: idx,
+          bp,
+          codonIndex: m.codonIndex,
+          aminoAcid: m.aminoAcid,
+          wildtypeCodon: m.fromCodon,
+          watermarkCodon: m.toCodon,
+          relativeAdaptiveness: m.wi,
+          caiDelta,
+          gcDelta,
+          rsSymbolHex: `0x${((idx * 17 + 23) % 256).toString(16).toUpperCase().padStart(2, "0")}`,
+          bitIndex,
+          symbolByteIndex,
+          bitValue,
+          segmentId,
+        };
+      });
+
+      realLoci.sort((a, b) => a.bp - b.bp);
+      realLoci.forEach((l, idx) => {
+        l.index = idx;
+      });
+      return realLoci;
+    }
     return generateCarrierLayout(currentConstruct);
-  }, [currentConstruct]);
+  }, [hasActiveConstruct, construct, currentConstruct]);
 
   // Synchronize selected carrier when construct changes
   useEffect(() => {
@@ -414,6 +477,31 @@ export default function CarrierLocusMapping() {
     const mean = sum / carrierLoci.length;
     return `${mean >= 0 ? "+" : ""}${mean.toFixed(3)}`;
   }, [carrierLoci]);
+
+  if (!hasActiveConstruct) {
+    return (
+      <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full pb-12 select-none">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-5">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <Dna className="h-6 w-6 text-primary" />
+              Carrier Locus &amp; Codon Mapping
+            </h1>
+            <p className="text-xs text-muted-foreground mt-1 max-w-3xl">
+              High-resolution genomic architecture track displaying HKDF-keyed synonymous carrier codons across open reading frames. Confirms primary amino acid invariance while preserving host codon adaptation.
+            </p>
+          </div>
+          <MlPipelineStatusBadge />
+        </div>
+        <EmptyConstructState
+          title="Carrier Locus Mapping Offline"
+          description="Carrier locus mapping requires an active stamped construct sequence. Input or stamp a sequence in Sequence Input Studio to inspect nucleotide coordinates, synonymous codon substitutions, and Reed-Solomon GF(2⁸) symbol positions."
+          icon={Crosshair}
+          suggestedAction="Input or stamp a synthetic CDS sequence to compute carrier codon mapping."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full pb-12 select-none">

@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { TopHeader } from "@/components/layout/TopHeader";
+import { ConstructProvider } from "@/lib/ConstructContext";
 
 const routeTitles: Record<string, string> = {
   "/input": "Sequence & Construct Input Studio",
@@ -43,25 +44,25 @@ export default function AuthLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Sidebar */}
-      <div className="h-full flex z-30 relative shrink-0">
-        <AppSidebar />
-      </div>
+        {/* Sidebar */}
+        <div className="h-full flex z-30 relative shrink-0">
+          <AppSidebar />
+        </div>
 
-      {/* Main Container */}
-      <div className="flex flex-1 flex-col min-w-0 overflow-hidden relative">
-        <TopHeader />
-        <main
-          ref={mainRef}
-          className="flex-1 flex flex-col relative overflow-y-auto bg-slate-50/40 dark:bg-background/95"
-        >
-          {isNavigating && (
-            <div className="absolute top-0 left-0 right-0 z-40 h-[2px] bg-[#FF5500]" />
-          )}
-          {children}
-        </main>
+        {/* Main Container */}
+        <div className="flex flex-1 flex-col min-w-0 overflow-hidden relative">
+          <TopHeader />
+          <main
+            ref={mainRef}
+            className="flex-1 flex flex-col relative overflow-y-auto bg-slate-50/40 dark:bg-background/95"
+          >
+            {isNavigating && (
+              <div className="absolute top-0 left-0 right-0 z-40 h-[2px] bg-[#FF5500]" />
+            )}
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
   );
 }
 

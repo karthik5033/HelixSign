@@ -25,6 +25,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MetricCard } from "@/components/shared/MetricCard";
 import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
+import { EmptyConstructState } from "@/components/shared/EmptyConstructState";
+import { useConstruct } from "@/lib/ConstructContext";
 import { downloadDataAsCsv } from "@/lib/utils";
 
 type TabKey = "filtration" | "landscapes" | "stability" | "recurrence" | "manifold";
@@ -87,14 +89,15 @@ const PRESET_CONSTRUCTS: PresetConstruct[] = [
 ];
 
 export default function TopologyEnginePage() {
+  const { construct, hasActiveConstruct } = useConstruct();
   const [selectedPresetId, setSelectedPresetId] = useState<string>("lacz-ecoli");
   const currentPreset = PRESET_CONSTRUCTS.find((p) => p.id === selectedPresetId) || PRESET_CONSTRUCTS[0];
 
   const [activeTab, setActiveTab] = useState<TabKey>("filtration");
 
-  // Filtration state (Defaults to active smooth breathing cycle)
+  // Filtration state (Idle by default, only animates when user scrubs or hits Play)
   const [epsilon, setEpsilon] = useState<number>(0.42);
-  const [isFiltrationPlaying, setIsFiltrationPlaying] = useState<boolean>(true);
+  const [isFiltrationPlaying, setIsFiltrationPlaying] = useState<boolean>(false);
   const [filtrationDirection, setFiltrationDirection] = useState<number>(1);
   const [filtrationSpeed, setFiltrationSpeed] = useState<number>(1);
 
@@ -517,6 +520,32 @@ export default function TopologyEnginePage() {
     ];
     downloadDataAsCsv("codon_manifold_topology_summary.csv", rows);
   };
+
+  if (!hasActiveConstruct) {
+    return (
+      <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full select-none">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-5">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+                <Cpu className="h-6 w-6 text-[#FF5500]" />
+                Codon Manifold &amp; Realism Engine
+              </h1>
+              <MlPipelineStatusBadge />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 max-w-3xl">
+              Synonymous codon equivalence fibers, Vietoris-Rips simplicial filtration, WGAN-GP latent manifold projection, and k-mer distribution invariance.
+            </p>
+          </div>
+        </div>
+        <EmptyConstructState
+          title="Codon Manifold Engine Offline"
+          description="Topological data analysis (TDA) requires an engineered synthetic CDS to compute Vietoris-Rips filtration complexes, topological Betti numbers (β₀, β₁), and codon degeneracy loops."
+          icon={Cpu}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full select-none">

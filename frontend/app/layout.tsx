@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/lib/ThemeContext";
 import { AuthProvider } from "@/lib/AuthContext";
 import { LanguageProvider } from "@/lib/LanguageContext";
+import { ConstructProvider } from "@/lib/ConstructContext";
 
 export const metadata: Metadata = {
   title: {
@@ -32,7 +33,9 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <LanguageProvider>
-              {children}
+              <ConstructProvider>
+                {children}
+              </ConstructProvider>
             </LanguageProvider>
           </AuthProvider>
         </ThemeProvider>

@@ -24,6 +24,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
+import { EmptyConstructState } from "@/components/shared/EmptyConstructState";
+import { useConstruct } from "@/lib/ConstructContext";
 import { runStressTest, type StressResult } from "@/lib/mlPipelineClient";
 import {
   Table,
@@ -92,7 +94,8 @@ const MONITORED_CONSTRUCTS: MonitorConstruct[] = [
 const SAMPLE_COUNT = 240;
 
 export default function RealTimeMonitorPage() {
-  const [isStreaming, setIsStreaming] = useState(true);
+  const { construct, hasActiveConstruct } = useConstruct();
+  const [isStreaming, setIsStreaming] = useState(false);
   const [selectedConstructId, setSelectedConstructId] = useState("lacz");
   const [selectedChannel, setSelectedChannel] = useState("CH-01");
   const [manualNoiseOverride, setManualNoiseOverride] = useState<number | null>(null);
@@ -113,6 +116,7 @@ export default function RealTimeMonitorPage() {
     setIsRunningLiveStress(true);
     try {
       const sampleSeq =
+        construct.sequence ||
         "ATGACCATGATTACGGATTCACTGGCCGTCGTTTTACAACGTCGTGACTGGGAAAACCCTGGCGTTACCCAACTTAATCGCCTTGCAGCACATCCCCCTTTCGCCAGCTGGCGTAATAGCGAAGAGGCCCGCACCGATCGCCCTTCCCAACAGTTGCGCAGCCTGAATGGCGAATGGCGCTTTGCCTGGTTTCCGGCACCAGAAGCGGTGCCGGAAAGCTGGCTGGAGTGCGATCTTCCTGAGGCCGATACTGTCGTCGTCCCCTCAAACTGGCAGATGCACGGTTACGATGCGCCCATCTACACCAACGTGACCTATCCCATTACGGTCAATCCGCCGTTTGTTCCCACGGAGAATCCGACGGGTTGTTACTCGCTCACATTTAATGTTGATGAAAGCTGGCTACAGGAAGGCCAGACGCGAATTATTTTTGATGGCGTTAACTCGGCGTTTCATCTGTGGTGCAACGGGCGCTGGGTCGGTTACGGCCAGGACAGTCGTTTGCCGTCTGAATTTGACCTGAGCGCATTTTTACGCGCCGGAGAAAACCGCCTCGCGGTGATGGTGCTGCGCTGGAGTGACGGCAGTTATCTGGAAGATCAGGATATGTGGCGGATGAGCGGCATTTTCCGTGACGTCTCGTTGCTGCATAAACCGACTACACAAATCAGCGATTTCCATGTTGCCACTCGCTTTAATGATGATTTCAGCCGCGCTGTACTGGAGGCTGAAGTTCAGATGTGCGGCGAGTTGCGTGACTACCTACGGGTAACAGTTTCTTTATGGCAGGGTGAAACGCAGGTCGCCAGCGGCACCGCGCCTTTCGGCGGTGAAATTATCGATGAGCGTGGTGGTTATGCCGATCGCGTCACACTACGTCTGAACGTCGAAAACCCGAAACTGTGGAGCGCCGAAATCCCGAATCTCTATCGTGCGGTGGTTGAACTGCACACCGCCGACGGCACGCTGATTGAAGCAGAAGCCTGCGATGTCGGTTTCCGCGAGGTGCGGATTGAAAATGGTCTGCTGCTGCTGAACGGCAAGCCGTTGCTGATTCGAGGCGTTAACCGTCACGAGCATCATCCTCTGCATGGTCAGGTCATGGATGAGCAGACGATGGTGCAGGATATCCTGCTGATGAAGCAGAACAACTTTAACGCCGTGCGCTGTTCGCATTATCCGAACCATCCGCTGTGGTACACGCTGTGCGACCGCTACGGCCTGTATGTGGTGGATGAAGCCAATATTGAAACCCACGGCATGGTGCCAATGAATCGTCTGACCGATGATCCGCGCTGGCTACCGGCGATGAGCGAACGCGTAACGCGAATGGTGCAGCGCGATCGTAATCACCCGAGTGTGATCATCTGGTCGCTGGGGAATGAATCAGGCCACGGCGCTAATCACGACGCGCTGTATCGCTGGATCAAATCTGTCGATCCTTCCCGCCCGGTGCAGTATGAAGGCGGCGGAGCCGACACCACGGCCACCGATATTATTTGCCCGATGTACGCGCGCGTGGATGAAGACCAGCCCTTCCCGGCTGTGCCGAAATGGTCCATCAAAAAATGGCTTTCGCTACCTGGAGAGACGCGCCCGCTGATCCTTTGCGAATACGCCCACGCGATGGGTAACAGTCTTGGCGGTTTCGCTAAATACTGGCAGGCGTTTCGTCAGTATCCCCGTTTACAGGGCGGCTTCGTCTGGGACTGGGTGGATCAGTCGCTGATTAAATATGATGAAAACGGCAACCCGTGGTCGGCTTACGGCGGTGATTTTGGCGATACGCCGAACGATCGCCAGTTCTGTATGAACGGTCTGGTCTTTGCCGACCGCACGCCGCATCCAGCGCTGACGGAAGCAAAACACCAGCAGCAGTTTTTCCAGTTCCGTTTATCCGGGCAAACCATCGAAGTGACCAGCGAATACCTGTTCCGTCATAGCGATAACGAGCTCCTGCACTGGATGGTGGCGCTGGATGGTAAGCCGCTGGCAAGCGGTGAAGTGCCTCTGGATGTCGCTCCACAAGGTAAACAGTTGATTGAACTGCCTGAACTACCGCAGCCGGAGAGCGCCGGGCAACTCTGGCTCACAGTACGCGTAGTGCAACCGAACGCGACCGCATGGTCAGAAGCCGGGCACATCAGCGCCTGGCAGCAGTGGCGTCTGGCGGAAAACCTCAGTGTGACGCTCCCCGCCGCGTCCCACGCCATCCCGCATCTGACCACCAGCGAAATGGATTTTTGCATCGAGCTGGGTAATAAGCGTTGGCAATTTAACCGCCAGTCAGGCTTTCTTTCACAGATGTGGATTGGCGATAAAAAACAACTGCTGACGCCGCTGCGCGATCAGTTCACCCGTGCACCGCTGGATAACGACATTGGCGTAAGTGAAGCGACCCGCATTGACCCTAACGCCTGGGTCGAACGCTGGAAGGCGGCGGGCCATTACCAGGCCGAAGCAGCGTTGTTGCAGTGCACGGCAGATACACTTGCTGATGCGGTGCTGATTACGACCGCTCACGCGTGGCAGCATCAGGGGAAAACCTTATTTATCAGCCGGAAAACCTACCGGATTGATGGTAGTGGTCAAATGGCGATTACCGTTGATGTTGAAGTGGCGAGCGATACACCGCATCCGGCGCGGATTGGCCTGAACTGCCAGCTGGCGCAGGTAGCAGAGCGGGTAAACTGGCTCGGATTAGGGCCGCAAGAAAACTATCCCGACCGCCTTACTGCCGCCTGTTTTGACCGCTGGGATCTGCCATTGTCAGACATGTATACCCCGTACGTCTTCCCGAGCGAAAACGGTCTGCGCTGCGGGACGCGCGAATTGAATTATGGCCCACACCAGTGGCGCGGCGACTTCCAGTTCAACATCAGCCGCTACAGTCAACAGCAACTGATGGAAACCAGCCATCGCCATCTGCTGCACGCGGAAGAAGGCACATGGCTGAATATCGACGGTTTCCATATGGGGATTGGTGGCGACGACTCCTGGAGCCCGTCAGTATCGGCGGAATTCCAGCTGAGCGCCGGTCGCTACCATTACCAGTTGGTCTGGTGTCAAAAATAA";
       const rate = activeBaseNoise / 100;
       const res = await runStressTest({
@@ -147,52 +151,23 @@ export default function RealTimeMonitorPage() {
   };
 
   const activeConstruct = useMemo(() => {
+    if (hasActiveConstruct && construct.sequence) {
+      return {
+        id: "active",
+        name: `${construct.geneName || "Active Stamped Construct"} (${construct.sequence.length.toLocaleString()} bp)`,
+        gene: construct.geneName || "Custom CDS",
+        lengthBp: construct.sequence.length,
+        codons: Math.floor(construct.sequence.length / 3),
+        eccTiles: Math.max(1, Math.floor(construct.sequence.length / 1024)),
+        carrierCount: construct.mutations.length || 64,
+        baseCai: construct.caiScore || 0.988,
+      };
+    }
     return MONITORED_CONSTRUCTS.find((c) => c.id === selectedConstructId) || MONITORED_CONSTRUCTS[0];
-  }, [selectedConstructId]);
+  }, [hasActiveConstruct, construct, selectedConstructId]);
 
-  // Initial historical trials
-  const [trialLogs, setTrialLogs] = useState<TrialLogEntry[]>([
-    {
-      id: "TR-412",
-      time: "23:59:12",
-      channelName: "Point Substitution",
-      noiseLevel: "1.0% Mut",
-      uncorrectedRecovery: 52.5,
-      rsRecovery: 100.0,
-      parityUsed: 0,
-      status: "Resilient",
-    },
-    {
-      id: "TR-411",
-      time: "23:58:45",
-      channelName: "Adversarial Shuffle",
-      noiseLevel: "15.0% Shuffle",
-      uncorrectedRecovery: 0.0,
-      rsRecovery: 100.0,
-      parityUsed: 3,
-      status: "ECC Active",
-    },
-    {
-      id: "TR-410",
-      time: "23:58:10",
-      channelName: "Indel PCR Jitter",
-      noiseLevel: "0.5% Indel",
-      uncorrectedRecovery: 72.4,
-      rsRecovery: 100.0,
-      parityUsed: 0,
-      status: "Resilient",
-    },
-    {
-      id: "TR-409",
-      time: "23:57:30",
-      channelName: "Host Pol III Drift",
-      noiseLevel: "2.0% Mut",
-      uncorrectedRecovery: 27.5,
-      rsRecovery: 100.0,
-      parityUsed: 1,
-      status: "Resilient",
-    },
-  ]);
+  // Dynamic historical trials logged from real channel runs
+  const [trialLogs, setTrialLogs] = useState<TrialLogEntry[]>([]);
 
   // Advance simulation clock
   useEffect(() => {
@@ -328,6 +303,32 @@ export default function RealTimeMonitorPage() {
       setTrialLogs((prev) => [newEntry, ...prev.slice(0, 9)]);
     }
   }, [tick, isStreaming, selectedChannel, rawUncorrectedPoints, recoveryPoints, currentParityUsed, isBurstActive, currentNoiseNow]);
+
+  if (!hasActiveConstruct) {
+    return (
+      <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full font-sans select-none pb-12">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+              <Radio className="h-5 w-5 text-primary" />
+              <span>Channel Stress Lab &amp; Real-Time Noise Simulator</span>
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Simulate in-vivo biological evolutionary degradation, PCR replication noise, point substitutions, and indel slippage
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <MlPipelineStatusBadge />
+          </div>
+        </div>
+        <EmptyConstructState
+          title="Channel Stress Lab Offline"
+          description="Channel stress simulation requires a stamped construct sequence to evaluate Reed-Solomon GF(2⁸) symbol error recovery across biological noise channels."
+          icon={Radio}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full font-sans select-none pb-12">
@@ -832,40 +833,54 @@ export default function RealTimeMonitorPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {trialLogs.map((hit) => (
-                  <TableRow key={hit.id} className="border-border hover:bg-muted/30">
-                    <TableCell className="font-mono text-xs text-foreground/80 font-medium">{hit.id}</TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">{hit.time}</TableCell>
-                    <TableCell className="font-mono text-xs text-foreground">{hit.noiseLevel}</TableCell>
-                    <TableCell className="text-xs">
-                      <Badge
-                        variant="outline"
-                        className={`text-[10px] font-mono font-medium ${
-                          hit.status === "Alert"
-                            ? "border-red-500/50 text-red-400 bg-red-500/10"
-                            : hit.status === "ECC Active"
-                            ? "border-primary/40 text-primary bg-primary/5"
-                            : "border-border text-zinc-300 bg-muted/40"
-                        }`}
-                      >
-                        {hit.channelName}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">
-                      {hit.uncorrectedRecovery.toFixed(1)}%
-                    </TableCell>
-                    <TableCell className="font-mono text-xs text-foreground font-bold">
-                      {hit.rsRecovery.toFixed(1)}%
-                    </TableCell>
-                    <TableCell className="text-right pr-4">
-                      <Link href="/analysis">
-                        <Button variant="ghost" size="sm" className="h-6 text-[11px] text-muted-foreground hover:text-foreground cursor-pointer">
-                          Pipeline View →
-                        </Button>
-                      </Link>
+                {trialLogs.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="h-36 text-center text-xs text-muted-foreground font-mono">
+                      <div className="flex flex-col items-center justify-center gap-2 py-4">
+                        <Radio className="w-6 h-6 text-muted-foreground/40" />
+                        <span className="text-foreground/90 font-medium">No channel stress trials logged yet.</span>
+                        <span className="text-[11px] text-muted-foreground">
+                          Click &quot;Run Live Stress Channel&quot; or start simulation stream above to run real Reed-Solomon GF(2⁸) decoding.
+                        </span>
+                      </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  trialLogs.map((hit) => (
+                    <TableRow key={hit.id} className="border-border hover:bg-muted/30">
+                      <TableCell className="font-mono text-xs text-foreground/80 font-medium">{hit.id}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">{hit.time}</TableCell>
+                      <TableCell className="font-mono text-xs text-foreground">{hit.noiseLevel}</TableCell>
+                      <TableCell className="text-xs">
+                        <Badge
+                          variant="outline"
+                          className={`text-[10px] font-mono font-medium ${
+                            hit.status === "Alert"
+                              ? "border-red-500/50 text-red-400 bg-red-500/10"
+                              : hit.status === "ECC Active"
+                              ? "border-primary/40 text-primary bg-primary/5"
+                              : "border-border text-zinc-300 bg-muted/40"
+                          }`}
+                        >
+                          {hit.channelName}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {hit.uncorrectedRecovery.toFixed(1)}%
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-foreground font-bold">
+                        {hit.rsRecovery.toFixed(1)}%
+                      </TableCell>
+                      <TableCell className="text-right pr-4">
+                        <Link href="/analysis">
+                          <Button variant="ghost" size="sm" className="h-6 text-[11px] text-muted-foreground hover:text-foreground cursor-pointer">
+                            Pipeline View →
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>

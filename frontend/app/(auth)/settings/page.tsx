@@ -33,11 +33,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
 import { useAuth } from "@/lib/AuthContext";
+import { useConstruct } from "@/lib/ConstructContext";
+import { getCodonAdaptiveness } from "@/lib/codonMetrics";
 
 type SettingsTab = "crypto" | "pipeline" | "notifications" | "profile";
 
 export default function SettingsPage() {
   const { user, updateUser } = useAuth();
+  const { construct, hasActiveConstruct } = useConstruct();
   const [activeTab, setActiveTab] = useState<SettingsTab>("crypto");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -136,6 +139,7 @@ export default function SettingsPage() {
     let sumStego = 0;
 
     const yBase = 72; // bottom baseline in SVG coordinates
+    const totalCodons = hasActiveConstruct && construct.sequence ? Math.floor(construct.sequence.length / 3) : 0;
 
     for (let i = 0; i < N; i++) {
       const x = (i / (N - 1)) * 300;
@@ -146,10 +150,18 @@ export default function SettingsPage() {
       const hostHeight = Math.max(2, h1 + h2);
       const yHost = Math.max(12, yBase - hostHeight);
 
-      // Watermarked distribution shift driven by user's Delta-CAI and Delta-GC settings
-      const caiShift = (caiTolerance / 0.040) * 8.5 * Math.sin((i / N) * Math.PI * 2.2);
-      const gcShift = (gcSkewTolerance / 4.0) * 2.5 * Math.cos((i / N) * Math.PI * 3.0);
-      const stegoHeight = Math.max(2, hostHeight - (caiShift + gcShift));
+      let stegoHeight = hostHeight;
+      if (hasActiveConstruct && totalCodons > 0) {
+        // Empirical codon adaptiveness from the active stamped construct
+        const codonIdx = Math.floor((i / (N - 1)) * (totalCodons - 1));
+        const codonStr = construct.sequence.slice(codonIdx * 3, codonIdx * 3 + 3);
+        const wi = getCodonAdaptiveness(codonStr);
+        const ratio = Math.max(0.75, Math.min(1.25, wi / hostConfig.baseCai));
+        stegoHeight = Math.max(2, hostHeight * ratio);
+      } else {
+        // Theoretical host reference baseline (awaiting user construct input)
+        stegoHeight = hostHeight;
+      }
       const yStego = Math.max(12, yBase - stegoHeight);
 
       pts.push({ x, yHost, yStego });
@@ -162,14 +174,16 @@ export default function SettingsPage() {
 
     // Exact empirical Kullback-Leibler relative entropy
     let kl = 0;
-    for (let i = 0; i < N; i++) {
-      const ph = pHost[i] / sumHost;
-      const ps = pStego[i] / sumStego;
-      if (ph > 0 && ps > 0) {
-        kl += ph * Math.log(ph / ps);
+    if (hasActiveConstruct && totalCodons > 0) {
+      for (let i = 0; i < N; i++) {
+        const ph = pHost[i] / sumHost;
+        const ps = pStego[i] / sumStego;
+        if (ph > 0 && ps > 0) {
+          kl += ph * Math.log(ph / ps);
+        }
       }
     }
-    const cleanKl = Math.max(0.0005, kl);
+    const cleanKl = hasActiveConstruct ? Math.max(0.0008, Math.abs(kl)) : 0;
 
     const hPath = pts.reduce((acc, pt, idx) => {
       return idx === 0 ? `M ${pt.x.toFixed(1)} ${pt.yHost.toFixed(1)}` : `${acc} L ${pt.x.toFixed(1)} ${pt.yHost.toFixed(1)}`;
@@ -188,7 +202,7 @@ export default function SettingsPage() {
       stegoSvgPath: sPath,
       stegoAreaPath: sArea,
     };
-  }, [hostConfig, caiTolerance, gcSkewTolerance]);
+  }, [hostConfig, hasActiveConstruct, construct]);
 
   // Computed Steganography & Bio-Viability Metrics
   const bioStegoMetrics = useMemo(() => {
@@ -197,21 +211,23 @@ export default function SettingsPage() {
     else if (carrierDensityPreset === "48bp") spacingBp = 48;
     else if (carrierDensityPreset === "64bp") spacingBp = 64;
 
-    const totalCarrierCodons = 64;
+    const totalCarrierCodons = hasActiveConstruct && construct.mutations.length > 0 ? construct.mutations.length : 64;
     const requiredCdsBp = totalCarrierCodons * spacingBp;
-    const rawCapacityBits = 128; // 64 payload + 64 RS(16,8) parity
-    const caiConcordance = (hostConfig.baseCai - caiTolerance * 0.38).toFixed(3);
+    const rawCapacityBits = hasActiveConstruct && construct.stampResult?.stats?.capacityTotal ? construct.stampResult.stats.capacityTotal : 128;
+    const caiConcordance = hasActiveConstruct
+      ? construct.caiScore.toFixed(3)
+      : (hostConfig.baseCai - caiTolerance * 0.38).toFixed(3);
 
     return {
       spacingBp,
       requiredCdsBp,
       rawCapacityBits,
       caiConcordance,
-      klDivergence: klDivergenceValue.toFixed(4),
+      klDivergence: hasActiveConstruct ? klDivergenceValue.toFixed(4) : "0.0000",
       homopolymerSafe: homopolymerCeiling <= 4,
       proteinInvariant: "100.00%",
     };
-  }, [carrierDensityPreset, hostConfig, caiTolerance, klDivergenceValue, homopolymerCeiling]);
+  }, [carrierDensityPreset, hostConfig, caiTolerance, klDivergenceValue, homopolymerCeiling, hasActiveConstruct, construct]);
 
   const handleRegenerateSalt = () => {
     const bytes = new Uint8Array(32);
@@ -568,7 +584,9 @@ export default function SettingsPage() {
                       <Activity className="w-3.5 h-3.5 text-primary" />
                       Derived Steganography Metrics
                     </span>
-                    <span className="text-[10px] font-mono text-muted-foreground">Derived from current inputs</span>
+                    <Badge variant="outline" className="text-[10px] font-mono border-border text-muted-foreground">
+                      {hasActiveConstruct ? "Active Construct Telemetry" : "Theoretical Baseline Model"}
+                    </Badge>
                   </div>
 
                   <div className="space-y-2 text-[11px]">
@@ -582,11 +600,13 @@ export default function SettingsPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Min Required CDS Length:</span>
-                      <span className="font-bold text-foreground">{bioStegoMetrics.requiredCdsBp.toLocaleString()} bp</span>
+                      <span className="font-bold text-foreground">
+                        {bioStegoMetrics.requiredCdsBp.toLocaleString()} bp {hasActiveConstruct && `(Construct: ${construct.sequence.length.toLocaleString()} bp)`}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Host CAI Concordance:</span>
-                      <span className="font-bold text-primary">{bioStegoMetrics.caiConcordance} (Optimal)</span>
+                      <span className="font-bold text-primary">{bioStegoMetrics.caiConcordance} {hasActiveConstruct ? "(Optimal)" : "(Reference)"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Homopolymer Safe Margin:</span>
@@ -596,7 +616,9 @@ export default function SettingsPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">K-L Codon Divergence (D_KL):</span>
-                      <span className="font-bold text-primary">{bioStegoMetrics.klDivergence} nats</span>
+                      <span className="font-bold text-primary">
+                        {bioStegoMetrics.klDivergence} nats {hasActiveConstruct ? "(Empirical)" : "(Awaiting Input)"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -605,7 +627,9 @@ export default function SettingsPage() {
                 <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2 font-mono text-xs">
                   <div className="flex items-center justify-between pb-1 text-[11px]">
                     <span className="text-muted-foreground">Codon Bias Convergence:</span>
-                    <span className="text-primary font-bold">{hostConfig.name}</span>
+                    <span className="text-primary font-bold">
+                      {hasActiveConstruct ? (construct.geneName || "Active Stamped Construct") : `${hostConfig.name} (Theoretical Model)`}
+                    </span>
                   </div>
 
                   {/* Dynamic SVG Comparative Frequency Chart */}
@@ -632,46 +656,65 @@ export default function SettingsPage() {
                         opacity="0.85"
                       />
 
-                      {/* HelixSign Watermarked Area Glow */}
-                      <path
-                        d={stegoAreaPath}
-                        fill="url(#stegoAreaGlow)"
-                      />
+                      {/* HelixSign Watermarked Area Glow (only if active construct) */}
+                      {hasActiveConstruct && (
+                        <path
+                          d={stegoAreaPath}
+                          fill="url(#stegoAreaGlow)"
+                        />
+                      )}
 
                       {/* HelixSign Watermarked Codon Curve (Orange Solid) */}
-                      <path
-                        d={stegoSvgPath}
-                        fill="none"
-                        stroke="#FF5500"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+                      {hasActiveConstruct && (
+                        <path
+                          d={stegoSvgPath}
+                          fill="none"
+                          stroke="#FF5500"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      )}
 
                       {/* Legend - Cleanly placed with no overlapping */}
                       <g transform="translate(10, 14)">
-                        <line x1="0" y1="0" x2="14" y2="0" stroke="#FF5500" strokeWidth="2.2" />
-                        <text x="20" y="3" fill="#FF5500" fontSize="8" fontFamily="monospace" fontWeight="bold">HelixSign Stamped</text>
-                        
-                        <line x1="130" y1="0" x2="144" y2="0" stroke="#a1a1aa" strokeWidth="1.6" strokeDasharray="3,3" />
-                        <text x="150" y="3" fill="#a1a1aa" fontSize="8" fontFamily="monospace">Wildtype Host</text>
+                        {hasActiveConstruct ? (
+                          <>
+                            <line x1="0" y1="0" x2="14" y2="0" stroke="#FF5500" strokeWidth="2.2" />
+                            <text x="20" y="3" fill="#FF5500" fontSize="8" fontFamily="monospace" fontWeight="bold">HelixSign Stamped</text>
+                            
+                            <line x1="130" y1="0" x2="144" y2="0" stroke="#a1a1aa" strokeWidth="1.6" strokeDasharray="3,3" />
+                            <text x="150" y="3" fill="#a1a1aa" fontSize="8" fontFamily="monospace">Wildtype Host</text>
+                          </>
+                        ) : (
+                          <>
+                            <line x1="0" y1="0" x2="14" y2="0" stroke="#a1a1aa" strokeWidth="1.6" strokeDasharray="3,3" />
+                            <text x="20" y="3" fill="#a1a1aa" fontSize="8" fontFamily="monospace">Host Reference Model (Awaiting Sequence Input)</text>
+                          </>
+                        )}
                       </g>
                     </svg>
                   </div>
 
                   <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1">
                     <span>
-                      Empirical K-L divergence: <strong className="text-foreground">D_KL = {bioStegoMetrics.klDivergence} nats</strong>
+                      {hasActiveConstruct ? (
+                        <>Empirical K-L divergence: <strong className="text-foreground">D_KL = {bioStegoMetrics.klDivergence} nats</strong></>
+                      ) : (
+                        <span>Empirical K-L divergence: <strong className="text-muted-foreground">Awaiting Sequence Input</strong></span>
+                      )}
                     </span>
                     <Badge
                       variant="outline"
                       className={`text-[9px] font-mono ${
-                        klDivergenceValue < 0.015
+                        !hasActiveConstruct
+                          ? "border-muted text-muted-foreground bg-muted/20"
+                          : klDivergenceValue < 0.015
                           ? "border-primary/40 text-primary bg-primary/10"
                           : "border-amber-500/40 text-amber-400 bg-amber-500/10"
                       }`}
                     >
-                      {klDivergenceValue < 0.015 ? "Stealth Verified" : "Elevated Risk"}
+                      {!hasActiveConstruct ? "Awaiting Input" : klDivergenceValue < 0.015 ? "Stealth Verified" : "Elevated Risk"}
                     </Badge>
                   </div>
                 </div>
