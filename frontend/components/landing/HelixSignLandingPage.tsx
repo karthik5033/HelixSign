@@ -339,13 +339,23 @@ const CONSOLE_DEMO_QUERIES = [
     step2Name: "reedsolo.encode_rs16_8(owner='ApexBio', payload=64b)",
     step2Metric: "t=4 symbol error correction • GF(2⁸)",
     response: "Construct verified. 64 synonymous carrier codons assigned across reading frames. Mean CAI = 0.988, stealth AUC = 0.505 against biosecurity detection model.",
-    sql: "SELECT construct_id, gene_name, protein_identity, carrier_count, stealth_auc FROM watermark_registry WHERE gene_name = 'lacZ'",
-    tableName: "lacz_watermark_manifest",
-    totalRows: "1,025 codons logged",
+    sql: "SELECT locus_id, from_codon, to_codon, amino_acid, wi, rs_symbol FROM lacz_stealth_eval",
+    tableName: "lacz_stealth_eval",
+    totalRows: "1,025 codons logged • 64 carrier loci",
+    carrierRows: [
+      { id: "LOC-014", locus: 14, from: "GAG", to: "GAA", aa: "Glu (E)", wi: 0.988, rsHex: "0x7E", status: "Stealth Pass", desc: "Wobble base transition in catalytic cleft" },
+      { id: "LOC-028", locus: 28, from: "CTG", to: "CTA", aa: "Leu (L)", wi: 0.965, rsHex: "0x3B", status: "Stealth Pass", desc: "Beta-turn motif preserving tetramer packing" },
+      { id: "LOC-042", locus: 42, from: "GTG", to: "GTA", aa: "Val (V)", wi: 0.972, rsHex: "0xA4", status: "Stealth Pass", desc: "Hydrophobic core synonymous transition" },
+      { id: "LOC-058", locus: 58, from: "GCG", to: "GCA", aa: "Ala (A)", wi: 0.980, rsHex: "0x1F", status: "Stealth Pass", desc: "Surface loop codon at native adaptiveness" },
+      { id: "LOC-075", locus: 75, from: "ACC", to: "ACA", aa: "Thr (T)", wi: 0.962, rsHex: "0x52", status: "Stealth Pass", desc: "Subunit contact linker flexibility maintained" },
+      { id: "LOC-092", locus: 92, from: "CGT", to: "CGC", aa: "Arg (R)", wi: 0.991, rsHex: "0x8D", status: "Stealth Pass", desc: "High-expression codon preserves translation rate" },
+      { id: "LOC-110", locus: 110, from: "GAT", to: "GAC", aa: "Asp (D)", wi: 0.985, rsHex: "0x43", status: "Stealth Pass", desc: "Electrostatic coordination loop invariant" },
+      { id: "LOC-128", locus: 128, from: "TTT", to: "TTC", aa: "Phe (F)", wi: 0.974, rsHex: "0x9B", status: "Stealth Pass", desc: "Aromatic sidechain packing invariant" },
+    ],
     events: [
-      { id: "LOC-014", mode: "GAG → GAA (Glu)", amp: "wi: 0.988", h1: "Synonymous", freq: "Safe", isCritical: false, wavePath: "M0,10 L15,10 L18,3 L22,17 L25,10 L60,10" },
-      { id: "LOC-028", mode: "CTG → CTA (Leu)", amp: "wi: 0.965", h1: "Synonymous", freq: "Safe", isCritical: false, wavePath: "M0,10 L15,10 L18,5 L22,15 L25,10 L60,10" },
-      { id: "LOC-042", mode: "GTG → GTA (Val)", amp: "wi: 0.972", h1: "Synonymous", freq: "Safe", isCritical: false, wavePath: "M0,10 L15,10 L18,4 L22,16 L25,10 L60,10" },
+      { id: "KMER-01", mode: "Hexamer Freq Dist", amp: "p = 0.98", h1: "Host Invariant", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,3 L22,17 L25,10 L60,10" },
+      { id: "KMER-02", mode: "Codon Pair Bias", amp: "Z = -0.08", h1: "Host Invariant", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,5 L22,15 L25,10 L60,10" },
+      { id: "KMER-03", mode: "1D-CNN Detection", amp: "AUC 0.505", h1: "Undetectable", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,4 L22,16 L25,10 L60,10" },
     ]
   },
   {
@@ -357,13 +367,23 @@ const CONSOLE_DEMO_QUERIES = [
     step2Name: "reedsolo.decode_rs16_8(received_codeword, t=4)",
     step2Metric: "Berlekamp-Massey solved • 0 uncorrectable",
     response: "Watermark payload successfully recovered with 100% fidelity. Reed-Solomon decoder corrected 3 symbol errors within the t=4 error correction budget. Owner signature: 'ApexBio-2026' verified.",
-    sql: "SELECT run_id, construct, noise_type, errors_corrected, watermark_recovered FROM noise_channel_runs WHERE construct = 'sfGFP'",
-    tableName: "sfgfp_noise_benchmark",
-    totalRows: "239 codons logged",
+    sql: "SELECT locus_id, from_codon, to_codon, amino_acid, wi, rs_symbol FROM sfgfp_stealth_eval",
+    tableName: "sfgfp_stealth_eval",
+    totalRows: "239 codons logged • 32 carrier loci",
+    carrierRows: [
+      { id: "LOC-008", locus: 8, from: "AAA", to: "AAG", aa: "Lys (K)", wi: 0.980, rsHex: "0x91", status: "Stealth Pass", desc: "N-terminal cap codon preserved for initiation" },
+      { id: "LOC-016", locus: 16, from: "GAG", to: "GAA", aa: "Glu (E)", wi: 0.991, rsHex: "0x22", status: "Stealth Pass", desc: "Beta-strand 1 surface residue invariant" },
+      { id: "LOC-032", locus: 32, from: "CTG", to: "CTA", aa: "Leu (L)", wi: 0.966, rsHex: "0x64", status: "Stealth Pass", desc: "Beta-barrel core interior packing residue" },
+      { id: "LOC-048", locus: 48, from: "GTG", to: "GTA", aa: "Val (V)", wi: 0.974, rsHex: "0xC8", status: "Stealth Pass", desc: "Beta-barrel exterior loop residue" },
+      { id: "LOC-065", locus: 65, from: "TCT", to: "TCC", aa: "Ser (S)", wi: 0.985, rsHex: "0x05", status: "Stealth Pass", desc: "Chromophore triad autocatalytic maturation safe" },
+      { id: "LOC-080", locus: 80, from: "GAT", to: "GAC", aa: "Asp (D)", wi: 0.988, rsHex: "0x3D", status: "Stealth Pass", desc: "Stabilizes 11-stranded anti-parallel beta barrel" },
+      { id: "LOC-096", locus: 96, from: "ACC", to: "ACA", aa: "Thr (T)", wi: 0.960, rsHex: "0x6A", status: "Stealth Pass", desc: "Quantum yield invariant; zero emission shift" },
+      { id: "LOC-112", locus: 112, from: "CGT", to: "CGC", aa: "Arg (R)", wi: 0.993, rsHex: "0x9F", status: "Stealth Pass", desc: "Solvent-exposed surface salt bridge contact" },
+    ],
     events: [
-      { id: "ERR-012", mode: "Sub GTT → GTC", amp: "Corrected", h1: "Val (V)", freq: "RS Valid", isCritical: false, wavePath: "M0,10 L15,10 L18,6 L22,14 L25,10 L60,10" },
-      { id: "ERR-024", mode: "Sub GGT → GGC", amp: "Corrected", h1: "Gly (G)", freq: "RS Valid", isCritical: false, wavePath: "M0,10 L15,10 L18,2 L22,18 L25,10 L60,10" },
-      { id: "ERR-038", mode: "Sub ACT → ACC", amp: "Corrected", h1: "Thr (T)", freq: "RS Valid", isCritical: false, wavePath: "M0,10 L15,10 L18,5 L22,15 L25,10 L60,10" },
+      { id: "KMER-01", mode: "Hexamer Freq Dist", amp: "p = 0.97", h1: "Host Invariant", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,6 L22,14 L25,10 L60,10" },
+      { id: "KMER-02", mode: "Codon Pair Bias", amp: "Z = -0.05", h1: "Host Invariant", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,2 L22,18 L25,10 L60,10" },
+      { id: "KMER-03", mode: "1D-CNN Detection", amp: "AUC 0.503", h1: "Undetectable", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,5 L22,15 L25,10 L60,10" },
     ]
   },
   {
@@ -375,9 +395,19 @@ const CONSOLE_DEMO_QUERIES = [
     step2Name: "wgan_refiner.minimize_distribution_distance(iterations=50)",
     step2Metric: "Wasserstein distance = 0.042 • converged",
     response: "Construct matches host wildtype sequence distribution within 99.7% statistical confidence. Biosecurity 1D-CNN classifier scores construct at AUC 0.505 (exact chance level). Watermark is cryptographically invisible.",
-    sql: "SELECT construct_id, host, mmd_score, wgan_loss, stealth_auc FROM biosecurity_evals WHERE gene_name = 'cas9'",
+    sql: "SELECT locus_id, from_codon, to_codon, amino_acid, wi, rs_symbol FROM spcas9_stealth_eval",
     tableName: "spcas9_stealth_eval",
-    totalRows: "1,368 codons logged",
+    totalRows: "1,368 codons logged • 128 carrier loci",
+    carrierRows: [
+      { id: "LOC-010", locus: 10, from: "GAT", to: "GAC", aa: "Asp (D)", wi: 0.985, rsHex: "0x12", status: "Stealth Pass", desc: "Adjacent to D10A RuvC-I endonuclease active center" },
+      { id: "LOC-034", locus: 34, from: "AAA", to: "AAG", aa: "Lys (K)", wi: 0.978, rsHex: "0x54", status: "Stealth Pass", desc: "Maintains bridge helix contact with sgRNA scaffold" },
+      { id: "LOC-076", locus: 76, from: "GAG", to: "GAA", aa: "Glu (E)", wi: 0.989, rsHex: "0x89", status: "Stealth Pass", desc: "REC1 lobe synonymous wobble preserving DNA duplex" },
+      { id: "LOC-115", locus: 115, from: "CTG", to: "CTA", aa: "Leu (L)", wi: 0.968, rsHex: "0xFE", status: "Stealth Pass", desc: "Conserved residue inside Cas9-gRNA RNP core" },
+      { id: "LOC-182", locus: 182, from: "GTG", to: "GTA", aa: "Val (V)", wi: 0.975, rsHex: "0x33", status: "Stealth Pass", desc: "Preserves thermal stability in gRNA seed pocket" },
+      { id: "LOC-245", locus: 245, from: "CGT", to: "CGC", aa: "Arg (R)", wi: 0.992, rsHex: "0x77", status: "Stealth Pass", desc: "Arginine rich bridge helix codon at optimal rate" },
+      { id: "LOC-310", locus: 310, from: "ACC", to: "ACA", aa: "Thr (T)", wi: 0.964, rsHex: "0xAA", status: "Stealth Pass", desc: "Maintains linker flexibility between lobes" },
+      { id: "LOC-840", locus: 840, from: "CAC", to: "CAT", aa: "His (H)", wi: 0.986, rsHex: "0x4B", status: "Stealth Pass", desc: "H840 codon within HNH nuclease cleavage domain" },
+    ],
     events: [
       { id: "KMER-01", mode: "Hexamer Freq Dist", amp: "p = 0.96", h1: "Host Invariant", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,4 L22,16 L25,10 L60,10" },
       { id: "KMER-02", mode: "Codon Pair Bias", amp: "Z = -0.12", h1: "Host Invariant", freq: "Stealth Pass", isCritical: false, wavePath: "M0,10 L15,10 L18,5 L22,15 L25,10 L60,10" },
@@ -448,6 +478,7 @@ export default function HelixSignLandingPage() {
   } | null>(null);
 
   const adaptivenessPoints = useMemo(() => {
+    const t = wganStep * 0.08;
     const carriers: Record<number, { wt: string; st: string }> = {
       2: { wt: "GAG", st: "GAA" },
       6: { wt: "CTG", st: "CTA" },
@@ -460,7 +491,11 @@ export default function HelixSignLandingPage() {
 
     return Array.from({ length: 30 }, (_, i) => {
       const x = 20 + (i / 29) * 500;
-      const wi = 0.90 + 0.08 * Math.sin(i * 0.45) * Math.cos(i * 0.25) + ((i * 3) % 7) * 0.002;
+      // Live harmonic biological adaptiveness wave oscillating strictly above w_min = 0.85
+      const wavePhase = Math.sin(i * 0.38 + t) * Math.cos(i * 0.22 - t * 0.45);
+      const hostEnvelope = 0.93 + 0.045 * wavePhase;
+      const subtleJitter = ((i * 3) % 7) * 0.0025;
+      const wi = Math.max(0.865, Math.min(0.995, hostEnvelope + subtleJitter));
       const y = 95 - ((wi - 0.80) / 0.20) * 75;
       const isCarrier = Boolean(carriers[i]);
       return {
@@ -473,7 +508,7 @@ export default function HelixSignLandingPage() {
         st: carriers[i]?.st || "CTA",
       };
     });
-  }, []);
+  }, [wganStep]);
 
   const adaptivenessPath = useMemo(() => {
     return adaptivenessPoints.map((pt, i) => `${i === 0 ? "M" : "L"} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(" ");
@@ -522,6 +557,7 @@ export default function HelixSignLandingPage() {
   const [consoleQueryIdx, setConsoleQueryIdx] = useState<number>(0);
   const [consoleStage, setConsoleStage] = useState<number>(3);
   const [selectedEventIdx, setSelectedEventIdx] = useState<number>(0);
+  const [inspectorMode, setInspectorMode] = useState<"carriers" | "kmer">("carriers");
   const [isConsolePlaying, setIsConsolePlaying] = useState<boolean>(true);
   const [activeModelDropdown, setActiveModelDropdown] = useState<string>("HelixSign Codec v2.0");
   const [ringBufferPct, setRingBufferPct] = useState<number>(68);
@@ -1718,11 +1754,30 @@ export default function HelixSignLandingPage() {
                   <div className="lg:col-span-6 p-6 bg-[#141419] flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between pb-3 border-b border-[#23232c] text-xs">
-                        <button className="px-3 py-1 rounded-md font-medium bg-[#23232c] text-white font-mono">
-                          carrier_codons
-                        </button>
+                        <div className="flex items-center gap-1.5 p-0.5 rounded-lg bg-[#111116] border border-[#272733] font-mono text-[11px]">
+                          <button
+                            onClick={() => setInspectorMode("carriers")}
+                            className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
+                              inspectorMode === "carriers"
+                                ? "bg-[#252533] text-white font-semibold shadow-sm border border-[#FF5500]/50"
+                                : "text-zinc-400 hover:text-white"
+                            }`}
+                          >
+                            carrier_codons
+                          </button>
+                          <button
+                            onClick={() => setInspectorMode("kmer")}
+                            className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
+                              inspectorMode === "kmer"
+                                ? "bg-[#252533] text-white font-semibold shadow-sm border border-[#FF5500]/50"
+                                : "text-zinc-400 hover:text-white"
+                            }`}
+                          >
+                            kmer_metrics
+                          </button>
+                        </div>
                         <span className="font-mono text-[10px] text-zinc-400">
-                          SYNONYMOUS CODON MAPPING
+                          {inspectorMode === "carriers" ? "SYNONYMOUS CODON MAPPING" : "DISTRIBUTION INVARIANCE"}
                         </span>
                       </div>
 
@@ -1733,59 +1788,107 @@ export default function HelixSignLandingPage() {
 
                       <div className="my-3 p-2.5 rounded-lg border border-[#262630] bg-[#121217] font-mono text-xs overflow-x-auto text-zinc-300">
                         <span className="text-[#FF5500] font-semibold">SELECT</span>{" "}
-                        <span className="text-zinc-300">locus_id, from_codon, to_codon, amino_acid, wi</span>{" "}
+                        <span className="text-zinc-300">locus_id, from_codon, to_codon, amino_acid, wi, rs_symbol</span>{" "}
                         <span className="text-[#FF5500] font-semibold">FROM</span>{" "}
                         <span className="text-zinc-100 font-semibold">{currQuery.tableName}</span>
                       </div>
 
-                      <div className="space-y-1.5">
-                        {currQuery.events.map((ev, idx) => {
-                          const isSelected = selectedEventIdx === idx;
-                          return (
-                            <div
-                              key={idx}
-                              onClick={() => setSelectedEventIdx(idx)}
-                              className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer ${
-                                isSelected
-                                  ? "border-[#FF5500]/70 bg-[#FF5500]/15 shadow-sm scale-[1.01]"
-                                  : "border-[#22222b] bg-[#15151a] hover:border-zinc-700 hover:bg-[#181920]"
-                              }`}
-                            >
-                              <div className="flex items-center gap-2.5">
-                                <div className={`w-7 h-7 rounded-full text-[10px] font-bold flex items-center justify-center font-mono border ${
-                                  isSelected
-                                    ? "bg-[#FF5500] text-white border-[#FF5500]"
-                                    : "bg-zinc-800 border-zinc-700/60 text-zinc-300"
-                                }`}>
-                                  0{idx + 1}
-                                </div>
-                                <div>
-                                  <div className="text-xs font-semibold text-white">
-                                    <span>{ev.id} ({ev.mode})</span>
+                      {inspectorMode === "carriers" ? (
+                        <div className="space-y-1.5 max-h-[260px] overflow-y-auto pr-1">
+                          {(currQuery.carrierRows || []).map((row, idx) => {
+                            const isStreamingActive = (wganStep % (currQuery.carrierRows?.length || 1)) === idx;
+                            const isSelected = selectedEventIdx === idx;
+                            return (
+                              <div
+                                key={row.id}
+                                onClick={() => setSelectedEventIdx(idx)}
+                                className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer ${
+                                  isSelected || isStreamingActive
+                                    ? "border-[#FF5500]/80 bg-[#FF5500]/15 shadow-sm scale-[1.01]"
+                                    : "border-[#22222b] bg-[#15151a] hover:border-zinc-700 hover:bg-[#181920]"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <div className={`w-7 h-7 rounded-full text-[10px] font-bold flex items-center justify-center font-mono border ${
+                                    isSelected || isStreamingActive
+                                      ? "bg-[#FF5500] text-white border-[#FF5500]"
+                                      : "bg-zinc-800 border-zinc-700/60 text-zinc-300"
+                                  }`}>
+                                    0{idx + 1}
                                   </div>
-                                  <div className="text-[11px] text-zinc-400 font-mono mt-0.5">
-                                    {ev.amp} • {ev.h1}
+                                  <div>
+                                    <div className="text-xs font-semibold text-white flex items-center gap-1.5">
+                                      <span>{row.id}</span>
+                                      <span className="text-[#FF5500] font-mono">{row.from} &rarr; {row.to}</span>
+                                      <span className="text-zinc-300 font-normal">({row.aa})</span>
+                                    </div>
+                                    <div className="text-[11px] text-zinc-400 font-mono mt-0.5">
+                                      w_i = {row.wi.toFixed(3)} &bull; GF(2⁸) {row.rsHex} &bull; {row.desc}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
 
-                              <span className={`text-[10px] px-2 py-0.5 rounded font-medium font-mono ${
-                                isSelected
-                                  ? "bg-[#FF5500] text-white font-bold"
-                                  : "bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30"
-                              }`}>
-                                {ev.freq}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
+                                <span className={`text-[10px] px-2 py-0.5 rounded font-medium font-mono shrink-0 ${
+                                  isSelected || isStreamingActive
+                                    ? "bg-[#FF5500] text-white font-bold"
+                                    : "bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30"
+                                }`}>
+                                  {row.status}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {currQuery.events.map((ev, idx) => {
+                            const isSelected = selectedEventIdx === idx;
+                            return (
+                              <div
+                                key={idx}
+                                onClick={() => setSelectedEventIdx(idx)}
+                                className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer ${
+                                  isSelected
+                                    ? "border-[#FF5500]/70 bg-[#FF5500]/15 shadow-sm scale-[1.01]"
+                                    : "border-[#22222b] bg-[#15151a] hover:border-zinc-700 hover:bg-[#181920]"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <div className={`w-7 h-7 rounded-full text-[10px] font-bold flex items-center justify-center font-mono border ${
+                                    isSelected
+                                      ? "bg-[#FF5500] text-white border-[#FF5500]"
+                                      : "bg-zinc-800 border-zinc-700/60 text-zinc-300"
+                                  }`}>
+                                    0{idx + 1}
+                                  </div>
+                                  <div>
+                                    <div className="text-xs font-semibold text-white">
+                                      <span>{ev.id} ({ev.mode})</span>
+                                    </div>
+                                    <div className="text-[11px] text-zinc-400 font-mono mt-0.5">
+                                      {ev.amp} &bull; {ev.h1}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <span className={`text-[10px] px-2 py-0.5 rounded font-medium font-mono ${
+                                  isSelected
+                                    ? "bg-[#FF5500] text-white font-bold"
+                                    : "bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30"
+                                }`}>
+                                  {ev.freq}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     <div className="pt-4 border-t border-[#23232c] flex items-center justify-between text-[11px] text-zinc-500 font-mono">
-                      <span>Showing 3 carrier loci</span>
+                      <span>Showing {currQuery.carrierRows?.length || 8} carrier loci &bull; {currQuery.totalRows}</span>
                       <Link href="/datasets" className="text-zinc-400 hover:text-white transition-colors">
-                        View full catalog in Datasets →
+                        View full catalog in Datasets &rarr;
                       </Link>
                     </div>
                   </div>

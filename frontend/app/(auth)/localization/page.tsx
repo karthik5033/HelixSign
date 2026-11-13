@@ -19,6 +19,7 @@ import { MetricCard } from "@/components/shared/MetricCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
 
 // NCBI Table 11 Codon Codec & Degenerate Bit-Pairs (Rank 1 vs Rank 2 in E. coli K-12)
 interface CodonBitPair {
@@ -430,6 +431,7 @@ export default function CarrierLocusMapping() {
 
         {/* Global Preset Selector & Actions */}
         <div className="flex flex-wrap items-center gap-2.5">
+          <MlPipelineStatusBadge />
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono text-muted-foreground">Construct:</span>
             <select

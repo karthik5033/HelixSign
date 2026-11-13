@@ -550,147 +550,208 @@ export function DnaHelix3DShowcase() {
 
     projectedNodesRef.current = projected;
 
-    // 3. Render Continuous Phosphodiester Backbones (Strand 1 & Strand 2)
-    const drawBackboneRibbon = (isStrand1: boolean) => {
-      ctx.beginPath();
-      for (let i = 0; i < projected.length; i++) {
-        const node = projected[i];
-        const px = isStrand1 ? node.x1 : node.x2;
-        const py = isStrand1 ? node.y1 : node.y2;
-        if (i === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      }
-      ctx.strokeStyle = isStrand1
-        ? "rgba(255, 85, 0, 0.45)" // Brand orange for Carrier Sense Strand
-        : "rgba(148, 163, 184, 0.35)"; // Slate steel for Invariant Antisense Backbone
-      ctx.lineWidth = isStrand1 ? 2.2 : 1.8;
-      ctx.stroke();
-    };
+    // 3. Volumetric 3D Rendering Pipeline (Exact Depth-Sorted Painter's Algorithm)
+    // We break the double helix into discrete 3D render primitives:
+    // - Backbone segments on Sense Strand 1
+    // - Backbone segments on Antisense Strand 2
+    // - Hydrogen bond rungs with base pairing
+    // - Strand 1 and Strand 2 nucleotide atoms
+    // All primitives are sorted along the Z-axis so front elements cleanly occlude rear elements.
 
-    drawBackboneRibbon(false);
-    drawBackboneRibbon(true);
+    type RenderPrimitive =
+      | { type: "backbone"; strand: 1 | 2; xA: number; yA: number; xB: number; yB: number; z: number; isCarrierSegment: boolean }
+      | { type: "rung"; node: ProjectedNode; z: number }
+      | { type: "atom1"; node: ProjectedNode; z: number }
+      | { type: "atom2"; node: ProjectedNode; z: number };
 
-    // 4. Depth-Sort Elements from Back to Front (Painter's Algorithm)
-    const sortedNodes = [...projected].sort((a, b) => a.avgZ - b.avgZ);
+    const primitives: RenderPrimitive[] = [];
 
-    sortedNodes.forEach((node) => {
-      const isCarrier = node.pair.isCarrier;
-      const isSelected = selectedBasePair?.index === node.pair.index;
-      const isHovered = hoveredBasePair?.index === node.pair.index;
+    // Push backbone segments
+    for (let i = 0; i < projected.length - 1; i++) {
+      const curr = projected[i];
+      const next = projected[i + 1];
 
-      // Authentic depth fog factor
-      const depthAlpha = Math.max(0.25, Math.min(1.0, (node.avgZ + HELIX_RADIUS) / (2 * HELIX_RADIUS)));
+      // Sense Strand 1 segment
+      const zStrand1 = (curr.z1 + next.z1) / 2;
+      primitives.push({
+        type: "backbone",
+        strand: 1,
+        xA: curr.x1,
+        yA: curr.y1,
+        xB: next.x1,
+        yB: next.y1,
+        z: zStrand1,
+        isCarrierSegment: curr.pair.isCarrier || next.pair.isCarrier,
+      });
 
-      // Scanning verification pulse wave intensity
-      const scanDist = Math.abs(node.index - scanPos);
-      const cyclicDist = Math.min(scanDist, TOTAL_BASE_PAIRS - scanDist);
-      const pulseIntensity = Math.exp(-Math.pow(cyclicDist / 1.8, 2));
+      // Antisense Strand 2 segment
+      const zStrand2 = (curr.z2 + next.z2) / 2;
+      primitives.push({
+        type: "backbone",
+        strand: 2,
+        xA: curr.x2,
+        yA: curr.y2,
+        xB: next.x2,
+        yB: next.y2,
+        z: zStrand2,
+        isCarrierSegment: false,
+      });
+    }
 
-      // --- Hydrogen Bond Rung ---
-      ctx.beginPath();
-      ctx.moveTo(node.x1, node.y1);
-      ctx.lineTo(node.x2, node.y2);
+    // Push rungs and atoms
+    projected.forEach((node) => {
+      primitives.push({ type: "rung", node, z: node.avgZ });
+      primitives.push({ type: "atom1", node, z: node.z1 });
+      primitives.push({ type: "atom2", node, z: node.z2 });
+    });
 
-      if (isCarrier) {
-        ctx.strokeStyle = isSelected || isHovered
-          ? "#FF5500"
-          : `rgba(255, 115, 20, ${Math.min(1.0, depthAlpha * 0.75 + pulseIntensity * 0.4)})`;
-        ctx.lineWidth = isSelected || isHovered ? 2.8 : 2.0;
-      } else {
-        ctx.strokeStyle = `rgba(148, 163, 184, ${depthAlpha * 0.35 + pulseIntensity * 0.25})`;
-        ctx.lineWidth = 1.1;
-      }
-      ctx.stroke();
+    // Sort all 3D primitives strictly from back (lowest z) to front (highest z)
+    primitives.sort((a, b) => a.z - b.z);
 
-      // Hydrogen Bond Hash Ticks (2 for AT, 3 for GC)
-      const numBonds = node.pair.pairType.includes("G") ? 3 : 2;
-      for (let b = 1; b <= numBonds; b++) {
-        const t = b / (numBonds + 1);
-        const bx = node.x1 + (node.x2 - node.x1) * t;
-        const by = node.y1 + (node.y2 - node.y1) * t;
-        ctx.fillStyle = isCarrier
-          ? `rgba(255, 150, 50, ${depthAlpha * 0.9})`
-          : `rgba(200, 210, 225, ${depthAlpha * 0.6})`;
+    // 4. Render Sorted Primitives with Volumetric Atmospheric Depth Fog
+    primitives.forEach((prim) => {
+      // Atmospheric depth fog factor: 0.18 at back, 1.0 at front
+      const depthAlpha = Math.max(0.18, Math.min(1.0, (prim.z + HELIX_RADIUS * 1.2) / (HELIX_RADIUS * 2.4)));
+
+      if (prim.type === "backbone") {
         ctx.beginPath();
-        ctx.arc(bx, by, 1.2, 0, Math.PI * 2);
-        ctx.fill();
-      }
+        ctx.moveTo(prim.xA, prim.yA);
+        ctx.lineTo(prim.xB, prim.yB);
 
-      // --- Carrier Codon Cryptographic Targeting Seal ---
-      if (isCarrier) {
-        const midX = node.midX;
-        const midY = node.midY;
+        if (prim.strand === 1) {
+          // Sense Strand 1: Luminous brand orange / gold
+          ctx.strokeStyle = prim.isCarrierSegment
+            ? `rgba(255, 85, 0, ${Math.min(1.0, depthAlpha * 0.95)})`
+            : `rgba(255, 110, 30, ${Math.min(1.0, depthAlpha * 0.65)})`;
+          ctx.lineWidth = Math.max(1.5, 2.6 * depthAlpha);
+        } else {
+          // Antisense Strand 2: Invariant slate steel
+          ctx.strokeStyle = `rgba(148, 163, 184, ${Math.min(0.9, depthAlpha * 0.55)})`;
+          ctx.lineWidth = Math.max(1.2, 2.0 * depthAlpha);
+        }
+        ctx.stroke();
+      } else if (prim.type === "rung") {
+        const node = prim.node;
+        const isCarrier = node.pair.isCarrier;
+        const isSelected = selectedBasePair?.index === node.pair.index;
+        const isHovered = hoveredBasePair?.index === node.pair.index;
 
-        // Radiating verification shockwave when scanning pulse strikes
-        if (pulseIntensity > 0.05) {
-          const waveRadius = 6 + pulseIntensity * 14;
+        // Scanning verification pulse wave intensity
+        const scanDist = Math.abs(node.index - scanPos);
+        const cyclicDist = Math.min(scanDist, TOTAL_BASE_PAIRS - scanDist);
+        const pulseIntensity = Math.exp(-Math.pow(cyclicDist / 1.8, 2));
+
+        ctx.beginPath();
+        ctx.moveTo(node.x1, node.y1);
+        ctx.lineTo(node.x2, node.y2);
+
+        if (isCarrier) {
+          ctx.strokeStyle = isSelected || isHovered
+            ? "#FF5500"
+            : `rgba(255, 120, 20, ${Math.min(1.0, depthAlpha * 0.85 + pulseIntensity * 0.5)})`;
+          ctx.lineWidth = isSelected || isHovered ? 2.8 : Math.max(1.6, 2.2 * depthAlpha);
+        } else {
+          ctx.strokeStyle = `rgba(148, 163, 184, ${depthAlpha * 0.35 + pulseIntensity * 0.25})`;
+          ctx.lineWidth = Math.max(0.9, 1.3 * depthAlpha);
+        }
+        ctx.stroke();
+
+        // Hydrogen Bond Hash Ticks (2 for AT, 3 for GC)
+        const numBonds = node.pair.pairType.includes("G") ? 3 : 2;
+        for (let b = 1; b <= numBonds; b++) {
+          const t = b / (numBonds + 1);
+          const bx = node.x1 + (node.x2 - node.x1) * t;
+          const by = node.y1 + (node.y2 - node.y1) * t;
+          ctx.fillStyle = isCarrier
+            ? `rgba(255, 150, 50, ${depthAlpha * 0.95})`
+            : `rgba(200, 210, 225, ${depthAlpha * 0.65})`;
           ctx.beginPath();
-          ctx.arc(midX, midY, waveRadius, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(255, 85, 0, ${pulseIntensity * 0.6 * depthAlpha})`;
-          ctx.lineWidth = 1.2;
-          ctx.stroke();
+          ctx.arc(bx, by, Math.max(1.0, 1.4 * depthAlpha), 0, Math.PI * 2);
+          ctx.fill();
         }
 
-        // Outer Reticle Ring
+        // Carrier Codon Reticle Halo when selected or pulsing
+        if (isCarrier) {
+          const midX = node.midX;
+          const midY = node.midY;
+
+          if (pulseIntensity > 0.05) {
+            const waveRadius = 6 + pulseIntensity * 16;
+            ctx.beginPath();
+            ctx.arc(midX, midY, waveRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 85, 0, ${pulseIntensity * 0.7 * depthAlpha})`;
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+          }
+
+          ctx.beginPath();
+          ctx.arc(midX, midY, isSelected ? 8.5 : 6.0, 0, Math.PI * 2);
+          ctx.strokeStyle = isSelected
+            ? "#FF5500"
+            : `rgba(255, 120, 30, ${Math.min(1.0, depthAlpha * 0.85 + pulseIntensity * 0.3)})`;
+          ctx.lineWidth = isSelected ? 1.6 : 1.0;
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.arc(midX, midY, isSelected ? 3.5 : 2.2, 0, Math.PI * 2);
+          ctx.fillStyle = isSelected ? "#FFFFFF" : `rgba(255, 85, 0, ${depthAlpha * 0.95})`;
+          ctx.fill();
+        }
+
+        if (isSelected || isHovered) {
+          ctx.strokeStyle = "#FF5500";
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(node.midX, node.midY, 13, 0, Math.PI * 2);
+          ctx.setLineDash([4, 4]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      } else if (prim.type === "atom1") {
+        // Strand 1 Atom (Sense Strand / Carrier Track)
+        const node = prim.node;
+        const isCarrier = node.pair.isCarrier;
+        const isSelected = selectedBasePair?.index === node.pair.index;
+        const atomRadius1 = Math.max(2.8, 5.0 * node.scale1);
+
         ctx.beginPath();
-        ctx.arc(midX, midY, isSelected ? 8.5 : 6.5, 0, Math.PI * 2);
-        ctx.strokeStyle = isSelected
-          ? "#FF5500"
-          : `rgba(255, 120, 30, ${Math.min(1.0, depthAlpha * 0.85 + pulseIntensity * 0.3)})`;
-        ctx.lineWidth = isSelected ? 1.6 : 1.0;
+        ctx.arc(node.x1, node.y1, atomRadius1, 0, Math.PI * 2);
+        ctx.fillStyle = isCarrier
+          ? isSelected
+            ? "#FF5500"
+            : `rgba(255, 95, 15, ${depthAlpha * 0.95})`
+          : `rgba(220, 85, 15, ${depthAlpha * 0.85})`;
+        ctx.fill();
+        ctx.strokeStyle = "rgba(16, 17, 22, 0.9)";
+        ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Inner Solid Nucleus
+        // Specular highlight on front-facing atoms
+        if (node.z1 < 0) {
+          ctx.beginPath();
+          ctx.arc(node.x1 - atomRadius1 * 0.3, node.y1 - atomRadius1 * 0.3, atomRadius1 * 0.35, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+          ctx.fill();
+        }
+      } else if (prim.type === "atom2") {
+        // Strand 2 Atom (Antisense Strand / Invariant Backbone)
+        const node = prim.node;
+        const atomRadius2 = Math.max(2.5, 4.4 * node.scale2);
+
         ctx.beginPath();
-        ctx.arc(midX, midY, isSelected ? 3.5 : 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = isSelected ? "#FFFFFF" : `rgba(255, 85, 0, ${depthAlpha * 0.95})`;
+        ctx.arc(node.x2, node.y2, atomRadius2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(148, 163, 184, ${depthAlpha * 0.85})`;
         ctx.fill();
-      }
-
-      // --- Strand 1 Atom (Sense Strand / Carrier Track) ---
-      const atomRadius1 = Math.max(3.0, 4.8 * node.scale1);
-      ctx.beginPath();
-      ctx.arc(node.x1, node.y1, atomRadius1, 0, Math.PI * 2);
-      ctx.fillStyle = isCarrier
-        ? isSelected
-          ? "#FF5500"
-          : `rgba(255, 95, 15, ${depthAlpha * 0.95})`
-        : `rgba(215, 80, 10, ${depthAlpha * 0.8})`;
-      ctx.fill();
-      ctx.strokeStyle = "rgba(16, 17, 22, 0.9)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      // Specular highlight on front atoms
-      if (node.z1 < 0) {
-        ctx.beginPath();
-        ctx.arc(node.x1 - atomRadius1 * 0.3, node.y1 - atomRadius1 * 0.3, atomRadius1 * 0.35, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-        ctx.fill();
-      }
-
-      // --- Strand 2 Atom (Antisense Strand / Invariant Backbone) ---
-      const atomRadius2 = Math.max(2.8, 4.4 * node.scale2);
-      ctx.beginPath();
-      ctx.arc(node.x2, node.y2, atomRadius2, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(148, 163, 184, ${depthAlpha * 0.85})`;
-      ctx.fill();
-      ctx.strokeStyle = "rgba(16, 17, 22, 0.9)";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      // --- Interactive Selection Halo Reticle ---
-      if (isSelected || isHovered) {
-        ctx.strokeStyle = "#FF5500";
-        ctx.lineWidth = 1.2;
-        const reticleR = 12;
-
-        // Corner brackets around rung midpoint
-        ctx.beginPath();
-        ctx.arc(node.midX, node.midY, reticleR, 0, Math.PI * 2);
-        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = "rgba(16, 17, 22, 0.9)";
+        ctx.lineWidth = 1;
         ctx.stroke();
-        ctx.setLineDash([]);
+
+        if (node.z2 < 0) {
+          ctx.beginPath();
+          ctx.arc(node.x2 - atomRadius2 * 0.3, node.y2 - atomRadius2 * 0.3, atomRadius2 * 0.35, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+          ctx.fill();
+        }
       }
     });
 

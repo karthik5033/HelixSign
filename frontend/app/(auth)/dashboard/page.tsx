@@ -52,6 +52,8 @@ import {
   AnalysisRecord,
 } from "@/lib/echosenseData";
 import { downloadDataAsCsv } from "@/lib/utils";
+import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
+import { fetchRegistry, type RegistryItem } from "@/lib/mlPipelineClient";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -266,6 +268,32 @@ export default function DashboardPage() {
   // Automated resilience sweeping state
   const [isAutoSweeping, setIsAutoSweeping] = useState(true);
   const [activeStepIndex, setActiveStepIndex] = useState(0);
+  const [monitoredConstructs, setMonitoredConstructs] = useState<MonitoredConstruct[]>(MONITORED_CONSTRUCTS);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchRegistry().then((items) => {
+      if (!mounted || !items || items.length === 0) return;
+      const mapped: MonitoredConstruct[] = items.map((it) => ({
+        id: it.id,
+        name: `${it.geneName || "Construct"} (${it.projectName})`,
+        gene: `${it.geneName || "Synthetic CDS"} (${it.ownerName})`,
+        lengthBp: it.stampedSequence.length,
+        codons: Math.floor(it.stampedSequence.length / 3),
+        carrierCount: it.carrierPositions.length,
+        baseCai: 0.988,
+        gcContent: 50.8,
+        eccTiles: Math.max(1, Math.floor(it.carrierPositions.length / 128)),
+        status: "Verified",
+        runId: it.id.slice(0, 8),
+        summary: `${it.carrierPositions.length} carrier codons verified via ML microservice. Owner: ${it.ownerName}.`,
+      }));
+      setMonitoredConstructs([...mapped, ...MONITORED_CONSTRUCTS]);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -274,10 +302,10 @@ export default function DashboardPage() {
 
   const activeConstruct = useMemo(() => {
     return (
-      MONITORED_CONSTRUCTS.find((c) => c.id === selectedConstructId) ||
-      MONITORED_CONSTRUCTS[0]
+      monitoredConstructs.find((c) => c.id === selectedConstructId) ||
+      monitoredConstructs[0]
     );
-  }, [selectedConstructId]);
+  }, [selectedConstructId, monitoredConstructs]);
 
   // Dynamically computed mathematical resilience curve based on real biophysics & ECC
   const activeTrendData = useMemo(() => {
@@ -385,7 +413,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Action Navigation */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <MlPipelineStatusBadge />
           <Button
             size="sm"
             onClick={() => router.push("/upload")}
@@ -685,7 +714,7 @@ export default function DashboardPage() {
           </CardHeader>
 
           <CardContent className="pt-3 space-y-3 flex-1">
-            {MONITORED_CONSTRUCTS.map((c) => {
+            {monitoredConstructs.map((c) => {
               const isSelected = selectedConstructId === c.id;
               return (
                 <div

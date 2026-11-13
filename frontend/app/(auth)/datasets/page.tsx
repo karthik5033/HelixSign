@@ -31,6 +31,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
 import { DATASETS_LIBRARY, AeDatasetItem } from "@/lib/echosenseData";
 import { downloadDataAsCsv } from "@/lib/utils";
 
@@ -310,10 +311,13 @@ export default function DatasetsPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Database className="h-6 w-6 text-primary" />
-            Genomic CDS Datasets Library
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <Database className="h-6 w-6 text-primary" />
+              Genomic CDS Datasets Library
+            </h1>
+            <MlPipelineStatusBadge />
+          </div>
           <p className="text-xs text-muted-foreground mt-0.5">
             Annotated bacterial reference strains, synthetic BioBrick expression cassettes, and eukaryotic model open reading frames
           </p>

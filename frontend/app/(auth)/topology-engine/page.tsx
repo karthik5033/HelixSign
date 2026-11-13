@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MetricCard } from "@/components/shared/MetricCard";
+import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
 import { downloadDataAsCsv } from "@/lib/utils";
 
 type TabKey = "filtration" | "landscapes" | "stability" | "recurrence" | "manifold";
@@ -522,10 +523,13 @@ export default function TopologyEnginePage() {
       {/* HEADER SECTION WITH CONSTRUCT SELECTOR */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-5">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Cpu className="h-6 w-6 text-[#FF5500]" />
-            Codon Manifold &amp; Realism Engine
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <Cpu className="h-6 w-6 text-[#FF5500]" />
+              Codon Manifold &amp; Realism Engine
+            </h1>
+            <MlPipelineStatusBadge />
+          </div>
           <p className="text-xs text-muted-foreground mt-1 max-w-3xl">
             Synonymous codon equivalence fibers, Vietoris-Rips simplicial filtration, WGAN-GP latent manifold projection, and k-mer distribution invariance.
           </p>

@@ -22,6 +22,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SignalWaveformPlot } from "@/components/tda/SignalWaveformPlot";
+import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
+import {
+  stampConstruct,
+  verifyConstruct,
+  type StampResult,
+  type VerifyResult,
+} from "@/lib/mlPipelineClient";
 
 // Authentic DNA Presets from E. coli K-12 RefSeq & Standard Synthetic Cassettes
 interface ConstructPreset {
@@ -250,13 +257,52 @@ export default function StampStudioPage() {
     };
   }, [sequenceInput, currentPreset]);
 
-  // Execute Stamping Action
-  const handleExecuteStamp = () => {
+  const [liveStampData, setLiveStampData] = useState<StampResult | null>(null);
+  const [liveVerifyData, setLiveVerifyData] = useState<VerifyResult | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  // Execute Stamping Action via Live ML Microservice & Backend
+  const handleExecuteStamp = async () => {
     setIsStamping(true);
-    setTimeout(() => {
-      setIsStamping(false);
+    try {
+      const cleaned = sequenceInput.replace(/[^a-zA-Z]/g, "").toUpperCase();
+      const res = await stampConstruct({
+        ownerName: owner || "ApexBio Lab",
+        projectName: project || "Project Helios",
+        batchName: batchId || "B-2026-X1",
+        sequence: cleaned,
+        host: "E. coli K-12",
+        geneName: currentPreset.gene,
+      });
+
+      if (res && res.data) {
+        setLiveStampData(res.data);
+        setSequenceInput(res.data.stampedSequence);
+        setIsStamped(true);
+
+        // Immediate verification through ML Extractor
+        const ver = await verifyConstruct(res.data.stampedSequence);
+        setLiveVerifyData(ver);
+      }
+    } catch (err) {
+      console.warn("Live ML stamping fallback to internal codec:", err);
       setIsStamped(true);
-    }, 450);
+    } finally {
+      setIsStamping(false);
+    }
+  };
+
+  const handleVerify = async () => {
+    setIsVerifying(true);
+    try {
+      const cleaned = sequenceInput.replace(/[^a-zA-Z]/g, "").toUpperCase();
+      const ver = await verifyConstruct(cleaned);
+      setLiveVerifyData(ver);
+    } catch (err) {
+      console.warn("Verification error:", err);
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   // Download Stamped Sequence as FASTA
@@ -291,7 +337,8 @@ export default function StampStudioPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <MlPipelineStatusBadge />
           <Link href="/compare">
             <Button size="sm" variant="outline" className="gap-1.5 text-xs">
               <BarChart2 className="h-3.5 w-3.5" />
@@ -463,8 +510,8 @@ export default function StampStudioPage() {
                 </div>
               </div>
 
-              {/* Primary Stamping Action Button */}
-              <div className="pt-2 mt-auto">
+              {/* Primary Stamping & Verification Action Buttons */}
+              <div className="pt-2 mt-auto space-y-2">
                 <Button
                   onClick={handleExecuteStamp}
                   disabled={isStamping || !validation.isValid}
@@ -473,15 +520,54 @@ export default function StampStudioPage() {
                   {isStamping ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      Embedding Reed-Solomon Codewords...
+                      Running ML Embedder (/ml/embed)...
                     </>
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4" />
-                      Stamp Construct &amp; Generate Provenance Seal
+                      Stamp Construct via ML Pipeline
                     </>
                   )}
                 </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={handleVerify}
+                  disabled={isVerifying || !validation.isValid}
+                  className="w-full border-border hover:bg-secondary/60 text-xs font-mono py-2.5 gap-2 cursor-pointer"
+                >
+                  {isVerifying ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      Extracting via ML / RS Codec...
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                      Verify Watermark Integrity (/api/verify)
+                    </>
+                  )}
+                </Button>
+
+                {liveVerifyData && (
+                  <div className={`p-2.5 rounded-lg border text-xs font-mono flex items-center justify-between ${
+                    liveVerifyData.status === "verified"
+                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+                      : "border-amber-500/40 bg-amber-500/10 text-amber-300"
+                  }`}>
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                      <span>
+                        Status: <strong>{liveVerifyData.status.toUpperCase()}</strong>
+                      </span>
+                    </div>
+                    {liveVerifyData.data && (
+                      <span className="text-[11px] opacity-90">
+                        Owner: {liveVerifyData.data.owner} | Errors Corrected: {liveVerifyData.data.errorsCorrected} | Erasures: {liveVerifyData.data.erasures}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

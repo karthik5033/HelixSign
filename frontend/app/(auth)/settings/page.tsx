@@ -31,6 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
 import { useAuth } from "@/lib/AuthContext";
 
 type SettingsTab = "crypto" | "pipeline" | "notifications" | "profile";
@@ -343,10 +344,13 @@ export default function SettingsPage() {
           <span>/</span>
           <span className="text-primary font-bold">Cryptographic &amp; Bio Settings</span>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5 mt-1">
-          <Sliders className="h-6 w-6 text-primary" />
-          Cryptographic &amp; Bio-Constraint Settings
-        </h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+            <Sliders className="h-6 w-6 text-primary" />
+            Cryptographic &amp; Bio-Constraint Settings
+          </h1>
+          <MlPipelineStatusBadge />
+        </div>
         <p className="text-xs text-muted-foreground mt-0.5 max-w-3xl">
           Calibrate HKDF-keyed carrier codon permutations, host organism translation tables, Reed-Solomon RS(16,8) parity budgets, and biosecurity screening webhooks.
         </p>

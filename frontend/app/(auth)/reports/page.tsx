@@ -21,6 +21,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
 import {
   Table,
   TableBody,
@@ -73,10 +74,13 @@ export default function AssessmentReportsPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <FileText className="h-6 w-6 text-primary" />
-            Provenance Certificates &amp; Forensic Audit Reports
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <FileText className="h-6 w-6 text-primary" />
+              Provenance Certificates &amp; Forensic Audit Reports
+            </h1>
+            <MlPipelineStatusBadge />
+          </div>
           <p className="text-xs text-muted-foreground mt-0.5">
             Cryptographic ownership attestations, Reed-Solomon verification logs, and sequence integrity signatures
           </p>

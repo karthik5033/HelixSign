@@ -26,6 +26,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MlPipelineStatusBadge } from "@/components/shared/MlPipelineStatusBadge";
 import {
   Table,
   TableBody,
@@ -114,10 +115,13 @@ export default function AnalysisPage() {
       {/* Header with Run Selector */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-3 border-b border-border/60">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Activity className="h-6 w-6 text-[#FF5500]" />
-            Steganographic Pipeline Explorer
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <Activity className="h-6 w-6 text-[#FF5500]" />
+              Steganographic Pipeline Explorer
+            </h1>
+            <MlPipelineStatusBadge />
+          </div>
           <p className="text-xs text-muted-foreground mt-0.5">
             Stage-by-stage cryptographic steganography, host codon adaptation, and function-invariant verification
           </p>
