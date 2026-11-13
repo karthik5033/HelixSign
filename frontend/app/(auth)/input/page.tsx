@@ -404,12 +404,12 @@ export default function InputStudioPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold">
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-semibold">
               Primary Ingestion Studio
             </span>
             <span className="text-xs font-mono text-muted-foreground">ISO/IEC 27001 Provenance Codec</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2">
             <Dna className="h-6 w-6 text-primary" />
             Sequence &amp; Construct Input Studio
           </h1>
@@ -451,7 +451,7 @@ export default function InputStudioPage() {
               onClick={() => handleSelectPreset(preset)}
               className={`px-3 py-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer flex items-center gap-2 ${
                 selectedPresetId === preset.id
-                  ? "bg-primary text-white border-primary shadow-sm font-semibold"
+                  ? "bg-primary text-primary-foreground border-primary font-semibold"
                   : "bg-muted/30 border-border hover:bg-muted/70 text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -470,11 +470,11 @@ export default function InputStudioPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column (6 Cols): Input & Parameters */}
         <div className="lg:col-span-6 space-y-5">
-          <Card className="border border-border bg-card shadow-sm">
+          <Card className="border border-border bg-card ">
             <CardHeader className="pb-3 border-b border-border/50">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <CardTitle className="text-base font-bold flex items-center gap-2">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
                     <FileText className="h-4 w-4 text-primary" />
                     Target Coding Sequence (CDS) Input
                   </CardTitle>
@@ -597,7 +597,7 @@ export default function InputStudioPage() {
                   }}
                   rows={9}
                   placeholder="ATGACCATGATTACGGATTCACTGGCCGTCGTTTTACAACGTCGT..."
-                  className={`w-full font-mono text-xs leading-relaxed p-3.5 rounded-xl border bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none resize-y tracking-wider text-foreground placeholder:text-muted-foreground/50 transition-colors ${
+                  className={`w-full font-mono text-xs leading-relaxed p-3.5 rounded-xl border bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none resize-y text-foreground placeholder:text-muted-foreground/50 transition-colors ${
                     isDragging ? "border-primary ring-2 ring-primary/40 bg-primary/5" : "border-border"
                   }`}
                 />
@@ -616,7 +616,7 @@ export default function InputStudioPage() {
                     ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                     : "border-amber-500/30 bg-amber-500/10 text-amber-400"
                 }`}>
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Reading Frame</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground">Reading Frame</span>
                   <span className="font-semibold mt-0.5">{validation.isMod3 ? "In-Frame (% 3 = 0)" : "Frame Shift"}</span>
                 </div>
 
@@ -625,19 +625,19 @@ export default function InputStudioPage() {
                     ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                     : "border-rose-500/30 bg-rose-500/10 text-rose-400"
                 }`}>
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Alphabet</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground">Alphabet</span>
                   <span className="font-semibold mt-0.5">{validation.isCleanAlphabet ? "Valid ACGT" : "Invalid Bases"}</span>
                 </div>
 
                 <div className="p-2.5 rounded-lg border border-border/80 bg-muted/20 text-xs font-mono flex flex-col justify-between">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Capacity</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground">Capacity</span>
                   <span className="font-semibold text-foreground mt-0.5">
                     {validation.capacityBits} bits avail
                   </span>
                 </div>
 
                 <div className="p-2.5 rounded-lg border border-border/80 bg-muted/20 text-xs font-mono flex flex-col justify-between">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground">Homopolymer</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground">Homopolymer</span>
                   <span className={`font-semibold mt-0.5 ${validation.homopolymer <= 4 ? "text-foreground" : "text-amber-400"}`}>
                     {validation.homopolymer} bp
                   </span>
@@ -648,7 +648,7 @@ export default function InputStudioPage() {
               <div className="space-y-1.5 p-3 rounded-xl border border-border/60 bg-muted/10">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="text-muted-foreground">Reed-Solomon RS(16,8) Capacity:</span>
-                  <span className="font-bold text-foreground">
+                  <span className="font-semibold text-foreground">
                     {validation.payloadBits} bits required / {validation.capacityBits} bits avail
                   </span>
                 </div>
@@ -746,12 +746,12 @@ export default function InputStudioPage() {
                 <Button
                   onClick={handleExecuteStamp}
                   disabled={isStamping || !validation.isValid}
-                  className="w-full bg-[#FF5500] hover:bg-[#e04b00] text-white font-semibold py-3 gap-2 cursor-pointer shadow-md text-sm transition-all"
+                  className="w-full bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] font-medium py-3 gap-2 cursor-pointer text-sm transition-colors"
                 >
                   {isStamping ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      Executing Neural Embedder (/ml/embed) &amp; WGAN-GP Critic...
+                      Embedding watermark...
                     </>
                   ) : (
                     <>
@@ -809,15 +809,15 @@ export default function InputStudioPage() {
 
         {/* Right Column (6 Cols): Dynamic Stamping Results & Mutation Inspector */}
         <div className="lg:col-span-6 space-y-5">
-          <Card className="border border-border bg-card shadow-sm flex flex-col">
+          <Card className="border border-border bg-card flex flex-col">
             <CardHeader className="pb-3 border-b border-border/50">
               <div className="flex items-center justify-between gap-2">
-                <CardTitle className="text-base font-bold flex items-center gap-2">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
                   Live Stamping Ledger &amp; Carrier Track
                 </CardTitle>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold">
+                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-semibold">
                     {allMutations.length} Carrier Loci
                   </span>
                 </div>
@@ -830,25 +830,26 @@ export default function InputStudioPage() {
             <CardContent className="pt-4 space-y-4">
               {!liveStampData ? (
                 <div className="py-16 px-6 text-center border border-dashed border-border/80 rounded-xl bg-muted/10 space-y-4">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary ">
                     <Sparkles className="w-7 h-7 text-primary" />
                   </div>
                   <div className="space-y-1.5 max-w-md mx-auto">
-                    <h3 className="text-base font-bold text-foreground">Awaiting Construct Stamping</h3>
+                    <h3 className="text-base font-semibold text-foreground">Awaiting Construct Stamping</h3>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Enter or paste your synthetic CDS on the left and click <strong className="text-foreground">&quot;Stamp Construct via ML Pipeline&quot;</strong>. The neural stego-embedder will allocate synonymous carrier codons, enforce biophysical constraints, and run WGAN-GP biosecurity detection.
+                      Enter or paste your synthetic CDS on the left and click <strong className="text-foreground">&quot;Stamp Construct via ML Pipeline&quot;</strong>. The embedder will allocate synonymous carrier codons, enforce biophysical constraints, and check biosecurity stealth.
                     </p>
                   </div>
                   <div className="pt-2">
                     <Button
+                      variant="outline"
                       onClick={handleExecuteStamp}
                       disabled={isStamping || !validation.isValid}
-                      className="bg-[#FF5500] hover:bg-[#e04b00] text-white font-semibold text-xs gap-2 h-9 px-4 shadow-sm cursor-pointer"
+                      className="text-xs gap-2 h-9 px-4 cursor-pointer"
                     >
                       {isStamping ? (
                         <>
                           <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                          Executing Neural Embedder...
+                          Embedding...
                         </>
                       ) : (
                         <>
@@ -864,7 +865,7 @@ export default function InputStudioPage() {
                   {/* Live Stamp Banner */}
                   <div className="p-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-xs font-mono text-emerald-300 space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold flex items-center gap-1.5 text-emerald-400">
+                      <span className="font-semibold flex items-center gap-1.5 text-emerald-400">
                         <CheckCircle2 className="w-4 h-4" />
                         Construct Stamped via ML Embedder
                       </span>
@@ -882,7 +883,7 @@ export default function InputStudioPage() {
               {liveStealthData && (
                 <div className="p-3 rounded-xl border border-primary/30 bg-primary/5 text-xs font-mono space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-foreground flex items-center gap-1.5">
+                    <span className="font-semibold text-foreground flex items-center gap-1.5">
                       <BarChart2 className="w-3.5 h-3.5 text-primary" />
                       Live ML Biosecurity Screening
                     </span>
@@ -917,7 +918,7 @@ export default function InputStudioPage() {
                   <button
                     onClick={() => setViewMode("diff")}
                     className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
-                      viewMode === "diff" ? "bg-background text-foreground font-semibold shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      viewMode === "diff" ? "bg-background text-foreground font-semibold " : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     Mutated Loci Track
@@ -925,7 +926,7 @@ export default function InputStudioPage() {
                   <button
                     onClick={() => setViewMode("stamped")}
                     className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
-                      viewMode === "stamped" ? "bg-background text-foreground font-semibold shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      viewMode === "stamped" ? "bg-background text-foreground font-semibold " : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     Stamped CDS
@@ -933,7 +934,7 @@ export default function InputStudioPage() {
                   <button
                     onClick={() => setViewMode("wildtype")}
                     className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
-                      viewMode === "wildtype" ? "bg-background text-foreground font-semibold shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      viewMode === "wildtype" ? "bg-background text-foreground font-semibold " : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     Wildtype CDS
@@ -969,7 +970,7 @@ export default function InputStudioPage() {
                         onClick={() => setFilterAminoAcid("ALL")}
                         className={`px-2 py-0.5 rounded border cursor-pointer ${
                           filterAminoAcid === "ALL"
-                            ? "bg-primary text-white border-primary"
+                            ? "bg-primary text-primary-foreground border-primary"
                             : "bg-muted/40 border-border text-muted-foreground hover:text-foreground"
                         }`}
                       >
@@ -981,7 +982,7 @@ export default function InputStudioPage() {
                           onClick={() => setFilterAminoAcid(aa)}
                           className={`px-1.5 py-0.5 rounded border cursor-pointer ${
                             filterAminoAcid === aa
-                              ? "bg-primary text-white border-primary"
+                              ? "bg-primary text-primary-foreground border-primary"
                               : "bg-muted/40 border-border text-muted-foreground hover:text-foreground"
                           }`}
                         >
@@ -1008,7 +1009,7 @@ export default function InputStudioPage() {
                             onMouseLeave={() => setActiveDiffCodon(null)}
                             className={`p-3 rounded-xl border transition-all font-mono cursor-pointer relative overflow-hidden ${
                               isHovered
-                                ? "border-primary bg-primary/10 shadow-md scale-102"
+                                ? "border-primary bg-primary/10 scale-102"
                                 : "border-border/80 bg-muted/20 hover:border-zinc-500"
                             }`}
                           >
@@ -1016,16 +1017,16 @@ export default function InputStudioPage() {
                               <span className={`font-semibold ${isHovered ? "text-primary" : "text-foreground"}`}>
                                 Locus #{mut.codonIndex}
                               </span>
-                              <span className="px-1.5 py-0.5 rounded bg-muted border border-border text-xs font-bold text-foreground">
+                              <span className="px-1.5 py-0.5 rounded bg-muted border border-border text-xs font-semibold text-foreground">
                                 {mut.aminoAcid}
                               </span>
                             </div>
-                            <div className="flex items-center justify-between py-1 text-sm font-bold">
+                            <div className="flex items-center justify-between py-1 text-sm font-semibold">
                               <span className="text-muted-foreground line-through text-xs font-mono">
                                 {mut.fromCodon}
                               </span>
-                              <span className="text-primary text-sm font-bold px-1">&rarr;</span>
-                              <span className="text-foreground bg-primary/20 border border-primary/40 px-2 py-0.5 rounded text-xs font-bold font-mono tracking-wider">
+                              <span className="text-primary text-sm font-semibold px-1">&rarr;</span>
+                              <span className="text-foreground bg-primary/20 border border-primary/40 px-2 py-0.5 rounded text-xs font-semibold font-mono ">
                                 {mut.toCodon}
                               </span>
                             </div>
@@ -1067,7 +1068,7 @@ export default function InputStudioPage() {
               {/* View 2 & 3: Sequence Text Display */}
               {viewMode !== "diff" && (
                 <div className="space-y-2">
-                  <div className="p-3 rounded-xl border border-border bg-background font-mono text-xs leading-relaxed max-h-80 overflow-y-auto break-all tracking-wider text-foreground">
+                  <div className="p-3 rounded-xl border border-border bg-background font-mono text-xs leading-relaxed max-h-80 overflow-y-auto break-all text-foreground">
                     {viewMode === "stamped" ? sequenceInput : originalWildtype}
                   </div>
                   <div className="flex items-center justify-between text-xs font-mono text-muted-foreground">
@@ -1104,7 +1105,7 @@ export default function InputStudioPage() {
                   <Button
                     size="sm"
                     onClick={handleDownloadFasta}
-                    className="bg-[#FF5500] hover:bg-[#e04b00] text-white text-xs gap-1.5 font-semibold h-9 px-3.5 cursor-pointer shadow-sm"
+                    className="bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] text-xs gap-1.5 font-semibold h-9 px-3.5 cursor-pointer "
                   >
                     <Download className="w-4 h-4" />
                     Download FASTA

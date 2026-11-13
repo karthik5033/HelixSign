@@ -156,12 +156,9 @@ export function AppLogo({
             >
               {name}
             </span>
-            <span className="text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded bg-[#FF5500]/15 text-[#FF5500] border border-[#FF5500]/30 uppercase tracking-wider">
-              DNA STAMP
-            </span>
           </div>
-          <span className="text-[10px] font-mono tracking-wider text-zinc-400 uppercase mt-0.5">
-            DNA PROVENANCE
+          <span className="text-[10px] font-mono text-zinc-500 mt-0.5">
+            DNA provenance
           </span>
         </div>
       )}

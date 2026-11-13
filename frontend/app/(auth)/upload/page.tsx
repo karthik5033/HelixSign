@@ -306,7 +306,7 @@ export default function StampStudioPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2">
             <Dna className="h-6 w-6 text-primary" />
             Construct Ingestion &amp; Stamp Studio
           </h1>
@@ -344,7 +344,7 @@ export default function StampStudioPage() {
             onClick={() => handleSelectPreset(preset)}
             className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer border ${
               selectedPresetId === preset.id
-                ? "bg-primary text-primary-foreground border-primary font-bold shadow-sm"
+                ? "bg-primary text-primary-foreground border-primary font-semibold "
                 : "bg-secondary/60 hover:bg-secondary text-muted-foreground hover:text-foreground border-border"
             }`}
           >
@@ -364,7 +364,7 @@ export default function StampStudioPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* Left Column (6 Cols): Target CDS Ingestion & Credentials */}
         <div className="lg:col-span-6 flex flex-col">
-          <Card className="border border-border bg-card shadow-sm flex flex-col flex-1">
+          <Card className="border border-border bg-card flex flex-col flex-1">
             <CardHeader className="pb-3 border-b border-border/50">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
@@ -476,7 +476,7 @@ export default function StampStudioPage() {
                 </div>
                 <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
                   <div
-                    className="h-full bg-[#FF5500] rounded-full transition-all duration-300"
+                    className="h-full bg-[#C97A45] rounded-full transition-all duration-300"
                     style={{
                       width: `${Math.min(100, (validation.payloadBits / Math.max(1, validation.capacityBits)) * 100)}%`,
                     }}
@@ -493,7 +493,7 @@ export default function StampStudioPage() {
                 <Button
                   onClick={handleExecuteStamp}
                   disabled={isStamping || !validation.isValid}
-                  className="w-full bg-[#FF5500] hover:bg-[#E54B00] text-white text-sm font-semibold py-3 gap-2 cursor-pointer shadow-md"
+                  className="w-full bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] text-sm font-semibold py-3 gap-2 cursor-pointer "
                 >
                   {isStamping ? (
                     <>
@@ -553,14 +553,14 @@ export default function StampStudioPage() {
 
         {/* Right Column (6 Cols): Carrier Codon Allocation Ledger */}
         <div className="lg:col-span-6 flex flex-col">
-          <Card className="border border-border bg-card shadow-sm flex flex-col flex-1">
+          <Card className="border border-border bg-card flex flex-col flex-1">
             <CardHeader className="pb-3 border-b border-border/50">
               <div className="flex items-center justify-between gap-2">
-                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
                   Carrier Codon Allocation Ledger
                 </CardTitle>
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#1E1E28] border border-[#2E2E3E] text-zinc-300 font-semibold">
+                <span className="text-xs font-mono px-2 py-0.5 rounded bg-card border border-[#2E2E3E] text-zinc-300 font-semibold">
                   Table 11 Codec
                 </span>
               </div>
@@ -571,8 +571,8 @@ export default function StampStudioPage() {
             <CardContent className="pt-5 space-y-4 flex flex-col flex-1">
               {/* Biophysical Health Metrics Bar (Strictly Dynamically Computed from Sequence) */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
-                <div className="p-3 rounded-xl border border-border/70 bg-[#141419] transition-all hover:border-zinc-500">
-                  <span className="text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider block">
+                <div className="p-3 rounded-xl border border-border/70 bg-card transition-all hover:border-zinc-500">
+                  <span className="text-xs font-mono font-medium text-zinc-400 block">
                     Peptide Match
                   </span>
                   <span className={`text-base sm:text-lg font-extrabold font-mono block mt-1 ${
@@ -584,8 +584,8 @@ export default function StampStudioPage() {
                     {biophysicalMetrics.alterations === 0 ? "0 alterations" : `${biophysicalMetrics.alterations} mutation(s)`}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl border border-border/70 bg-[#141419] transition-all hover:border-zinc-500">
-                  <span className="text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider block">
+                <div className="p-3 rounded-xl border border-border/70 bg-card transition-all hover:border-zinc-500">
+                  <span className="text-xs font-mono font-medium text-zinc-400 block">
                     GC Drift
                   </span>
                   <span className="text-base sm:text-lg font-extrabold font-mono text-white block mt-1">
@@ -595,19 +595,19 @@ export default function StampStudioPage() {
                     &Delta;GC: {biophysicalMetrics.gcDelta >= 0 ? "+" : ""}{biophysicalMetrics.gcDelta.toFixed(1)}% (Safe)
                   </span>
                 </div>
-                <div className="p-3 rounded-xl border border-border/70 bg-[#141419] transition-all hover:border-zinc-500">
-                  <span className="text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider block">
+                <div className="p-3 rounded-xl border border-border/70 bg-card transition-all hover:border-zinc-500">
+                  <span className="text-xs font-mono font-medium text-zinc-400 block">
                     Host CAI Score
                   </span>
-                  <span className="text-base sm:text-lg font-extrabold font-mono text-[#FF5500] block mt-1">
+                  <span className="text-base sm:text-lg font-extrabold font-mono text-[#C97A45] block mt-1">
                     {biophysicalMetrics.caiScore.toFixed(3)}
                   </span>
                   <span className="text-xs font-mono text-zinc-400 block mt-0.5">
                     {biophysicalMetrics.caiScore >= 0.95 ? "Optimal Translation" : "Viable Translation"}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl border border-border/70 bg-[#141419] transition-all hover:border-zinc-500">
-                  <span className="text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider block">
+                <div className="p-3 rounded-xl border border-border/70 bg-card transition-all hover:border-zinc-500">
+                  <span className="text-xs font-mono font-medium text-zinc-400 block">
                     Max Homopolymer
                   </span>
                   <span className={`text-base sm:text-lg font-extrabold font-mono block mt-1 ${
@@ -627,19 +627,19 @@ export default function StampStudioPage() {
                   <span className="font-semibold text-white flex items-center gap-1.5">
                     Synonymous Carrier Codon Track:
                   </span>
-                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-semibold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary " />
                     {isStampedState && displayMutations.length > 0 ? `${displayMutations.length} Carrier Codons Verified` : "Awaiting Stamping"}
                   </span>
                 </div>
 
                 {!isStampedState || displayMutations.length === 0 ? (
-                  <div className="py-12 px-6 text-center border border-dashed border-border/80 rounded-xl bg-[#14141A] space-y-3">
+                  <div className="py-12 px-6 text-center border border-dashed border-border/80 rounded-xl bg-card space-y-3">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto text-primary">
                       <Sparkles className="w-6 h-6" />
                     </div>
                     <div className="space-y-1 max-w-sm mx-auto">
-                      <h3 className="text-sm font-bold text-white">Awaiting Construct Stamping</h3>
+                      <h3 className="text-sm font-semibold text-white">Awaiting Construct Stamping</h3>
                       <p className="text-xs text-zinc-400">
                         Click <strong className="text-white">&quot;Stamp Construct via ML Pipeline&quot;</strong> on the left to allocate synonymous carrier codons, enforce biophysical neutrality, and evaluate stealth.
                       </p>
@@ -670,27 +670,27 @@ export default function StampStudioPage() {
                             onMouseLeave={() => setActiveDiffCodon(null)}
                             className={`p-3 rounded-xl border transition-all font-mono cursor-pointer relative overflow-hidden ${
                               isHovered
-                                ? "border-[#FF5500] bg-[#FF5500]/20 shadow-[0_0_12px_rgba(255,85,0,0.25)] scale-102"
+                                ? "border-[#C97A45] bg-[#C97A45]/20 scale-102"
                                 : isPulse
-                                ? "border-[#FF5500]/70 bg-[#FF5500]/10 shadow-[0_0_8px_rgba(255,85,0,0.15)]"
-                                : "border-border/80 bg-[#15151c] hover:border-zinc-500"
+                                ? "border-[#C97A45]/70 bg-[#C97A45]/10"
+                                : "border-border/80 bg-card hover:border-zinc-500"
                             }`}
                           >
                             {isPulse && (
-                              <div className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-ping m-1.5" />
+                              <div className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-[#C97A45] m-1.5" />
                             )}
                             <div className="flex items-center justify-between text-xs text-zinc-300 mb-1.5">
-                              <span className={`font-semibold ${isHovered || isPulse ? "text-[#FF5500]" : "text-zinc-300"}`}>
+                              <span className={`font-semibold ${isHovered || isPulse ? "text-[#C97A45]" : "text-zinc-300"}`}>
                                 Locus #{mut.codonIndex}
                               </span>
-                              <span className="px-1.5 py-0.5 rounded bg-[#20202C] border border-[#303042] text-xs font-bold text-white">
+                              <span className="px-1.5 py-0.5 rounded bg-card border border-[#303042] text-xs font-semibold text-white">
                                 {mut.aminoAcid}
                               </span>
                             </div>
-                            <div className="flex items-center justify-between py-1 text-sm font-bold">
+                            <div className="flex items-center justify-between py-1 text-sm font-semibold">
                               <span className="text-zinc-400 line-through text-xs font-mono">{mut.fromCodon}</span>
-                              <span className="text-primary text-sm font-bold px-1">&rarr;</span>
-                              <span className="text-white bg-[#FF5500]/25 border border-[#FF5500]/40 px-2 py-0.5 rounded text-xs font-bold font-mono tracking-wider">
+                              <span className="text-primary text-sm font-semibold px-1">&rarr;</span>
+                              <span className="text-[#1a1614] bg-[#C97A45]/25 border border-[#C97A45]/40 px-2 py-0.5 rounded text-xs font-semibold font-mono ">
                                 {mut.toCodon}
                               </span>
                             </div>
@@ -727,7 +727,7 @@ export default function StampStudioPage() {
               </div>
 
               {/* Biological Invariance Guarantee Banner */}
-              <div className="p-3.5 rounded-xl border border-border/80 bg-[#14141A] space-y-1.5">
+              <div className="p-3.5 rounded-xl border border-border/80 bg-card space-y-1.5">
                 <div className="flex items-center gap-2 text-white font-semibold text-sm">
                   <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
                   <span>Translationally Silent Provenance Seal Guaranteed</span>
@@ -753,7 +753,7 @@ export default function StampStudioPage() {
                   <Button
                     size="sm"
                     onClick={handleDownloadFasta}
-                    className="bg-[#FF5500] hover:bg-[#E54B00] text-white text-xs sm:text-sm gap-1.5 font-semibold h-9 px-4 cursor-pointer shadow-sm"
+                    className="bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] text-xs sm:text-sm gap-1.5 font-semibold h-9 px-4 cursor-pointer "
                   >
                     <Download className="w-4 h-4" />
                     Download Stamped FASTA

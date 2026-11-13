@@ -323,7 +323,7 @@ export default function TopologyEnginePage() {
     points.forEach((p) => {
       ctx.beginPath();
       ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
-      ctx.fillStyle = "#FF5500";
+      ctx.fillStyle = "#C97A45";
       ctx.fill();
       ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 1.2;
@@ -377,7 +377,7 @@ export default function TopologyEnginePage() {
         if (diff <= recurrenceEps) {
           recCount++;
           const isDiag = Math.abs(i - j) <= 1;
-          ctx.fillStyle = isDiag ? "#FF5500" : "rgba(6, 182, 212, 0.85)";
+          ctx.fillStyle = isDiag ? "#C97A45" : "rgba(6, 182, 212, 0.85)";
           ctx.fillRect(i * cellW, (N - 1 - j) * cellH, cellW - 0.5, cellH - 0.5);
         } else {
           ctx.fillStyle = "rgba(22, 22, 27, 0.7)";
@@ -478,7 +478,7 @@ export default function TopologyEnginePage() {
       if (pt.cluster === "wildtype") ctx.fillStyle = "#94a3b8";
       else if (pt.cluster === "stamped") ctx.fillStyle = "#06b6d4";
       else if (pt.cluster === "naive") ctx.fillStyle = "#f59e0b";
-      else ctx.fillStyle = "#FF5500";
+      else ctx.fillStyle = "#C97A45";
       ctx.fill();
       ctx.strokeStyle = "#16161b";
       ctx.lineWidth = 1.2;
@@ -527,8 +527,8 @@ export default function TopologyEnginePage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-5">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-                <Cpu className="h-6 w-6 text-[#FF5500]" />
+              <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2">
+                <Cpu className="h-6 w-6 text-[#C97A45]" />
                 Codon Manifold &amp; Realism Engine
               </h1>
               <MlPipelineStatusBadge />
@@ -553,8 +553,8 @@ export default function TopologyEnginePage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-5">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              <Cpu className="h-6 w-6 text-[#FF5500]" />
+            <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2">
+              <Cpu className="h-6 w-6 text-[#C97A45]" />
               Codon Manifold &amp; Realism Engine
             </h1>
             <MlPipelineStatusBadge />
@@ -601,7 +601,7 @@ export default function TopologyEnginePage() {
           subtext={`Neighborhood: ${(epsilon * 125).toFixed(0)} px metric radius`}
           change={`${simplexCount.t} Triads`}
           isPositive={true}
-          icon={<Sliders className="h-4 w-4 text-[#FF5500]" />}
+          icon={<Sliders className="h-4 w-4 text-[#C97A45]" />}
         />
         <MetricCard
           title="Homology Invariant β₁"
@@ -635,7 +635,7 @@ export default function TopologyEnginePage() {
           onClick={() => setActiveTab("filtration")}
           className={`pb-2.5 transition-all flex items-center gap-2 cursor-pointer font-medium ${
             activeTab === "filtration"
-              ? "border-b-2 border-primary text-foreground font-bold"
+              ? "border-b-2 border-primary text-foreground font-semibold"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -647,7 +647,7 @@ export default function TopologyEnginePage() {
           onClick={() => setActiveTab("landscapes")}
           className={`pb-2.5 transition-all flex items-center gap-2 cursor-pointer font-medium ${
             activeTab === "landscapes"
-              ? "border-b-2 border-primary text-foreground font-bold"
+              ? "border-b-2 border-primary text-foreground font-semibold"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -659,7 +659,7 @@ export default function TopologyEnginePage() {
           onClick={() => setActiveTab("stability")}
           className={`pb-2.5 transition-all flex items-center gap-2 cursor-pointer font-medium ${
             activeTab === "stability"
-              ? "border-b-2 border-primary text-foreground font-bold"
+              ? "border-b-2 border-primary text-foreground font-semibold"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -671,7 +671,7 @@ export default function TopologyEnginePage() {
           onClick={() => setActiveTab("recurrence")}
           className={`pb-2.5 transition-all flex items-center gap-2 cursor-pointer font-medium ${
             activeTab === "recurrence"
-              ? "border-b-2 border-primary text-foreground font-bold"
+              ? "border-b-2 border-primary text-foreground font-semibold"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -683,7 +683,7 @@ export default function TopologyEnginePage() {
           onClick={() => setActiveTab("manifold")}
           className={`pb-2.5 transition-all flex items-center gap-2 cursor-pointer font-medium ${
             activeTab === "manifold"
-              ? "border-b-2 border-primary text-foreground font-bold"
+              ? "border-b-2 border-primary text-foreground font-semibold"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -730,32 +730,32 @@ export default function TopologyEnginePage() {
             <CardContent className="space-y-4">
               {/* TOP HUD TELEMETRY BAR */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
-                <div className="p-2.5 rounded-lg border border-border bg-[#14141c]">
+                <div className="p-2.5 rounded-lg border border-border bg-card">
                   <span className="text-[10px] text-muted-foreground block">0-SIMPLICES (VERTICES)</span>
-                  <span className="text-sm font-bold text-foreground mt-0.5 block">{simplexCount.v} Codon Loci</span>
+                  <span className="text-sm font-semibold text-foreground mt-0.5 block">{simplexCount.v} Codon Loci</span>
                 </div>
-                <div className="p-2.5 rounded-lg border border-border bg-[#14141c]">
+                <div className="p-2.5 rounded-lg border border-border bg-card">
                   <span className="text-[10px] text-muted-foreground block">1-SIMPLICES (EDGES)</span>
-                  <span className="text-sm font-bold text-primary mt-0.5 block">{simplexCount.e} Transitions</span>
+                  <span className="text-sm font-semibold text-primary mt-0.5 block">{simplexCount.e} Transitions</span>
                 </div>
-                <div className="p-2.5 rounded-lg border border-border bg-[#14141c]">
+                <div className="p-2.5 rounded-lg border border-border bg-card">
                   <span className="text-[10px] text-muted-foreground block">2-SIMPLICES (FACES)</span>
-                  <span className="text-sm font-bold text-[#FF5500] mt-0.5 block">{simplexCount.t} Triads</span>
+                  <span className="text-sm font-semibold text-[#C97A45] mt-0.5 block">{simplexCount.t} Triads</span>
                 </div>
-                <div className="p-2.5 rounded-lg border border-border bg-[#14141c]">
+                <div className="p-2.5 rounded-lg border border-border bg-card">
                   <span className="text-[10px] text-muted-foreground block">EULER CHAR. (χ = V - E + F)</span>
-                  <span className="text-sm font-bold text-foreground mt-0.5 block">{simplexCount.chi}</span>
+                  <span className="text-sm font-semibold text-foreground mt-0.5 block">{simplexCount.chi}</span>
                 </div>
               </div>
 
               {/* CANVAS VIEWPORT */}
-              <div className="relative border border-border/80 rounded-xl bg-[#111116] overflow-hidden flex flex-col items-center p-3">
+              <div className="relative border border-border/80 rounded-xl bg-card overflow-hidden flex flex-col items-center p-3">
                 <canvas ref={filtrationCanvasRef} width={560} height={360} className="w-full max-w-[560px] h-[360px]" />
 
                 {/* Persistent Cycle Indicator Banner */}
                 {simplexCount.b1 > 0 && (
-                  <div className="mt-2 w-full py-1.5 px-3 rounded-lg bg-[#FF5500]/10 border border-[#FF5500]/30 flex items-center justify-between text-xs font-mono text-[#FF5500]">
-                    <span className="flex items-center gap-1.5 font-bold">
+                  <div className="mt-2 w-full py-1.5 px-3 rounded-lg bg-[#C97A45]/10 border border-[#C97A45]/30 flex items-center justify-between text-xs font-mono text-[#C97A45]">
+                    <span className="flex items-center gap-1.5 font-semibold">
                       <GitBranch className="w-3.5 h-3.5" />
                       Persistent Degeneracy Fiber Active (H₁ Invariant Loops = {simplexCount.b1})
                     </span>
@@ -767,10 +767,10 @@ export default function TopologyEnginePage() {
               </div>
 
               {/* FILTRATION CONTROLS */}
-              <div className="p-3.5 rounded-lg border border-border/60 bg-[#14141c] space-y-3">
+              <div className="p-3.5 rounded-lg border border-border/60 bg-card space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="text-muted-foreground">Codon Scale Parameter (ε):</span>
-                  <span className="font-bold text-[#FF5500]">ε = {epsilon.toFixed(2)} / 1.20</span>
+                  <span className="font-semibold text-[#C97A45]">ε = {epsilon.toFixed(2)} / 1.20</span>
                 </div>
                 <input
                   type="range"
@@ -779,7 +779,7 @@ export default function TopologyEnginePage() {
                   step="0.01"
                   value={epsilon}
                   onChange={(e) => setEpsilon(parseFloat(e.target.value))}
-                  className="w-full accent-[#FF5500] cursor-pointer"
+                  className="w-full accent-[#C97A45] cursor-pointer"
                 />
                 <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
                   <span>ε = 0.05 (Isolated codons)</span>
@@ -801,9 +801,9 @@ export default function TopologyEnginePage() {
               </CardHeader>
               <CardContent className="space-y-3 text-xs text-muted-foreground leading-relaxed">
                 <p>
-                  Let <span className="font-mono text-foreground font-semibold">C ⊂ ℝ⁶⁴</span> represent the synonymous codon manifold where degenerate codons map to identical amino acid residues via the genetic code fiber projection <span className="font-mono text-primary font-bold">π: C &rarr; A</span>. The Vietoris-Rips complex at scale <span className="font-mono text-primary font-bold">ε</span> is defined as:
+                  Let <span className="font-mono text-foreground font-semibold">C ⊂ ℝ⁶⁴</span> represent the synonymous codon manifold where degenerate codons map to identical amino acid residues via the genetic code fiber projection <span className="font-mono text-primary font-semibold">π: C &rarr; A</span>. The Vietoris-Rips complex at scale <span className="font-mono text-primary font-semibold">ε</span> is defined as:
                 </p>
-                <div className="p-2.5 rounded-md bg-[#111116] border border-border/80 font-mono text-[11px] text-foreground text-center">
+                <div className="p-2.5 rounded-md bg-card border border-border/80 font-mono text-[11px] text-foreground text-center">
                   {"VR(C, ε) = { σ ⊆ C | ∀ u, v ∈ σ, ||u - v|| ≤ ε }"}
                 </div>
                 <p>
@@ -812,21 +812,21 @@ export default function TopologyEnginePage() {
                 <div className="border-t border-border/60 pt-3 space-y-2 font-mono text-[11px]">
                   <div className="flex justify-between">
                     <span>β₀(ε) [Codon Clusters / Components]:</span>
-                    <span className="text-foreground font-bold">{simplexCount.b0}</span>
+                    <span className="text-foreground font-semibold">{simplexCount.b0}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>β₁(ε) [Synonymous Loops / 1-Cycles]:</span>
-                    <span className="text-[#FF5500] font-bold">{simplexCount.b1}</span>
+                    <span className="text-[#C97A45] font-semibold">{simplexCount.b1}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Codon Degeneracy Ratio (β₁/β₀):</span>
-                    <span className="text-primary font-bold">
+                    <span className="text-primary font-semibold">
                       {(simplexCount.b1 / Math.max(1, simplexCount.b0)).toFixed(3)}
                     </span>
                   </div>
                   <div className="flex justify-between border-t border-border/40 pt-1.5 text-zinc-300">
                     <span>Euler-Poincaré Identity:</span>
-                    <span className="text-foreground font-bold">χ ≡ β₀ - β₁ = {simplexCount.b0 - simplexCount.b1}</span>
+                    <span className="text-foreground font-semibold">χ ≡ β₀ - β₁ = {simplexCount.b0 - simplexCount.b1}</span>
                   </div>
                 </div>
               </CardContent>
@@ -842,7 +842,7 @@ export default function TopologyEnginePage() {
               <CardContent className="space-y-2 text-xs">
                 <div className="flex items-center justify-between text-muted-foreground font-mono text-[11px]">
                   <span>Engine:</span>
-                  <span className="text-foreground font-bold">Biopython SeqIO + Ripser v1.4</span>
+                  <span className="text-foreground font-semibold">Biopython SeqIO + Ripser v1.4</span>
                 </div>
                 <div className="flex items-center justify-between text-muted-foreground font-mono text-[11px]">
                   <span>Sequence Translation:</span>
@@ -850,13 +850,13 @@ export default function TopologyEnginePage() {
                 </div>
                 <div className="flex items-center justify-between text-muted-foreground font-mono text-[11px]">
                   <span>Manifold Latency:</span>
-                  <span className="text-foreground font-bold">
+                  <span className="text-foreground font-semibold">
                     {(currentPreset.codons * 0.0082).toFixed(1)} ms / {currentPreset.codons.toLocaleString()} codons
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-muted-foreground font-mono text-[11px]">
                   <span>ECC Codeword Scheme:</span>
-                  <span className="text-foreground font-bold">Reed-Solomon RS(16,8)</span>
+                  <span className="text-foreground font-semibold">Reed-Solomon RS(16,8)</span>
                 </div>
               </CardContent>
             </Card>
@@ -878,12 +878,12 @@ export default function TopologyEnginePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
-              <div className="p-4 rounded-xl border border-border/80 bg-[#111116] space-y-2">
+              <div className="p-4 rounded-xl border border-border/80 bg-card space-y-2">
                 <div className="flex items-center justify-between text-xs font-mono text-muted-foreground pb-1 border-b border-border/40">
                   <span>Persistence Landscape Function λₖ(t)</span>
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1.5 text-[#FF5500]">
-                      <span className="w-2.5 h-0.5 bg-[#FF5500] inline-block" /> λ₁ (k=3 Tri-nucleotide)
+                    <span className="flex items-center gap-1.5 text-[#C97A45]">
+                      <span className="w-2.5 h-0.5 bg-[#C97A45] inline-block" /> λ₁ (k=3 Tri-nucleotide)
                     </span>
                     <span className="flex items-center gap-1.5 text-zinc-400">
                       <span className="w-2.5 h-0.5 bg-zinc-400 inline-block" /> λ₂ (k=4 Tetra-nucleotide)
@@ -906,11 +906,11 @@ export default function TopologyEnginePage() {
                     <text x="470" y="185" fill="#777" fontSize="10" fontFamily="monospace">0.8 t</text>
                     <text x="15" y="30" fill="#777" fontSize="10" fontFamily="monospace">λ(t)</text>
 
-                    {/* Layer 1 (Orange #FF5500) */}
+                    {/* Layer 1 (Orange #C97A45) */}
                     <path
                       d="M 40 170 L 110 170 L 180 80 L 250 170 L 290 170 L 350 50 L 410 170 L 480 170"
                       fill="none"
-                      stroke="#FF5500"
+                      stroke="#C97A45"
                       strokeWidth="2.5"
                     />
                     <polygon
@@ -935,8 +935,8 @@ export default function TopologyEnginePage() {
                       strokeDasharray="4 2"
                     />
 
-                    <circle cx="350" cy="50" r="4" fill="#FF5500" />
-                    <text x="360" y="48" fill="#FF5500" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                    <circle cx="350" cy="50" r="4" fill="#C97A45" />
+                    <text x="360" y="48" fill="#C97A45" fontSize="10" fontFamily="monospace" fontWeight="bold">
                       Host Codon Mode (λ₁_max = 0.612)
                     </text>
                   </svg>
@@ -966,22 +966,22 @@ export default function TopologyEnginePage() {
               <CardDescription className="text-xs">Extracted inputs for biosecurity ML classification</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 font-mono text-xs">
-              <div className="p-2.5 rounded-lg bg-[#111116] border border-border/70 space-y-1">
+              <div className="p-2.5 rounded-lg bg-card border border-border/70 space-y-1">
                 <div className="flex justify-between text-muted-foreground">
                   <span>||λ₁||₁ (L₁-Norm k=3):</span>
-                  <span className="text-foreground font-bold">3.842</span>
+                  <span className="text-foreground font-semibold">3.842</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>||λ₁||₂ (L₂-Norm k=3):</span>
-                  <span className="text-[#FF5500] font-bold">1.492</span>
+                  <span className="text-[#C97A45] font-semibold">1.492</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>||λ₂||₁ (L₁-Norm k=4):</span>
-                  <span className="text-foreground font-bold">1.218</span>
+                  <span className="text-foreground font-semibold">1.218</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>||λ₂||₂ (L₂-Norm k=4):</span>
-                  <span className="text-[#06b6d4] font-bold">0.684</span>
+                  <span className="text-[#06b6d4] font-semibold">0.684</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>||λ₃||₂ (L₂-Norm k=5):</span>
@@ -990,8 +990,8 @@ export default function TopologyEnginePage() {
               </div>
 
               <div className="p-3 rounded-lg border border-border/80 bg-secondary/30 space-y-1.5 text-muted-foreground text-[11px]">
-                <div className="font-bold text-foreground">Topological Feature Vector Dimension:</div>
-                <div className="text-xs font-mono text-primary font-bold">dim(Φ) = 32 k-mer features</div>
+                <div className="font-semibold text-foreground">Topological Feature Vector Dimension:</div>
+                <div className="text-xs font-mono text-primary font-semibold">dim(Φ) = 32 k-mer features</div>
                 <p>Fed synchronously to XGBoost and 1D CNN biosecurity screening models.</p>
               </div>
             </CardContent>
@@ -1013,10 +1013,10 @@ export default function TopologyEnginePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
-              <div className="p-4 rounded-xl border border-border/80 bg-[#14141c] space-y-3">
+              <div className="p-4 rounded-xl border border-border/80 bg-card space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="text-muted-foreground">Injected Biological Mutation Rate (Substitutions &amp; Indels):</span>
-                  <span className="font-bold text-foreground">Error Rate = {mutationRate.toFixed(1)}%</span>
+                  <span className="font-semibold text-foreground">Error Rate = {mutationRate.toFixed(1)}%</span>
                 </div>
                 <input
                   type="range"
@@ -1025,7 +1025,7 @@ export default function TopologyEnginePage() {
                   step="0.1"
                   value={mutationRate}
                   onChange={(e) => handleMutationRateChange(parseFloat(e.target.value))}
-                  className="w-full accent-[#FF5500] cursor-pointer"
+                  className="w-full accent-[#C97A45] cursor-pointer"
                 />
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground font-mono">
                   <span>0.1% (High-fidelity synthesis / Illumina)</span>
@@ -1035,9 +1035,9 @@ export default function TopologyEnginePage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl border border-border/80 bg-[#111116] space-y-2">
+                <div className="p-4 rounded-xl border border-border/80 bg-card space-y-2">
                   <div className="text-xs font-mono text-muted-foreground">Bottleneck Distance d_B(D_native, D_stamped)</div>
-                  <div className="text-2xl font-bold font-mono text-foreground">{bottleneckDist}</div>
+                  <div className="text-2xl font-semibold font-mono text-foreground">{bottleneckDist}</div>
                   <div className="text-[11px] text-muted-foreground">
                     Theoretical bound: <span className="font-mono text-foreground">d_B ≤ ||f - g||_∞</span>
                   </div>
@@ -1046,9 +1046,9 @@ export default function TopologyEnginePage() {
                   </Badge>
                 </div>
 
-                <div className="p-4 rounded-xl border border-border/80 bg-[#111116] space-y-2">
+                <div className="p-4 rounded-xl border border-border/80 bg-card space-y-2">
                   <div className="text-xs font-mono text-muted-foreground">1-Wasserstein Distance W₁(P_native, P_stamped)</div>
-                  <div className="text-2xl font-bold font-mono text-foreground">{wassersteinDist}</div>
+                  <div className="text-2xl font-semibold font-mono text-foreground">{wassersteinDist}</div>
                   <div className="text-[11px] text-muted-foreground">
                     Optimal transport matching: <span className="font-mono text-foreground">inf_γ (Σ ||x - γ(x)||²)¹/²</span>
                   </div>
@@ -1059,8 +1059,8 @@ export default function TopologyEnginePage() {
               </div>
 
               <div className="p-3.5 rounded-lg border border-border/60 bg-secondary/20 text-xs text-muted-foreground leading-relaxed">
-                <span className="font-bold text-foreground">Robustness Guarantee: </span>
-                Even under harsh mutation noise, synonymous carrier codons with persistence <span className="font-mono text-primary font-bold">(death - birth) &gt; 2·d_B</span> remain topologically recoverable, preventing watermark loss from PCR amplification and sequencing errors.
+                <span className="font-semibold text-foreground">Robustness Guarantee: </span>
+                Even under harsh mutation noise, synonymous carrier codons with persistence <span className="font-mono text-primary font-semibold">(death - birth) &gt; 2·d_B</span> remain topologically recoverable, preventing watermark loss from PCR amplification and sequencing errors.
               </div>
             </CardContent>
           </Card>
@@ -1076,7 +1076,7 @@ export default function TopologyEnginePage() {
               <p>
                 By Cohen-Steiner, Edelsbrunner, &amp; Harer (2007) and the Kantorovich-Rubinstein theorem, for any two tame Lipschitz distributions <span className="font-mono text-foreground">P_r, P_g</span> on codon metric space:
               </p>
-              <div className="p-2.5 rounded-md bg-[#111116] border border-border/80 font-mono text-[11px] text-foreground text-center">
+              <div className="p-2.5 rounded-md bg-card border border-border/80 font-mono text-[11px] text-foreground text-center">
                 {"W₁(P_r, P_g) = sup_{||f||_L ≤ 1} E[f(x)] - E[f(y)]"}
               </div>
               <p>
@@ -1103,14 +1103,14 @@ export default function TopologyEnginePage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="relative border border-border/80 rounded-xl bg-[#111116] overflow-hidden flex justify-center p-2">
+              <div className="relative border border-border/80 rounded-xl bg-card overflow-hidden flex justify-center p-2">
                 <canvas ref={recurrenceCanvasRef} width={380} height={380} className="w-[380px] h-[380px] rounded-lg" />
               </div>
 
-              <div className="p-3.5 rounded-lg border border-border/60 bg-[#14141c] space-y-3">
+              <div className="p-3.5 rounded-lg border border-border/60 bg-card space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono">
                   <span className="text-muted-foreground">Recurrence Radius ε:</span>
-                  <span className="font-bold text-primary">ε = {recurrenceEps.toFixed(2)}</span>
+                  <span className="font-semibold text-primary">ε = {recurrenceEps.toFixed(2)}</span>
                 </div>
                 <input
                   type="range"
@@ -1119,7 +1119,7 @@ export default function TopologyEnginePage() {
                   step="0.02"
                   value={recurrenceEps}
                   onChange={(e) => setRecurrenceEps(parseFloat(e.target.value))}
-                  className="w-full accent-[#FF5500] cursor-pointer"
+                  className="w-full accent-[#C97A45] cursor-pointer"
                 />
               </div>
             </CardContent>
@@ -1134,40 +1134,40 @@ export default function TopologyEnginePage() {
               <CardDescription className="text-xs">Nonlinear codon sequence distribution</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 font-mono text-xs">
-              <div className="p-2.5 rounded-lg bg-[#111116] border border-border/70 space-y-1.5">
+              <div className="p-2.5 rounded-lg bg-card border border-border/70 space-y-1.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Determinism (DET):</span>
-                  <span className="text-foreground font-bold">{rqaDet}%</span>
+                  <span className="text-foreground font-semibold">{rqaDet}%</span>
                 </div>
                 <div className="text-[10px] text-muted-foreground font-sans">
                   Percentage of recurrence points forming diagonal motifs (host elongation bias concordance)
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-[#111116] border border-border/70 space-y-1.5">
+              <div className="p-2.5 rounded-lg bg-card border border-border/70 space-y-1.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Laminarity (LAM):</span>
-                  <span className="text-foreground font-bold">{rqaLam}%</span>
+                  <span className="text-foreground font-semibold">{rqaLam}%</span>
                 </div>
                 <div className="text-[10px] text-muted-foreground font-sans">
                   Absence of repetitive homopolymer stretches (&le; 4 bp constraint)
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-[#111116] border border-border/70 space-y-1.5">
+              <div className="p-2.5 rounded-lg bg-card border border-border/70 space-y-1.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Trapping Time (TT):</span>
-                  <span className="text-foreground font-bold">3.4 codons</span>
+                  <span className="text-foreground font-semibold">3.4 codons</span>
                 </div>
                 <div className="text-[10px] text-muted-foreground font-sans">
                   Mean run length in synonymous substitution state
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-[#111116] border border-border/70 space-y-1.5">
+              <div className="p-2.5 rounded-lg bg-card border border-border/70 space-y-1.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Max Codon Divergence (λ_max):</span>
-                  <span className="text-[#FF5500] font-bold">+0.384</span>
+                  <span className="text-[#C97A45] font-semibold">+0.384</span>
                 </div>
                 <div className="text-[10px] text-muted-foreground font-sans">
                   Uniform distribution of carrier loci across transcript length
@@ -1206,25 +1206,25 @@ export default function TopologyEnginePage() {
               </select>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="relative border border-border/80 rounded-xl bg-[#111116] overflow-hidden flex justify-center p-2">
+              <div className="relative border border-border/80 rounded-xl bg-card overflow-hidden flex justify-center p-2">
                 <canvas ref={manifoldCanvasRef} width={480} height={320} className="w-full max-w-[500px] h-[320px]" />
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
-                <div className="p-2 rounded-lg bg-[#16161b] border border-border/60 flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-card border border-border/60 flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#94a3b8]" />
                   <span className="text-muted-foreground">Wildtype Host CDS</span>
                 </div>
-                <div className="p-2 rounded-lg bg-[#16161b] border border-border/60 flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-card border border-border/60 flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#06b6d4]" />
                   <span className="text-muted-foreground">HelixSign Stamped</span>
                 </div>
-                <div className="p-2 rounded-lg bg-[#16161b] border border-border/60 flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-card border border-border/60 flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]" />
                   <span className="text-muted-foreground">Naive Tagged</span>
                 </div>
-                <div className="p-2 rounded-lg bg-[#16161b] border border-border/60 flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#FF5500]" />
+                <div className="p-2 rounded-lg bg-card border border-border/60 flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#C97A45]" />
                   <span className="text-muted-foreground">Exogenous Barcode</span>
                 </div>
               </div>
@@ -1234,15 +1234,15 @@ export default function TopologyEnginePage() {
           <Card className="border-border bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[#FF5500]" />
+                <Sparkles className="h-4 w-4 text-[#C97A45]" />
                 Construct Genomic Signature
               </CardTitle>
               <CardDescription className="text-xs">Inspected point in latent manifold</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 font-mono text-xs">
-              <div className="p-2.5 rounded-lg bg-[#111116] border border-border/70 space-y-1">
+              <div className="p-2.5 rounded-lg bg-card border border-border/70 space-y-1">
                 <div className="text-muted-foreground text-[10px]">CONSTRUCT ID</div>
-                <div className="text-sm font-bold text-foreground">HS-8921-lacZ</div>
+                <div className="text-sm font-semibold text-foreground">HS-8921-lacZ</div>
                 <Badge variant="outline" className="text-[10px] font-mono border-primary/40 text-primary bg-primary/10 mt-1">
                   HelixSign Synonymous Manifold
                 </Badge>
@@ -1255,20 +1255,20 @@ export default function TopologyEnginePage() {
                 </div>
                 <div className="flex justify-between">
                   <span>Degeneracy Loops:</span>
-                  <span className="text-foreground font-bold">β₁ = {simplexCount.b1}</span>
+                  <span className="text-foreground font-semibold">β₁ = {simplexCount.b1}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Wasserstein Shift:</span>
-                  <span className="text-[#FF5500] font-bold">W₁ = {wassersteinDist}</span>
+                  <span className="text-[#C97A45] font-semibold">W₁ = {wassersteinDist}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Reconstruction Loss:</span>
-                  <span className="text-foreground font-bold">0.0018 MSE</span>
+                  <span className="text-foreground font-semibold">0.0018 MSE</span>
                 </div>
               </div>
 
               <div className="p-3 rounded-lg border border-border/80 bg-secondary/30 text-[11px] font-sans text-muted-foreground leading-relaxed">
-                <span className="font-bold text-foreground">Manifold Interpretation: </span>
+                <span className="font-semibold text-foreground">Manifold Interpretation: </span>
                 Complete overlap with wildtype host CDS confirms this watermarked construct is indistinguishable from native host genes under both XGBoost and 1D CNN biosecurity detectors.
               </div>
             </CardContent>

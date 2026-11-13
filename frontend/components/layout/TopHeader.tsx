@@ -11,7 +11,6 @@ import {
   Layers,
   BookOpen,
   ChevronRight,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/ThemeContext";
@@ -74,7 +73,7 @@ export function TopHeader() {
           >
             <div className="flex items-center gap-2">
               <Search className="h-3.5 w-3.5 text-muted-foreground/70" />
-              <span>Search constructs, genes, watermarks, reports...</span>
+              <span>Search</span>
             </div>
             <kbd className="pointer-events-none hidden sm:inline-flex h-4 select-none items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
               ⌘K
@@ -87,9 +86,9 @@ export function TopHeader() {
           <Link href="/input">
             <Button
               size="sm"
-              className="bg-[#FF5500] hover:bg-[#e04b00] text-white font-semibold text-xs gap-1.5 h-8 px-3 rounded-lg shadow-sm cursor-pointer"
+              variant="outline"
+              className="text-xs gap-1.5 h-8 px-3 rounded-lg cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5" />
               <span>Input Sequence</span>
             </Button>
           </Link>

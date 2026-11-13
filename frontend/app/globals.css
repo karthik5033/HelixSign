@@ -67,8 +67,8 @@
   --popover: #1c1c22;
   --popover-foreground: #fafafa;
   
-  --primary: #B96F43;
-  --primary-foreground: #ffffff;
+  --primary: #C97A45;
+  --primary-foreground: #15110f;
   
   --secondary: #222228;
   --secondary-foreground: #fafafa;
@@ -153,6 +153,9 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-ibm-plex-sans);
+  --font-serif: var(--font-newsreader);
+  --font-mono: var(--font-ibm-plex-mono);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -275,6 +278,12 @@ body {
   100% {
     stroke-dashoffset: 0;
   }
+}
+
+/* Looping pulse/ping effects are noise on an instrument panel. */
+.animate-ping,
+.animate-pulse {
+  animation: none !important;
 }
 
 

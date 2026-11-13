@@ -688,8 +688,8 @@ export default function HelixSignLandingPage() {
               <span className="font-[600] text-white tracking-[-0.04em] font-sans text-[19px] leading-none">
                 HelixSign
               </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#FF5500]/15 text-[#FF5500] border border-[#FF5500]/30 font-semibold uppercase tracking-wider ml-0.5">
-                DNA STAMP
+              <span className="text-[11px] font-mono text-zinc-500 ml-0.5">
+                DNA provenance
               </span>
             </Link>
 
@@ -726,7 +726,7 @@ export default function HelixSignLandingPage() {
             </Link>
             <Link
               href="/upload"
-              className="bg-[#FF5500] hover:bg-[#E54B00] text-white text-sm font-semibold px-4 py-1.5 rounded-lg shadow-[0_0_15px_rgba(255,85,0,0.35)] hover:shadow-[0_0_20px_rgba(255,85,0,0.55)] transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              className="bg-[#FF5500] hover:bg-[#E54B00] text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors"
             >
               Stamp CDS
             </Link>
@@ -739,35 +739,25 @@ export default function HelixSignLandingPage() {
       {/* ========================================================= */}
       <section className="relative pt-16 pb-12 px-4 sm:px-6 flex flex-col items-center text-center overflow-hidden">
         
-        {/* Soft atmospheric ambient glow */}
-        <div className="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[450px] bg-[radial-gradient(ellipse_at_center,rgba(255,85,0,0.08)_0%,rgba(255,122,51,0.02)_50%,transparent_75%)] pointer-events-none -z-10" />
-
         {/* Announcement Pill */}
         <Link
           href="/docs"
-          className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#2d2d35] bg-[#1c1c21]/90 hover:border-[#FF5500]/50 text-xs transition-colors cursor-pointer mb-8 group backdrop-blur-sm"
+          className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#2d2d35] bg-[#1c1c21]/90 hover:border-[#3a3a44] text-xs transition-colors cursor-pointer mb-8 group"
         >
-          <span className="text-sm">⚡</span>
-          <span className="text-[#FF5500] font-medium">HelixSign 2.0</span>
-          <span className="text-[#d4d4d8] group-hover:text-white transition-colors">
-            Function-invariant DNA steganography &amp; provenance verification for synthetic biology →
+          <span className="text-[#d4d4d8]">HelixSign 2.0</span>
+          <span className="text-zinc-600">/</span>
+          <span className="text-[#a1a1aa] group-hover:text-[#d4d4d8] transition-colors">
+            Function-invariant DNA steganography &amp; provenance verification
           </span>
         </Link>
 
         {/* Hero Title */}
-        <h1 className="w-full max-w-[1200px] text-4xl sm:text-5xl md:text-6xl lg:text-[60px] xl:text-[64px] font-bold tracking-[-0.035em] leading-[1.12] mx-auto text-center">
-          <span className="inline-block sm:whitespace-nowrap">
-            <span className="bg-gradient-to-r from-[#FFB58A] via-[#FF7A33] to-[#FFA066] bg-clip-text text-transparent">
-              Prove every construct.
-            </span>
-          </span>
+        <h1 className="w-full max-w-[1200px] text-4xl sm:text-5xl md:text-6xl lg:text-[60px] xl:text-[64px] font-semibold tracking-[-0.035em] leading-[1.12] mx-auto text-center text-[#f4f1ea]">
+          <span className="inline-block sm:whitespace-nowrap">Prove every construct.</span>
           <br />
           <span className="inline-block sm:whitespace-nowrap">
-            <span className="text-[#fafafa]">Protect your</span>{" "}
-            <span className="bg-gradient-to-r from-[#FFB58A] to-[#FF7A33] bg-clip-text text-transparent">
-              DNA provenance.
-            </span>
-            <span className="inline-block text-[#FF5500] font-bold">_</span>
+            <span>Protect your</span>{" "}
+            <span className="text-[#FF8A5B]">DNA provenance.</span>
           </span>
         </h1>
 
@@ -780,7 +770,7 @@ export default function HelixSignLandingPage() {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
           <Link
             href="/upload"
-            className="bg-[#FF5500] hover:bg-[#E54B00] text-white font-medium px-5 py-2.5 rounded-lg shadow-[0_0_20px_rgba(255,85,0,0.35)] hover:shadow-[0_0_25px_rgba(255,85,0,0.55)] transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-sm"
+            className="bg-[#FF5500] hover:bg-[#E54B00] text-white font-medium px-5 py-2.5 rounded-lg transition-colors text-sm"
           >
             Stamp construct
           </Link>
@@ -792,12 +782,10 @@ export default function HelixSignLandingPage() {
           </Link>
         </div>
 
-        {/* Reed-Solomon Badge */}
-        <div className="mt-8 inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#2b2b32] bg-[#1a1a1f] text-[#9a9aa5] text-[11px] font-medium">
-          <svg className="w-3.5 h-3.5 text-zinc-400" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8 1L1 8l7 7 7-7-7-7zm0 2.83L12.17 8 8 12.17 3.83 8 8 3.83z" />
-          </svg>
-          <span>Reed-Solomon RS(16,8) &amp; WGAN-GP Realism Engine included</span>
+        {/* Technical note */}
+        <div className="mt-8 inline-flex items-center gap-2 text-[#8b8b95] text-[11px] font-mono">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#FF8A5B]" />
+          <span>RS(16,8) ECC · Bacterial Table 11 · protein-invariant</span>
         </div>
 
         {/* ========================================================= */}
@@ -835,7 +823,7 @@ export default function HelixSignLandingPage() {
                 Cryptographic Steganography &amp; Provenance Engine
               </h2>
               <p className="mt-1 text-xs text-zinc-400">
-                Interactive demonstration of synonymous codon allocation, Galois Field GF(2⁸) Reed-Solomon coding, and WGAN-GP biosecurity stealth validation.
+                Interactive demonstration of synonymous codon allocation, Galois Field GF(2⁸) Reed-Solomon coding, and biosecurity stealth validation.
               </p>
             </div>
 
@@ -2579,8 +2567,8 @@ export default function HelixSignLandingPage() {
               <span className="font-[600] text-white tracking-[-0.04em] font-sans text-[19px] leading-none">
                 HelixSign
               </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#FF5500]/15 text-[#FF5500] border border-[#FF5500]/30 font-semibold uppercase tracking-wider ml-0.5">
-                DNA STAMP
+              <span className="text-[11px] font-mono text-zinc-500 ml-0.5">
+                DNA provenance
               </span>
             </Link>
 

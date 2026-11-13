@@ -6,25 +6,19 @@ import { useRouter } from "next/navigation";
 import {
   Activity,
   AlertTriangle,
-  ArrowRight,
   Boxes,
   CheckCircle2,
   Cpu,
   Download,
   ExternalLink,
   Flame,
-  Layers,
   LineChart,
   Plus,
   Radio,
   RefreshCw,
   Search,
-  ShieldAlert,
-  ShieldCheck,
-  Dna,
   Sparkles,
   TrendingDown,
-  TrendingUp,
   UploadCloud,
   FileText,
   GitCompare,
@@ -287,7 +281,7 @@ export default function DashboardPage() {
         eccTiles: Math.max(1, Math.floor(construct.sequence.length / 1024)),
         status: "Verified",
         runId: construct.stampResult?.stampId?.slice(0, 8) || "ACTIVE",
-        summary: `${construct.mutations.length || 64} carrier codons verified via ML microservice.`,
+        summary: `${construct.mutations.length || 64} carrier codons verified locally.`,
       };
       setMonitoredConstructs((prev) => {
         const filtered = prev.filter((c) => c.id !== "active-construct");
@@ -324,7 +318,7 @@ export default function DashboardPage() {
           eccTiles: 1,
           status: "Verified",
           runId: it.id?.slice(0, 8) || "HS-7402",
-          summary: `${it.carrierPositions?.length || it.capacityUsed || 64} carrier codons verified via ML microservice. Owner: ${it.ownerName || "ApexBio"}.`,
+          summary: `${it.carrierPositions?.length || it.capacityUsed || 64} carrier codons verified locally. Owner: ${it.ownerName || "ApexBio"}.`,
         });
         if (mapped.length >= 8) break;
       }
@@ -440,8 +434,8 @@ export default function DashboardPage() {
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full select-none">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-primary/40 bg-[#141419] text-white text-xs font-mono shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <CheckCircle2 className="w-4 h-4 text-[#FF5500]" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-primary/40 bg-card text-white text-xs font-mono shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <CheckCircle2 className="w-4 h-4 text-[#C97A45]" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -449,12 +443,21 @@ export default function DashboardPage() {
       {/* Top Banner & Quick Actions */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-3 border-b border-border/60">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            HelixSign Provenance Console
+          <h1 className="text-2xl sm:text-[28px] font-serif font-medium tracking-tight text-foreground">
+            Provenance console
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Steganographic provenance tracking &bull; Translation sequence fidelity &amp; biosecurity stealth evaluation
+          <p className="text-xs text-muted-foreground mt-1">
+            Provenance tracking, sequence fidelity, and stealth evaluation
           </p>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 text-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              {activeConstruct.name}
+            </span>
+            <span>{activeConstruct.lengthBp.toLocaleString()} bp</span>
+            <span>{activeConstruct.codons.toLocaleString()} codons</span>
+            <span>{activeConstruct.carrierCount} carrier loci</span>
+          </div>
         </div>
 
         {/* Quick Action Navigation */}
@@ -463,7 +466,7 @@ export default function DashboardPage() {
           <Button
             size="sm"
             onClick={() => router.push("/upload")}
-            className="bg-[#FF5500] hover:bg-[#E54B00] text-white gap-1.5 shadow-sm text-xs cursor-pointer font-semibold"
+            className="bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] gap-1.5 text-xs cursor-pointer font-medium"
           >
             <Plus className="h-3.5 w-3.5" />
             New Construct Stamping
@@ -491,30 +494,29 @@ export default function DashboardPage() {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-foreground">No Active Synthetic Construct Stamped</h2>
+              <h2 className="text-sm font-semibold text-foreground">No Active Synthetic Construct Stamped</h2>
               <p className="text-xs text-muted-foreground">
                 Input a synthetic CDS or select a reference benchmark in the Input Studio to generate real-time biosecurity telemetry, codon manifold topology, and provenance verification.
               </p>
             </div>
           </div>
           <Link href="/input">
-            <Button size="sm" className="bg-[#FF5500] hover:bg-[#e04b00] text-white font-semibold text-xs gap-1.5 h-8 px-3 shrink-0 cursor-pointer shadow-sm">
-              <Sparkles className="w-3.5 h-3.5" />
+            <Button size="sm" variant="outline" className="text-xs gap-1.5 h-8 px-3 shrink-0 cursor-pointer">
               Open Input Studio
             </Button>
           </Link>
         </div>
       ) : (
-        <div className="p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono">
+        <div className="p-4 rounded-xl border border-border bg-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center text-emerald-500 shrink-0">
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-foreground text-sm">Active Construct: {construct.geneName || "Synthetic CDS"}</span>
-                <Badge variant="outline" className="text-[10px] bg-background text-emerald-400 border-emerald-500/40">
-                  Stamped via ML Microservice
+                <span className="font-semibold text-foreground text-sm">Active Construct: {construct.geneName || "Synthetic CDS"}</span>
+                <Badge variant="outline" className="text-[10px] bg-background text-muted-foreground border-border">
+                  Watermark embedded
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -539,90 +541,52 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* 4 Key Summary Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Total Analyses */}
-        <Card className="border border-border bg-card p-4 flex flex-col justify-between shadow-sm h-full">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Watermarked Constructs</span>
-              <span className="p-1.5 rounded-lg bg-muted text-muted-foreground">
-                <Cpu className="h-4 w-4" />
-              </span>
-            </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold font-mono text-foreground">{computedStats.totalAnalyses}</span>
-              <span className="text-xs font-mono text-muted-foreground flex items-center gap-0.5 whitespace-nowrap">
-                <TrendingUp className="h-3 w-3" /> +14 this week
-              </span>
-            </div>
+      {/* Instrument readout strip */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-y border-border divide-y sm:divide-y-0 sm:divide-x divide-border">
+        <div className="py-4 sm:px-5 sm:first:pl-0">
+          <div className="text-[11px] font-medium text-muted-foreground">Watermarked constructs</div>
+          <div className="mt-1.5 flex items-baseline gap-2">
+            <span className="text-2xl font-medium font-mono tabular-nums text-foreground">
+              {computedStats.totalAnalyses}
+            </span>
+            <span className="text-[11px] font-mono text-muted-foreground">recorded</span>
           </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">Registered in Local SQLite ledger</p>
-        </Card>
+          <p className="mt-1 text-[11px] text-muted-foreground">Local SQLite ledger</p>
+        </div>
 
-        {/* Card 2: Sequence Fidelity */}
-        <Card className="border border-border bg-card p-4 flex flex-col justify-between shadow-sm h-full">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Sequence Fidelity</span>
-              <span className="p-1.5 rounded-lg bg-muted text-muted-foreground">
-                <CheckCircle2 className="h-4 w-4 text-[#FF5500]" />
-              </span>
-            </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-bold font-mono text-foreground">100.0%</span>
-              <span className="text-xs font-mono text-muted-foreground flex items-center gap-0.5 whitespace-nowrap">
-                0 alterations
-              </span>
-            </div>
+        <div className="py-4 sm:px-5">
+          <div className="text-[11px] font-medium text-muted-foreground">Sequence fidelity</div>
+          <div className="mt-1.5 flex items-baseline gap-2">
+            <span className="text-2xl font-medium font-mono tabular-nums text-foreground">100.0%</span>
+            <span className="text-[11px] font-mono text-muted-foreground">0 alterations</span>
           </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">Synonymous codon preservation</p>
-        </Card>
+          <p className="mt-1 text-[11px] text-muted-foreground">Synonymous codon preservation</p>
+        </div>
 
-        {/* Card 3: Stealth Detector Score */}
-        <Card className="border border-border bg-card p-4 flex flex-col justify-between shadow-sm h-full">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Stealth Detector AUC</span>
-              <span className="p-1.5 rounded-lg bg-muted text-muted-foreground">
-                <Activity className="h-4 w-4" />
-              </span>
-            </div>
-            <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-              <span className="text-2xl font-bold font-mono text-foreground shrink-0">0.505</span>
-              <span className="min-w-0 text-xs font-mono text-muted-foreground flex items-center gap-0.5 break-words">
-                Chance level (Undetected)
-              </span>
-            </div>
+        <div className="py-4 sm:px-5">
+          <div className="text-[11px] font-medium text-muted-foreground">Stealth detector AUC</div>
+          <div className="mt-1.5 flex items-baseline gap-2">
+            <span className="text-2xl font-medium font-mono tabular-nums text-foreground">0.505</span>
+            <span className="text-[11px] font-mono text-muted-foreground">chance level</span>
           </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">Evaluated on held-out 1D CNN</p>
-        </Card>
+          <p className="mt-1 text-[11px] text-muted-foreground">Held-out 1D CNN</p>
+        </div>
 
-        {/* Card 4: ECC Resilience */}
-        <Card className="border border-border bg-card p-4 flex flex-col justify-between shadow-sm h-full">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">ECC Error Correction</span>
-              <span className="p-1.5 rounded-lg bg-muted text-muted-foreground">
-                <Layers className="h-4 w-4" />
-              </span>
-            </div>
-            <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-              <span className="text-2xl font-bold font-mono text-foreground shrink-0">RS(16,8)</span>
-              <span className="min-w-0 text-xs font-mono text-muted-foreground flex items-center gap-0.5 break-words">
-                GF(2^8) Galois Field
-              </span>
-            </div>
+        <div className="py-4 sm:px-5 sm:last:pr-0">
+          <div className="text-[11px] font-medium text-muted-foreground">ECC correction</div>
+          <div className="mt-1.5 flex items-baseline gap-2">
+            <span className="text-2xl font-medium font-mono tabular-nums text-foreground">RS(16,8)</span>
+            <span className="text-[11px] font-mono text-muted-foreground">GF(2^8)</span>
           </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">Corrects up to 4 symbol errors per tile</p>
-        </Card>
-      </div>
+          <p className="mt-1 text-[11px] text-muted-foreground">Up to 4 symbol errors per tile</p>
+        </div>
+      </section>
 
       {/* Main Charts & Overview Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
         {/* Left 8 Cols: AE Burst Progression Trend */}
-        <Card className="lg:col-span-8 border border-border bg-card shadow-sm flex flex-col justify-between lg:h-[530px]">
+        <Card className="lg:col-span-8 border border-border bg-card flex flex-col justify-between lg:h-[530px]">
           <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/50">
             <div>
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -650,7 +614,7 @@ export default function DashboardPage() {
                     }}
                     className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer ${
                       selectedRegime === r.key
-                        ? "bg-card text-foreground font-semibold shadow-sm"
+                        ? "bg-card text-foreground font-semibold "
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
@@ -663,12 +627,12 @@ export default function DashboardPage() {
                 onClick={() => setIsAutoSweeping(!isAutoSweeping)}
                 className={`px-2 py-1 rounded-lg border text-[11px] font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
                   isAutoSweeping
-                    ? "bg-[#FF5500]/15 text-[#FF5500] border-[#FF5500]/40 font-bold shadow-sm"
+                    ? "bg-[#C97A45]/15 text-[#C97A45] border-[#C97A45]/40 font-semibold "
                     : "bg-muted/40 text-muted-foreground border-border hover:text-foreground"
                 }`}
                 title="Continuous automated sweep across mutation steps"
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${isAutoSweeping ? "bg-[#FF5500] animate-ping" : "bg-zinc-500"}`} />
+                <span className={`w-1.5 h-1.5 rounded-full ${isAutoSweeping ? "bg-[#C97A45]" : "bg-zinc-500"}`} />
                 {isAutoSweeping ? "Auto Sweep" : "Sweep Paused"}
               </button>
             </div>
@@ -678,8 +642,8 @@ export default function DashboardPage() {
             {/* Legend & Interactive Step Selector Ribbon */}
             <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono px-1">
               <div className="flex items-center gap-4">
-                <span className="flex items-center gap-1.5 text-[#FF5500] font-semibold">
-                  <span className="w-2.5 h-1 rounded-full bg-[#FF5500]" />
+                <span className="flex items-center gap-1.5 text-[#C97A45] font-semibold">
+                  <span className="w-2.5 h-1 rounded-full bg-[#C97A45]" />
                   HelixSign RS(16,8) Decoded
                 </span>
                 <span className="flex items-center gap-1.5 text-zinc-400">
@@ -701,7 +665,7 @@ export default function DashboardPage() {
                       }}
                       className={`px-2 py-0.5 rounded text-[10px] font-mono transition-all cursor-pointer ${
                         isActive
-                          ? "bg-[#FF5500] text-white font-bold shadow-[0_0_8px_rgba(255,85,0,0.3)]"
+                          ? "bg-[#C97A45] text-[#1a1614] font-medium"
                           : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground"
                       }`}
                     >
@@ -716,20 +680,10 @@ export default function DashboardPage() {
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={activeTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="primaryGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#71717a" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="#71717a" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="precursorGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#FF5500" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="#FF5500" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#262633" vertical={false} />
-                  <XAxis dataKey="label" stroke="#52525b" fontSize={11} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                  <XAxis dataKey="label" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} />
                   <YAxis
-                    stroke="#52525b"
+                    stroke="var(--muted-foreground)"
                     fontSize={11}
                     tickLine={false}
                     domain={[0, 100]}
@@ -750,20 +704,20 @@ export default function DashboardPage() {
                     type="monotone"
                     dataKey="rawRecovery"
                     name="Uncorrected Naive Watermark (%)"
-                    stroke="#71717a"
+                    stroke="var(--muted-foreground)"
                     strokeWidth={1.8}
                     strokeDasharray="4 3"
-                    fillOpacity={1}
-                    fill="url(#primaryGrad)"
+                    fillOpacity={0.05}
+                    fill="var(--muted-foreground)"
                   />
                   <Area
                     type="monotone"
                     dataKey="rsRecovery"
                     name="HelixSign RS(16,8) Decoded (%)"
-                    stroke="#FF5500"
+                    stroke="#C97A45"
                     strokeWidth={2.4}
-                    fillOpacity={1}
-                    fill="url(#precursorGrad)"
+                    fillOpacity={0.07}
+                    fill="#C97A45"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -773,7 +727,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-border/50 text-[11px] font-mono">
               <div className="p-2.5 rounded-lg bg-muted/20 border border-border/50">
                 <span className="text-muted-foreground block text-[10px]">RS Parity Margin</span>
-                <span className="font-bold text-xs mt-0.5 block text-primary">
+                <span className="font-semibold text-xs mt-0.5 block text-primary">
                   {currentTrendPoint.parityRemaining} / 4 Symbols ({((currentTrendPoint.parityRemaining / 4) * 100).toFixed(0)}% Buffer)
                 </span>
               </div>
@@ -787,14 +741,14 @@ export default function DashboardPage() {
 
               <div className="p-2.5 rounded-lg bg-muted/20 border border-border/50">
                 <span className="text-muted-foreground block text-[10px]">Watermark Recovery</span>
-                <span className="font-bold text-foreground text-xs mt-0.5 block">
+                <span className="font-semibold text-foreground text-xs mt-0.5 block">
                   {currentTrendPoint.rsRecovery}% Bitrate (vs {currentTrendPoint.rawRecovery}% uncorrected)
                 </span>
               </div>
 
               <div className="p-2.5 rounded-lg bg-muted/20 border border-border/50">
                 <span className="text-muted-foreground block text-[10px]">Simulated Stress Mode</span>
-                <span className="font-bold text-primary text-xs mt-0.5 block uppercase truncate">
+                <span className="font-semibold text-primary text-xs mt-0.5 block truncate">
                   {currentTrendPoint.step} &bull; {currentTrendPoint.mutationRate}% Noise
                 </span>
               </div>
@@ -803,11 +757,11 @@ export default function DashboardPage() {
         </Card>
 
         {/* Right 4 Cols: Active Construct Monitoring (Interactive Selectors) */}
-        <Card className="lg:col-span-4 border border-border bg-card flex flex-col justify-between shadow-sm h-[530px] max-h-[530px]">
+        <Card className="lg:col-span-4 border border-border bg-card flex flex-col justify-between h-[530px] max-h-[530px]">
           <CardHeader className="pb-3 border-b border-border/50 shrink-0">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <Activity className="h-4 w-4 text-[#FF5500]" />
+                <Activity className="h-4 w-4 text-[#C97A45]" />
                 Construct Provenance Status
               </CardTitle>
               <span className="text-[10px] font-mono text-muted-foreground px-2 py-0.5 rounded border border-border bg-muted/40">
@@ -829,19 +783,19 @@ export default function DashboardPage() {
                   onClick={() => setSelectedConstructId(c.id)}
                   className={`p-3 rounded-xl border transition-all cursor-pointer text-xs space-y-1 group ${
                     isSelected
-                      ? "border-[#FF5500] bg-[#FF5500]/10 shadow-[0_0_15px_rgba(255,85,0,0.12)]"
+                      ? "border-primary/60 bg-primary/5"
                       : "border-border bg-muted/20 hover:bg-muted/40"
                   }`}
                 >
                   <div className="flex items-center justify-between font-semibold">
-                    <span className={`truncate mr-2 ${isSelected ? "text-[#FF5500] font-bold" : "text-foreground group-hover:underline"}`}>
+                    <span className={`truncate mr-2 ${isSelected ? "text-primary font-semibold" : "text-foreground"}`}>
                       {displayName} <span className="text-[11px] font-mono font-normal text-muted-foreground">({c.lengthBp.toLocaleString()} bp)</span>
                     </span>
                     <Badge
                       variant="outline"
-                      className={`uppercase font-mono text-[9px] shrink-0 ${
+                      className={`font-mono text-[9px] shrink-0 ${
                         isSelected
-                          ? "border-[#FF5500]/50 text-[#FF5500] bg-[#FF5500]/15 font-bold"
+                          ? "border-primary/50 text-primary bg-primary/10 font-semibold"
                           : "border-border text-muted-foreground bg-secondary"
                       }`}
                     >
@@ -858,9 +812,8 @@ export default function DashboardPage() {
 
           <div className="p-4 pt-2 border-t border-border/40 shrink-0">
             <Link href="/monitor" className="w-full">
-              <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs border-border cursor-pointer font-medium">
+              <Button variant="outline" size="sm" className="w-full text-xs border-border cursor-pointer font-medium">
                 Launch Channel Stress Lab
-                <ArrowRight className="h-3 w-3" />
               </Button>
             </Link>
           </div>
@@ -868,15 +821,14 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Provenance Analyses Table */}
-      <Card className="border border-border bg-card shadow-sm">
+      <Card className="border border-border bg-card ">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/50">
           <div>
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Layers className="h-4 w-4 text-primary" />
-              Recent Genomic Provenance Audits
+            <CardTitle className="text-sm font-medium">
+              Recent provenance audits
             </CardTitle>
             <CardDescription className="text-xs">
-              Latest construct runs with verified persistent homology, synonymous carrier loci, and stealth metrics
+              Latest stamp runs with carrier loci and stealth metrics
             </CardDescription>
           </div>
 
@@ -886,18 +838,18 @@ export default function DashboardPage() {
               <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search construct ID, gene..."
+                placeholder="Search runs"
                 value={tableSearchQuery}
                 onChange={(e) => setTableSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1 bg-muted/40 border border-border rounded-lg text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary w-48"
+                className="pl-8 pr-3 py-1 bg-muted/40 border border-border rounded-lg text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary w-44"
               />
             </div>
 
             {/* Filter pills */}
             <div className="flex items-center rounded-lg bg-muted/60 p-0.5 border border-border text-xs">
               {[
-                { id: "ALL", label: "ALL" },
-                { id: "lacZ", label: "lacZ (E. coli)" },
+                { id: "ALL", label: "All" },
+                { id: "lacZ", label: "lacZ" },
                 { id: "GFP", label: "GFP" },
                 { id: "Cas9", label: "Cas9" },
                 { id: "Wildtype", label: "Wildtype" },
@@ -905,9 +857,9 @@ export default function DashboardPage() {
                 <button
                   key={pill.id}
                   onClick={() => setFilterClass(pill.id)}
-                  className={`px-2.5 py-0.5 rounded text-[11px] font-mono transition-colors cursor-pointer ${
+                  className={`px-2.5 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer ${
                     filterClass === pill.id
-                      ? "bg-card text-foreground shadow-sm font-bold text-primary"
+                      ? "bg-card text-foreground"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -917,33 +869,31 @@ export default function DashboardPage() {
             </div>
 
             <Link href="/analysis">
-              <Button variant="ghost" size="sm" className="gap-1 text-xs cursor-pointer font-mono">
-                View All
-                <ArrowRight className="h-3 w-3" />
+              <Button variant="ghost" size="sm" className="text-xs cursor-pointer text-muted-foreground hover:text-foreground">
+                View all
               </Button>
             </Link>
           </div>
         </CardHeader>
 
         <CardContent className="p-0 overflow-x-auto">
-          <Table className="w-full min-w-[980px]">
+          <Table className="w-full min-w-[820px]">
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="w-28 font-mono text-xs pl-4">Run ID</TableHead>
-                <TableHead className="min-w-[280px] text-xs">Target Construct &amp; Host</TableHead>
-                <TableHead className="min-w-[210px] text-xs">Dataset Source</TableHead>
-                <TableHead className="min-w-[170px] text-xs">Steganographic Proof</TableHead>
-                <TableHead className="w-28 text-center text-xs font-mono">Protein Match</TableHead>
-                <TableHead className="w-28 text-center text-xs font-mono">Carrier Loci</TableHead>
-                <TableHead className="w-24 text-center text-xs font-mono">Stealth AUC</TableHead>
-                <TableHead className="w-28 text-right text-xs pr-4">Action</TableHead>
+                <TableHead className="w-28 pl-4 text-[11px] font-medium text-muted-foreground">Run</TableHead>
+                <TableHead className="min-w-[230px] text-[11px] font-medium text-muted-foreground">Construct</TableHead>
+                <TableHead className="min-w-[180px] text-[11px] font-medium text-muted-foreground">Source</TableHead>
+                <TableHead className="min-w-[140px] text-[11px] font-medium text-muted-foreground">Status</TableHead>
+                <TableHead className="w-24 text-center text-[11px] font-medium text-muted-foreground">Protein</TableHead>
+                <TableHead className="w-24 text-center text-[11px] font-medium text-muted-foreground">Carriers</TableHead>
+                <TableHead className="w-20 pr-4 text-right text-[11px] font-medium text-muted-foreground" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredAnalyses.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-10 text-xs text-muted-foreground font-mono">
-                    No genomic provenance records match the selected construct or filter criteria.
+                  <TableCell colSpan={7} className="text-center py-10 text-xs text-muted-foreground">
+                    No provenance records match this search.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -954,9 +904,9 @@ export default function DashboardPage() {
 
                   return (
                     <TableRow key={rec.id} className="border-border hover:bg-muted/30 transition-colors">
-                      <TableCell className="w-28 font-mono text-xs text-primary font-semibold pl-4 py-3.5">
-                        <div>{rec.id}</div>
-                        <div className="text-[10px] text-muted-foreground font-mono font-normal">
+                      <TableCell className="w-28 pl-4 py-3.5">
+                        <div className="font-medium text-foreground text-xs">{rec.id}</div>
+                        <div className="text-[10px] text-muted-foreground font-mono mt-0.5 whitespace-nowrap">
                           {rec.timestamp ? rec.timestamp.split(" ")[0] : "2026-11-12"}
                         </div>
                       </TableCell>
@@ -974,64 +924,48 @@ export default function DashboardPage() {
                           {rec.samplingRate}
                         </div>
                       </TableCell>
-                      <TableCell className="min-w-[170px] py-3.5">
+                      <TableCell className="min-w-[140px] py-3.5">
                         {isVerified && (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] font-mono px-2 py-0.5 border-zinc-700 bg-zinc-800/80 text-zinc-300 font-medium flex items-center gap-1.5 w-fit"
-                          >
-                            <ShieldCheck className="w-3 h-3 text-zinc-400 shrink-0" />
-                            <span>Verified ({(rec.confidence * 100).toFixed(0)}%)</span>
-                          </Badge>
+                          <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] text-foreground">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            Verified
+                            <span className="text-muted-foreground">{(rec.confidence * 100).toFixed(0)}%</span>
+                          </span>
                         )}
                         {isMutated && (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] font-mono px-2 py-0.5 border-amber-500/40 text-amber-300 bg-amber-500/10 font-medium flex items-center gap-1.5 w-fit"
-                          >
-                            <ShieldAlert className="w-3 h-3 text-amber-400 shrink-0" />
-                            <span>Mutated Passage ({(rec.confidence * 100).toFixed(0)}%)</span>
-                          </Badge>
+                          <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] text-foreground">
+                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                            Mutated passage
+                            <span className="text-muted-foreground">{(rec.confidence * 100).toFixed(0)}%</span>
+                          </span>
                         )}
                         {isWildtype && (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] font-mono px-2 py-0.5 border-zinc-700 text-zinc-400 bg-zinc-800/40 font-medium flex items-center gap-1.5 w-fit"
-                          >
-                            <Dna className="w-3 h-3 text-zinc-400 shrink-0" />
-                            <span>Wildtype Reference</span>
-                          </Badge>
+                          <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] text-muted-foreground">
+                            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                            Wildtype reference
+                          </span>
                         )}
                       </TableCell>
-                      <TableCell className="w-28 text-center py-3.5 font-mono">
-                        <div className="text-xs font-semibold text-foreground">100.0%</div>
+                      <TableCell className="w-24 text-center py-3.5 font-mono">
+                        <div className="text-xs font-medium text-foreground">100.0%</div>
                         <div className="text-[10px] text-muted-foreground">0 AA edits</div>
-                      </TableCell>
-                      <TableCell className="w-28 text-center py-3.5 font-mono">
-                        <div className="text-xs font-semibold text-foreground">
-                          {rec.changepointsDetected > 0 ? `${rec.changepointsDetected} Loci` : "0 (WT)"}
-                        </div>
-                        <div className="text-[10px] text-muted-foreground">
-                          {rec.changepointsDetected > 0 ? "HKDF Keyed" : "Native"}
-                        </div>
                       </TableCell>
                       <TableCell className="w-24 text-center py-3.5 font-mono">
                         <div className="text-xs font-medium text-foreground">
-                          {rec.rocAuc.toFixed(3)}
+                          {rec.changepointsDetected > 0 ? rec.changepointsDetected : "0"}
                         </div>
-                        <div className="text-[10px] text-muted-foreground font-mono">
-                          Chance
+                        <div className="text-[10px] text-muted-foreground">
+                          {rec.changepointsDetected > 0 ? "HKDF" : "Native"}
                         </div>
                       </TableCell>
-                      <TableCell className="w-28 text-right pr-4 py-3.5">
+                      <TableCell className="w-20 text-right pr-4 py-3.5">
                         <Link href={`/analysis?run=${rec.id}`}>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 text-xs font-mono text-primary hover:text-primary hover:bg-primary/10 gap-1 cursor-pointer"
+                            className="h-7 px-0 text-xs text-muted-foreground hover:text-foreground hover:bg-transparent cursor-pointer"
                           >
-                            <span>Audit Run</span>
-                            <ArrowRight className="w-3 h-3" />
+                            Open
                           </Button>
                         </Link>
                       </TableCell>

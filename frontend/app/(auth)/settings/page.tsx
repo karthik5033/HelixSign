@@ -347,21 +347,21 @@ export default function SettingsPage() {
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full pb-12 select-none font-sans">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-5 right-5 z-50 flex items-center gap-2 bg-[#1b1b24] border border-[#FF5500] text-white px-4 py-2.5 rounded-xl shadow-2xl font-mono text-xs animate-in fade-in slide-in-from-top-4">
-          <CheckCircle2 className="w-4 h-4 text-[#FF5500]" />
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-2 bg-card border border-[#C97A45] text-white px-4 py-2.5 rounded-xl shadow-2xl font-mono text-xs animate-in fade-in slide-in-from-top-4">
+          <CheckCircle2 className="w-4 h-4 text-[#C97A45]" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Header */}
       <div className="border-b border-border/60 pb-5">
-        <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground uppercase tracking-wider">
+        <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground ">
           <Link href="/dashboard" className="hover:text-foreground transition-colors">Console</Link>
           <span>/</span>
-          <span className="text-primary font-bold">Cryptographic &amp; Bio Settings</span>
+          <span className="text-primary font-semibold">Cryptographic &amp; Bio Settings</span>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+          <h1 className="text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2.5">
             <Sliders className="h-6 w-6 text-primary" />
             Cryptographic &amp; Bio-Constraint Settings
           </h1>
@@ -378,7 +378,7 @@ export default function SettingsPage() {
           onClick={() => setActiveTab("crypto")}
           className={`pb-2.5 transition-all flex items-center gap-2 cursor-pointer font-medium ${
             activeTab === "crypto"
-              ? "border-b-2 border-primary text-foreground font-bold"
+              ? "border-b-2 border-primary text-foreground font-semibold"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -389,7 +389,7 @@ export default function SettingsPage() {
           onClick={() => setActiveTab("pipeline")}
           className={`pb-2.5 transition-all flex items-center gap-2 cursor-pointer font-medium ${
             activeTab === "pipeline"
-              ? "border-b-2 border-primary text-foreground font-bold"
+              ? "border-b-2 border-primary text-foreground font-semibold"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -400,7 +400,7 @@ export default function SettingsPage() {
           onClick={() => setActiveTab("notifications")}
           className={`pb-2.5 transition-all flex items-center gap-2 cursor-pointer font-medium ${
             activeTab === "notifications"
-              ? "border-b-2 border-primary text-foreground font-bold"
+              ? "border-b-2 border-primary text-foreground font-semibold"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -411,7 +411,7 @@ export default function SettingsPage() {
           onClick={() => setActiveTab("profile")}
           className={`pb-2.5 transition-all flex items-center gap-2 cursor-pointer font-medium ${
             activeTab === "profile"
-              ? "border-b-2 border-primary text-foreground font-bold"
+              ? "border-b-2 border-primary text-foreground font-semibold"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
@@ -429,7 +429,7 @@ export default function SettingsPage() {
             <CardHeader className="p-0 pb-4 border-b border-border/50">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-base font-bold text-foreground">
+                  <CardTitle className="text-base font-semibold text-foreground">
                     Cryptographic Key Derivation &amp; Bio-Constraint Calibration
                   </CardTitle>
                   <CardDescription className="text-xs mt-0.5">
@@ -466,7 +466,7 @@ export default function SettingsPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between font-mono text-[11px]">
                     <span className="text-muted-foreground">Codon Adaptation Index Tolerance (ΔCAI):</span>
-                    <span className="text-primary font-bold text-xs">ΔCAI &le; {caiTolerance.toFixed(3)} (Strict Function Invariance)</span>
+                    <span className="text-primary font-semibold text-xs">ΔCAI &le; {caiTolerance.toFixed(3)} (Strict Function Invariance)</span>
                   </div>
                   <input
                     type="range"
@@ -479,7 +479,7 @@ export default function SettingsPage() {
                   />
                   <div className="flex justify-between text-[10px] text-muted-foreground font-mono">
                     <span>0.000 (Identity)</span>
-                    <span className="text-primary font-bold">0.015 (Optimal Viability)</span>
+                    <span className="text-primary font-semibold">0.015 (Optimal Viability)</span>
                     <span>0.040 (Max Shift)</span>
                   </div>
                 </div>
@@ -506,7 +506,7 @@ export default function SettingsPage() {
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between font-mono text-[11px]">
                       <span className="text-muted-foreground">Homopolymer Ceiling:</span>
-                      <span className="text-foreground font-bold">&le; {homopolymerCeiling} bp</span>
+                      <span className="text-foreground font-semibold">&le; {homopolymerCeiling} bp</span>
                     </div>
                     <input
                       type="range"
@@ -525,7 +525,7 @@ export default function SettingsPage() {
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between font-mono text-[11px]">
                       <span className="text-muted-foreground">GC Deviation (ΔGC):</span>
-                      <span className="text-foreground font-bold">&plusmn;{gcSkewTolerance.toFixed(1)}%</span>
+                      <span className="text-foreground font-semibold">&plusmn;{gcSkewTolerance.toFixed(1)}%</span>
                     </div>
                     <input
                       type="range"
@@ -546,7 +546,7 @@ export default function SettingsPage() {
                 <div className="space-y-1.5 pt-2 border-t border-border/40">
                   <div className="flex items-center justify-between font-mono text-[11px]">
                     <span className="text-muted-foreground">HKDF-SHA256 Keyed PRNG Salt:</span>
-                    <span className="text-primary font-bold">256-bit Entropy</span>
+                    <span className="text-primary font-semibold">256-bit Entropy</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <input
@@ -580,7 +580,7 @@ export default function SettingsPage() {
                 {/* Mathematical Viability Card */}
                 <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-3 font-mono text-xs">
                   <div className="flex items-center justify-between pb-2 border-b border-border/40">
-                    <span className="font-bold text-foreground flex items-center gap-1.5">
+                    <span className="font-semibold text-foreground flex items-center gap-1.5">
                       <Activity className="w-3.5 h-3.5 text-primary" />
                       Derived Steganography Metrics
                     </span>
@@ -592,31 +592,31 @@ export default function SettingsPage() {
                   <div className="space-y-2 text-[11px]">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Protein Sequence Drift:</span>
-                      <span className="font-bold text-foreground">0.00% (Strictly Invariant)</span>
+                      <span className="font-semibold text-foreground">0.00% (Strictly Invariant)</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Net Watermark Capacity:</span>
-                      <span className="font-bold text-foreground">{bioStegoMetrics.rawCapacityBits} bits (RS Protected)</span>
+                      <span className="font-semibold text-foreground">{bioStegoMetrics.rawCapacityBits} bits (RS Protected)</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Min Required CDS Length:</span>
-                      <span className="font-bold text-foreground">
+                      <span className="font-semibold text-foreground">
                         {bioStegoMetrics.requiredCdsBp.toLocaleString()} bp {hasActiveConstruct && `(Construct: ${construct.sequence.length.toLocaleString()} bp)`}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Host CAI Concordance:</span>
-                      <span className="font-bold text-primary">{bioStegoMetrics.caiConcordance} {hasActiveConstruct ? "(Optimal)" : "(Reference)"}</span>
+                      <span className="font-semibold text-primary">{bioStegoMetrics.caiConcordance} {hasActiveConstruct ? "(Optimal)" : "(Reference)"}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Homopolymer Safe Margin:</span>
-                      <span className="font-bold text-foreground">
+                      <span className="font-semibold text-foreground">
                         Max {homopolymerCeiling - 1} bp (&lt; {homopolymerCeiling} bp)
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">K-L Codon Divergence (D_KL):</span>
-                      <span className="font-bold text-primary">
+                      <span className="font-semibold text-primary">
                         {bioStegoMetrics.klDivergence} nats {hasActiveConstruct ? "(Empirical)" : "(Awaiting Input)"}
                       </span>
                     </div>
@@ -627,30 +627,30 @@ export default function SettingsPage() {
                 <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-2 font-mono text-xs">
                   <div className="flex items-center justify-between pb-1 text-[11px]">
                     <span className="text-muted-foreground">Codon Bias Convergence:</span>
-                    <span className="text-primary font-bold">
+                    <span className="text-primary font-semibold">
                       {hasActiveConstruct ? (construct.geneName || "Active Stamped Construct") : `${hostConfig.name} (Theoretical Model)`}
                     </span>
                   </div>
 
                   {/* Dynamic SVG Comparative Frequency Chart */}
-                  <div className="h-28 w-full bg-[#0a0a0f] rounded border border-border/60 relative overflow-hidden flex flex-col justify-between p-2">
+                  <div className="h-28 w-full bg-muted/30 rounded border border-border/60 relative overflow-hidden flex flex-col justify-between p-2">
                     <svg viewBox="0 0 300 85" className="w-full h-full">
                       <defs>
                         <linearGradient id="stegoAreaGlow" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#FF5500" stopOpacity="0.22" />
-                          <stop offset="100%" stopColor="#FF5500" stopOpacity="0.0" />
+                          <stop offset="0%" stopColor="#C97A45" stopOpacity="0.22" />
+                          <stop offset="100%" stopColor="#C97A45" stopOpacity="0.0" />
                         </linearGradient>
                       </defs>
 
                       {/* Grid & Baseline */}
-                      <line x1="0" y1="40" x2="300" y2="40" stroke="#1c1c28" strokeWidth="0.8" strokeDasharray="2,2" />
-                      <line x1="0" y1="72" x2="300" y2="72" stroke="#2a2a3e" strokeWidth="0.8" />
+                      <line x1="0" y1="40" x2="300" y2="40" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2,2" />
+                      <line x1="0" y1="72" x2="300" y2="72" stroke="var(--border)" strokeWidth="0.8" />
 
                       {/* Wildtype Host Codon Density Curve (Gray Dashed) */}
                       <path
                         d={hostSvgPath}
                         fill="none"
-                        stroke="#a1a1aa"
+                        stroke="var(--muted-foreground)"
                         strokeWidth="1.6"
                         strokeDasharray="3,3"
                         opacity="0.85"
@@ -669,7 +669,7 @@ export default function SettingsPage() {
                         <path
                           d={stegoSvgPath}
                           fill="none"
-                          stroke="#FF5500"
+                          stroke="#C97A45"
                           strokeWidth="2.2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -680,16 +680,16 @@ export default function SettingsPage() {
                       <g transform="translate(10, 14)">
                         {hasActiveConstruct ? (
                           <>
-                            <line x1="0" y1="0" x2="14" y2="0" stroke="#FF5500" strokeWidth="2.2" />
-                            <text x="20" y="3" fill="#FF5500" fontSize="8" fontFamily="monospace" fontWeight="bold">HelixSign Stamped</text>
+                            <line x1="0" y1="0" x2="14" y2="0" stroke="#C97A45" strokeWidth="2.2" />
+                            <text x="20" y="3" fill="#C97A45" fontSize="8" fontFamily="monospace" fontWeight="bold">HelixSign Stamped</text>
                             
-                            <line x1="130" y1="0" x2="144" y2="0" stroke="#a1a1aa" strokeWidth="1.6" strokeDasharray="3,3" />
-                            <text x="150" y="3" fill="#a1a1aa" fontSize="8" fontFamily="monospace">Wildtype Host</text>
+                            <line x1="130" y1="0" x2="144" y2="0" stroke="var(--muted-foreground)" strokeWidth="1.6" strokeDasharray="3,3" />
+                            <text x="150" y="3" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace">Wildtype Host</text>
                           </>
                         ) : (
                           <>
-                            <line x1="0" y1="0" x2="14" y2="0" stroke="#a1a1aa" strokeWidth="1.6" strokeDasharray="3,3" />
-                            <text x="20" y="3" fill="#a1a1aa" fontSize="8" fontFamily="monospace">Host Reference Model (Awaiting Sequence Input)</text>
+                            <line x1="0" y1="0" x2="14" y2="0" stroke="var(--muted-foreground)" strokeWidth="1.6" strokeDasharray="3,3" />
+                            <text x="20" y="3" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace">Host Reference Model (Awaiting Sequence Input)</text>
                           </>
                         )}
                       </g>
@@ -722,7 +722,7 @@ export default function SettingsPage() {
                 <Button
                   size="sm"
                   onClick={handleSaveCryptoSettings}
-                  className="w-full text-xs font-semibold gap-1.5 bg-[#FF5500] hover:bg-[#E54B00] text-white cursor-pointer"
+                  className="w-full text-xs font-semibold gap-1.5 bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] cursor-pointer"
                 >
                   <Check className="w-3.5 h-3.5" />
                   Save Cryptographic Calibration
@@ -742,7 +742,7 @@ export default function SettingsPage() {
           <CardHeader className="p-0 pb-4 border-b border-border/50">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base font-bold text-foreground">
+                <CardTitle className="text-base font-semibold text-foreground">
                   WGAN-GP &amp; Codon Manifold Hyperparameters
                 </CardTitle>
                 <CardDescription className="text-xs mt-0.5">
@@ -763,7 +763,7 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between font-mono text-[11px]">
                   <span className="text-muted-foreground">Manifold Embedding Dimension (d):</span>
-                  <span className="text-foreground font-bold text-xs">d = {embeddingDimD} Dimensions</span>
+                  <span className="text-foreground font-semibold text-xs">d = {embeddingDimD} Dimensions</span>
                 </div>
                 <input
                   type="range"
@@ -776,7 +776,7 @@ export default function SettingsPage() {
                 />
                 <div className="flex justify-between text-[10px] text-muted-foreground font-mono">
                   <span>d=2 (Planar)</span>
-                  <span className="text-foreground font-bold">d=3 (Phase Space Attractor)</span>
+                  <span className="text-foreground font-semibold">d=3 (Phase Space Attractor)</span>
                   <span>d=6 (High-dim)</span>
                 </div>
               </div>
@@ -800,7 +800,7 @@ export default function SettingsPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between font-mono text-[11px]">
                     <span className="text-muted-foreground">Max Filtration (εmax):</span>
-                    <span className="text-foreground font-bold">{filtrationMaxEpsilon.toFixed(2)}</span>
+                    <span className="text-foreground font-semibold">{filtrationMaxEpsilon.toFixed(2)}</span>
                   </div>
                   <input
                     type="range"
@@ -819,7 +819,7 @@ export default function SettingsPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between font-mono text-[11px]">
                     <span className="text-muted-foreground">Gradient Penalty Weight (λ):</span>
-                    <span className="text-foreground font-bold">λ = {wganLambdaGp}</span>
+                    <span className="text-foreground font-semibold">λ = {wganLambdaGp}</span>
                   </div>
                   <input
                     type="range"
@@ -838,7 +838,7 @@ export default function SettingsPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between font-mono text-[11px]">
                     <span className="text-muted-foreground">Critic Iterations (n_critic):</span>
-                    <span className="text-foreground font-bold">{criticIterations} steps</span>
+                    <span className="text-foreground font-semibold">{criticIterations} steps</span>
                   </div>
                   <input
                     type="range"
@@ -861,7 +861,7 @@ export default function SettingsPage() {
             <div className="lg:col-span-5 space-y-4">
               <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-3 font-mono text-xs">
                 <div className="flex items-center justify-between pb-2 border-b border-border/40">
-                  <span className="font-bold text-foreground flex items-center gap-1.5">
+                  <span className="font-semibold text-foreground flex items-center gap-1.5">
                     <Cpu className="w-3.5 h-3.5 text-primary" />
                     Manifold Dynamical Reconstruction
                   </span>
@@ -870,7 +870,7 @@ export default function SettingsPage() {
                   </Badge>
                 </div>
 
-                <div className="p-3 rounded-lg bg-[#0d0d12] border border-border/80 text-[11px] text-primary leading-relaxed">
+                <div className="p-3 rounded-lg bg-muted/30 border border-border/80 text-[11px] text-primary leading-relaxed">
                   VR(C, ε) = &#123; σ ⊆ C | ∀ u, v ∈ σ, ||u - v|| ≤ ε &#125;
                 </div>
 
@@ -881,11 +881,11 @@ export default function SettingsPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Bottleneck Distance (dB):</span>
-                    <span className="font-bold text-foreground">0.054</span>
+                    <span className="font-semibold text-foreground">0.054</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Homology Betti Dimensions:</span>
-                    <span className="font-bold text-foreground">H₀ (Clusters), H₁ (Synonymous Loops)</span>
+                    <span className="font-semibold text-foreground">H₀ (Clusters), H₁ (Synonymous Loops)</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Sequence Translation:</span>
@@ -897,7 +897,7 @@ export default function SettingsPage() {
               <Button
                 size="sm"
                 onClick={handleSavePipelineSettings}
-                className="w-full text-xs font-semibold gap-1.5 bg-[#FF5500] hover:bg-[#E54B00] text-white cursor-pointer"
+                className="w-full text-xs font-semibold gap-1.5 bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] cursor-pointer"
               >
                 <Check className="w-3.5 h-3.5" />
                 Update Manifold Defaults
@@ -915,7 +915,7 @@ export default function SettingsPage() {
           <CardHeader className="p-0 pb-4 border-b border-border/50">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base font-bold text-foreground">
+                <CardTitle className="text-base font-semibold text-foreground">
                   Biosecurity Screening &amp; Provenance Registry Webhooks
                 </CardTitle>
                 <CardDescription className="text-xs mt-0.5">
@@ -935,8 +935,8 @@ export default function SettingsPage() {
               {/* Branch 1: Topological Loop Persistence */}
               <div className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-2">
                 <div className="flex items-center justify-between font-mono text-[11px]">
-                  <span className="font-bold text-foreground">Branch 1: Persistent H₁ Loop Opening</span>
-                  <span className="text-primary font-bold">Persistence &ge; {h1LoopThreshold.toFixed(2)}</span>
+                  <span className="font-semibold text-foreground">Branch 1: Persistent H₁ Loop Opening</span>
+                  <span className="text-primary font-semibold">Persistence &ge; {h1LoopThreshold.toFixed(2)}</span>
                 </div>
                 <input
                   type="range"
@@ -955,8 +955,8 @@ export default function SettingsPage() {
               {/* Branch 2: Sequence Tamper Divergence */}
               <div className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-2">
                 <div className="flex items-center justify-between font-mono text-[11px]">
-                  <span className="font-bold text-foreground">Branch 2: 1-Wasserstein Tamper Divergence (W₁)</span>
-                  <span className="text-foreground font-bold">W₁ &ge; {tamperDivergenceThreshold.toFixed(3)}</span>
+                  <span className="font-semibold text-foreground">Branch 2: 1-Wasserstein Tamper Divergence (W₁)</span>
+                  <span className="text-foreground font-semibold">W₁ &ge; {tamperDivergenceThreshold.toFixed(3)}</span>
                 </div>
                 <input
                   type="range"
@@ -975,8 +975,8 @@ export default function SettingsPage() {
               {/* Branch 3: Host Codon Adaptation Drop */}
               <div className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-2">
                 <div className="flex items-center justify-between font-mono text-[11px]">
-                  <span className="font-bold text-foreground">Branch 3: Codon Adaptation Degradation (ΔCAI)</span>
-                  <span className="text-foreground font-bold">ΔCAI &ge; {caiDropThreshold.toFixed(3)}</span>
+                  <span className="font-semibold text-foreground">Branch 3: Codon Adaptation Degradation (ΔCAI)</span>
+                  <span className="text-foreground font-semibold">ΔCAI &ge; {caiDropThreshold.toFixed(3)}</span>
                 </div>
                 <input
                   type="range"
@@ -997,7 +997,7 @@ export default function SettingsPage() {
             {/* Right Column (5 cols): Endpoints */}
             <div className="lg:col-span-5 space-y-4 text-xs font-mono">
               <div className="p-4 rounded-xl border border-border bg-card space-y-3">
-                <span className="font-bold text-foreground block text-[11px] uppercase tracking-wider">
+                <span className="font-semibold text-foreground block text-[11px] ">
                   Provenance Registry Endpoints
                 </span>
 
@@ -1048,7 +1048,7 @@ export default function SettingsPage() {
           <CardHeader className="p-0 pb-4 border-b border-border/50">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base font-bold text-foreground">
+                <CardTitle className="text-base font-semibold text-foreground">
                   Principal Investigator &amp; Institutional Credentials
                 </CardTitle>
                 <CardDescription className="text-xs mt-0.5">
@@ -1096,12 +1096,12 @@ export default function SettingsPage() {
 
             <div className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-1.5 font-mono text-[11px]">
               <span className="text-muted-foreground block">Cryptographic Signing Public Key (ECDSA P-256):</span>
-              <span className="text-foreground font-bold block truncate">
+              <span className="text-foreground font-semibold block truncate">
                 SHA256: 7f8a42c3e12d99b1c7a8b3e5f4d1e2a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4
               </span>
             </div>
 
-            <Button type="submit" size="sm" className="bg-[#FF5500] hover:bg-[#E54B00] text-white text-xs font-semibold cursor-pointer">
+            <Button type="submit" size="sm" className="bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] text-xs font-semibold cursor-pointer">
               Save Profile Changes
             </Button>
           </form>

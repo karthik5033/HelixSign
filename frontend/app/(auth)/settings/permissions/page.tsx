@@ -92,7 +92,7 @@ export default function PermissionsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2">
             <ShieldCheck className="h-6 w-6 text-primary" />
             Role-Based Access Control (RBAC) Matrix
           </h2>
@@ -115,7 +115,7 @@ export default function PermissionsPage() {
       )}
 
       {/* Permissions Matrix Table */}
-      <Card className="border border-border bg-card shadow-sm">
+      <Card className="border border-border bg-card ">
         <CardContent className="p-0">
           <Table>
             <TableHeader>

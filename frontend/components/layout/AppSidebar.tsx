@@ -53,13 +53,13 @@ export function AppSidebar() {
     user.email?.toLowerCase().includes("rvu") ||
     user.email?.toLowerCase().includes("echosense");
   const displayName = isStale ? "Principal Investigator" : `${user.firstName} ${user.lastName}`;
-  const displayRole = isStale ? "DIRECTOR" : (role || "DIRECTOR");
+  const displayRole = isStale ? "Director" : (role || "Director");
   const initials = isStale ? "PI" : `${user.firstName[0] || ""}${user.lastName[0] || ""}`.toUpperCase();
 
   return (
     <aside
       className={cn(
-        "flex h-screen flex-col border-r border-border bg-card shadow-sm transition-all duration-300 relative select-none",
+        "flex h-screen flex-col border-r border-border bg-card transition-colors relative select-none",
         isCollapsed ? "w-20" : "w-64"
       )}
     >
@@ -99,7 +99,7 @@ export function AppSidebar() {
       {/* Navigation List */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
         {!isCollapsed && (
-          <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
+          <div className="px-3 pb-2 text-[10px] font-medium text-muted-foreground/70">
             Navigation
           </div>
         )}
@@ -115,9 +115,9 @@ export function AppSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all group relative cursor-pointer",
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors group relative cursor-pointer",
                 isActive
-                  ? "bg-secondary text-foreground font-semibold"
+                  ? "bg-secondary text-foreground"
                   : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
               )}
               title={isCollapsed ? item.label : undefined}

@@ -302,8 +302,8 @@ export default function DatasetsPage() {
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full select-none">
       {/* Toast Notification Banner */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-primary/40 bg-[#141419] text-white text-xs font-mono shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <CheckCircle2 className="w-4 h-4 text-[#FF5500]" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-primary/40 bg-card text-white text-xs font-mono shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <CheckCircle2 className="w-4 h-4 text-[#C97A45]" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -312,7 +312,7 @@ export default function DatasetsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2">
               <Database className="h-6 w-6 text-primary" />
               Genomic CDS Datasets Library
             </h1>
@@ -345,7 +345,7 @@ export default function DatasetsPage() {
 
         <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
           <span>Active Selection:</span>
-          <span className="font-bold text-foreground truncate max-w-[220px]">
+          <span className="font-semibold text-foreground truncate max-w-[220px]">
             {selectedDataset.name}
           </span>
         </div>
@@ -361,7 +361,7 @@ export default function DatasetsPage() {
               onClick={() => handleSelectDataset(ds)}
               className={`p-5 cursor-pointer transition-all flex flex-col justify-between relative group ${
                 isSelected
-                  ? "border-2 border-[#FF5500] bg-card shadow-lg ring-1 ring-[#FF5500]/20"
+                  ? "border-2 border-[#C97A45] bg-card shadow-lg ring-1 ring-[#C97A45]/20"
                   : "border-border hover:border-primary/40 bg-card hover:bg-muted/30"
               }`}
             >
@@ -373,7 +373,7 @@ export default function DatasetsPage() {
                   <span className="font-mono text-xs text-muted-foreground font-medium">{ds.size}</span>
                 </div>
 
-                <h3 className="text-sm font-bold text-foreground leading-snug group-hover:text-primary transition-colors">
+                <h3 className="text-sm font-semibold text-foreground leading-snug group-hover:text-primary transition-colors">
                   {ds.name}
                 </h3>
                 <p className="text-[11px] text-muted-foreground font-mono mt-1">{ds.source}</p>
@@ -392,7 +392,7 @@ export default function DatasetsPage() {
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[10px] font-mono uppercase text-primary font-bold">
+                  <span className="text-[10px] font-mono text-primary font-semibold">
                     {isSelected ? "● Selected Corpus" : "Click to Inspect"}
                   </span>
                   <button
@@ -419,7 +419,7 @@ export default function DatasetsPage() {
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 pb-4 border-b border-border/50">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg sm:text-xl font-bold text-foreground">{selectedDataset.name}</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground">{selectedDataset.name}</h2>
               <Badge variant="secondary" className="text-[10px] font-mono">
                 {selectedDataset.status}
               </Badge>
@@ -434,7 +434,7 @@ export default function DatasetsPage() {
                   className="hover:text-foreground transition-colors p-1 cursor-pointer"
                   title="Copy Citation & DOI"
                 >
-                  {hasCopiedCitation ? <Check className="w-3 h-3 text-[#FF5500]" /> : <Copy className="w-3 h-3" />}
+                  {hasCopiedCitation ? <Check className="w-3 h-3 text-[#C97A45]" /> : <Copy className="w-3 h-3" />}
                 </button>
               </span>
             </div>
@@ -445,7 +445,7 @@ export default function DatasetsPage() {
               size="sm"
               onClick={handleRunPipeline}
               disabled={isRunningPipeline}
-              className="bg-[#FF5500] hover:bg-[#E54B00] text-white text-xs gap-1.5 cursor-pointer shadow-md"
+              className="bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] text-xs gap-1.5 cursor-pointer "
             >
               <Sparkles className="h-3.5 w-3.5" />
               {isRunningPipeline ? "Launching Pipeline..." : "Run Pipeline on this Dataset"}
@@ -462,7 +462,7 @@ export default function DatasetsPage() {
             {/* Functional Classes Filter Pill Bar */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-foreground font-semibold uppercase tracking-wider text-[11px]">
+                <span className="text-foreground font-semibold text-[11px]">
                   Annotated Functional CDS Classes
                 </span>
                 <span className="text-muted-foreground text-[11px]">
@@ -475,7 +475,7 @@ export default function DatasetsPage() {
                   onClick={() => setSelectedModeFilter("ALL")}
                   className={`px-2.5 py-1 rounded-md text-xs font-mono transition-colors cursor-pointer ${
                     selectedModeFilter === "ALL"
-                      ? "bg-[#FF5500] text-white font-bold"
+                      ? "bg-[#C97A45] text-[#1a1614] font-semibold"
                       : "bg-muted/50 text-muted-foreground hover:text-foreground border border-border"
                   }`}
                 >
@@ -495,7 +495,7 @@ export default function DatasetsPage() {
                       }}
                       className={`px-2.5 py-1 rounded-md text-xs font-mono transition-colors cursor-pointer flex items-center gap-1.5 ${
                         isFiltered
-                          ? "bg-[#FF5500] text-white font-bold"
+                          ? "bg-[#C97A45] text-[#1a1614] font-semibold"
                           : "bg-muted/50 text-muted-foreground hover:text-foreground border border-border"
                       }`}
                     >
@@ -508,11 +508,11 @@ export default function DatasetsPage() {
             </div>
 
             {/* Interactive Benchmark Waveform Oscilloscope Preview */}
-            <div className="rounded-xl border border-border bg-[#0a0a0f] p-4 shadow-xl space-y-3">
+            <div className="rounded-xl border border-border bg-muted/30 p-4 shadow-xl space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-border/40 text-xs font-mono">
                 <div className="flex items-center gap-2">
-                  <Activity className="w-3.5 h-3.5 text-[#FF5500]" />
-                  <span className="font-bold text-foreground">{activeEvent.id}</span>
+                  <Activity className="w-3.5 h-3.5 text-[#C97A45]" />
+                  <span className="font-semibold text-foreground">{activeEvent.id}</span>
                   <span className="text-muted-foreground">({activeEvent.mode})</span>
                 </div>
 
@@ -533,17 +533,17 @@ export default function DatasetsPage() {
               <div className="relative h-44 w-full flex items-center justify-center">
                 <svg viewBox="0 0 600 180" className="w-full h-full select-none">
                   {/* Grid Lines */}
-                  <line x1="45" y1="30" x2="585" y2="30" stroke="#222230" strokeWidth="1" strokeDasharray="3,3" />
-                  <line x1="45" y1="85" x2="585" y2="85" stroke="#181824" strokeWidth="0.8" strokeDasharray="2,2" />
-                  <line x1="45" y1="140" x2="585" y2="140" stroke="#222230" strokeWidth="1" strokeDasharray="3,3" />
+                  <line x1="45" y1="30" x2="585" y2="30" stroke="var(--border)" strokeWidth="1" strokeDasharray="3,3" />
+                  <line x1="45" y1="85" x2="585" y2="85" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2,2" />
+                  <line x1="45" y1="140" x2="585" y2="140" stroke="var(--border)" strokeWidth="1" strokeDasharray="3,3" />
 
-                  <text x="8" y="34" fill="#71717a" fontSize="8" fontFamily="monospace">w = 1.00</text>
-                  <text x="8" y="89" fill="#71717a" fontSize="8" fontFamily="monospace">w = 0.85</text>
-                  <text x="8" y="144" fill="#71717a" fontSize="8" fontFamily="monospace">w = 0.70</text>
+                  <text x="8" y="34" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace">w = 1.00</text>
+                  <text x="8" y="89" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace">w = 0.85</text>
+                  <text x="8" y="144" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace">w = 0.70</text>
 
                   {/* Safe Host Adaptiveness Threshold Line (w_min = 0.85) */}
-                  <line x1="45" y1="85" x2="585" y2="85" stroke="#FF5500" strokeWidth="1" strokeDasharray="3,3" opacity="0.6" />
-                  <text x="490" y="78" fill="#FF5500" fontSize="8" fontFamily="monospace">w_min = 0.85 (Safe)</text>
+                  <line x1="45" y1="85" x2="585" y2="85" stroke="#C97A45" strokeWidth="1" strokeDasharray="3,3" opacity="0.6" />
+                  <text x="490" y="78" fill="#C97A45" fontSize="8" fontFamily="monospace">w_min = 0.85 (Safe)</text>
 
                   {/* Biological Codon Relative Adaptiveness wi Curve */}
                   <path
@@ -562,7 +562,7 @@ export default function DatasetsPage() {
                       return d;
                     })()}
                     fill="none"
-                    stroke="#FF5500"
+                    stroke="#C97A45"
                     strokeWidth="1.8"
                     strokeLinecap="round"
                   />
@@ -580,8 +580,8 @@ export default function DatasetsPage() {
                         cx={x}
                         cy={y}
                         r="3"
-                        fill="#FF5500"
-                        stroke="#ffffff"
+                        fill="#C97A45"
+                        stroke="var(--foreground)"
                         strokeWidth="0.8"
                       />
                     );
@@ -594,7 +594,7 @@ export default function DatasetsPage() {
                       y1="20"
                       x2={45 + playProgress * 540}
                       y2="155"
-                      stroke="#ffffff"
+                      stroke="var(--foreground)"
                       strokeWidth="1.2"
                       opacity="0.8"
                     />
@@ -606,19 +606,19 @@ export default function DatasetsPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-border/40 text-[11px] font-mono">
                 <div className="p-2 rounded bg-muted/30">
                   <span className="text-[10px] text-muted-foreground block">Codon Adaptation (CAI)</span>
-                  <span className="text-foreground font-bold">{activeEvent.caiScore}</span>
+                  <span className="text-foreground font-semibold">{activeEvent.caiScore}</span>
                 </div>
                 <div className="p-2 rounded bg-muted/30">
                   <span className="text-[10px] text-muted-foreground block">GC Content</span>
-                  <span className="text-foreground font-bold">{activeEvent.gcContent}%</span>
+                  <span className="text-foreground font-semibold">{activeEvent.gcContent}%</span>
                 </div>
                 <div className="p-2 rounded bg-muted/30">
                   <span className="text-[10px] text-muted-foreground block">CDS Length</span>
-                  <span className="text-foreground font-bold">{activeEvent.lengthBp} bp</span>
+                  <span className="text-foreground font-semibold">{activeEvent.lengthBp} bp</span>
                 </div>
                 <div className="p-2 rounded bg-muted/30">
                   <span className="text-[10px] text-muted-foreground block">Stealth AUC</span>
-                  <span className="text-primary font-bold">{activeEvent.stealthAuc}</span>
+                  <span className="text-primary font-semibold">{activeEvent.stealthAuc}</span>
                 </div>
               </div>
             </div>
@@ -630,7 +630,7 @@ export default function DatasetsPage() {
             {/* Event List Browser Card */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-foreground font-semibold uppercase tracking-wider text-[11px]">
+                <span className="text-foreground font-semibold text-[11px]">
                   Sample CDS Construct Index ({availableEvents.length})
                 </span>
                 <span className="text-muted-foreground text-[10px]">Select construct to inspect</span>
@@ -645,20 +645,20 @@ export default function DatasetsPage() {
                       onClick={() => setActiveEvent(ev)}
                       className={`p-2.5 rounded-lg border text-xs font-mono cursor-pointer transition-all flex items-center justify-between ${
                         isActive
-                          ? "border-[#FF5500] bg-[#FF5500]/10"
+                          ? "border-[#C97A45] bg-[#C97A45]/10"
                           : "border-border hover:border-primary/40 bg-muted/20"
                       }`}
                     >
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-foreground">{ev.id}</span>
+                          <span className="font-semibold text-foreground">{ev.id}</span>
                           <span className="text-[10px] text-primary">({ev.mode})</span>
                         </div>
                         <div className="text-[10px] text-muted-foreground">{ev.timestamp}</div>
                       </div>
 
                       <div className="text-right">
-                        <span className="font-bold text-foreground block">CAI {ev.caiScore}</span>
+                        <span className="font-semibold text-foreground block">CAI {ev.caiScore}</span>
                         <span className="text-[10px] text-muted-foreground block">{ev.gcContent}% GC</span>
                       </div>
                     </div>
@@ -670,7 +670,7 @@ export default function DatasetsPage() {
             {/* Interactive Data Partitioning & Leakage Prevention Card */}
             <div className="p-4 rounded-xl border border-border bg-card space-y-4 text-xs">
               <div className="flex items-center justify-between border-b border-border/40 pb-2">
-                <span className="font-semibold text-foreground uppercase tracking-wider font-mono text-[11px]">
+                <span className="font-semibold text-foreground font-mono text-[11px]">
                   Genomic Partitioning &amp; Cross-Validation
                 </span>
                 <Badge variant="outline" className="text-[10px] font-mono text-muted-foreground border-border">
@@ -702,7 +702,7 @@ export default function DatasetsPage() {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between font-mono text-[11px]">
                   <span className="text-muted-foreground">Train Proportion:</span>
-                  <span className="text-foreground font-bold">{trainSplit}% ({Math.round((selectedDataset.eventsCount * trainSplit) / 100).toLocaleString()} CDS)</span>
+                  <span className="text-foreground font-semibold">{trainSplit}% ({Math.round((selectedDataset.eventsCount * trainSplit) / 100).toLocaleString()} CDS)</span>
                 </div>
                 <input
                   type="range"
@@ -719,7 +719,7 @@ export default function DatasetsPage() {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between font-mono text-[11px]">
                   <span className="text-muted-foreground">Validation Proportion:</span>
-                  <span className="text-zinc-300 font-bold">{valSplit}% ({Math.round((selectedDataset.eventsCount * valSplit) / 100).toLocaleString()} CDS)</span>
+                  <span className="text-zinc-300 font-semibold">{valSplit}% ({Math.round((selectedDataset.eventsCount * valSplit) / 100).toLocaleString()} CDS)</span>
                 </div>
                 <input
                   type="range"
@@ -737,12 +737,12 @@ export default function DatasetsPage() {
                 <div className="flex items-center justify-between mb-1 font-mono text-[10px] text-muted-foreground">
                   <span>Train: {trainSplit}%</span>
                   <span>Val: {valSplit}%</span>
-                  <span className="text-primary font-bold">Test: {testSplit}% ({Math.round((selectedDataset.eventsCount * testSplit) / 100).toLocaleString()})</span>
+                  <span className="text-primary font-semibold">Test: {testSplit}% ({Math.round((selectedDataset.eventsCount * testSplit) / 100).toLocaleString()})</span>
                 </div>
                 <div className="w-full h-2.5 rounded-full overflow-hidden flex bg-muted/60 border border-border/50">
                   <div className="bg-zinc-500 h-full transition-all" style={{ width: `${trainSplit}%` }} />
                   <div className="bg-zinc-700 h-full transition-all" style={{ width: `${valSplit}%` }} />
-                  <div className="bg-[#FF5500] h-full transition-all" style={{ width: `${testSplit}%` }} />
+                  <div className="bg-[#C97A45] h-full transition-all" style={{ width: `${testSplit}%` }} />
                 </div>
               </div>
 
@@ -752,7 +752,7 @@ export default function DatasetsPage() {
                 onClick={() => showToast(`Partition saved: ${trainSplit}% Train / ${valSplit}% Val / ${testSplit}% Test on ${holdoutSpecimen}`)}
                 className="w-full text-xs font-semibold gap-1.5 border-border cursor-pointer"
               >
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#FF5500]" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#C97A45]" />
                 Lock Partition Configuration
               </Button>
             </div>
@@ -765,11 +765,11 @@ export default function DatasetsPage() {
       {/* Upload New Dataset Modal */}
       {isUploadModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-lg rounded-2xl border border-border bg-[#141419] p-6 shadow-2xl space-y-5 text-xs">
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-5 text-xs">
             <div className="flex items-center justify-between pb-3 border-b border-border/60">
               <div className="flex items-center gap-2">
                 <Database className="w-5 h-5 text-primary" />
-                <h3 className="text-base font-bold text-foreground">Register New Genomic CDS Corpus</h3>
+                <h3 className="text-base font-semibold text-foreground">Register New Genomic CDS Corpus</h3>
               </div>
               <button
                 onClick={() => setIsUploadModalOpen(false)}
@@ -857,7 +857,7 @@ export default function DatasetsPage() {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-[#FF5500] hover:bg-[#E54B00] text-white text-xs font-semibold cursor-pointer"
+                  className="bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] text-xs font-semibold cursor-pointer"
                 >
                   Register Corpus
                 </Button>

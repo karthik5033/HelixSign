@@ -57,7 +57,7 @@ export default function AuthLayout({
             className="flex-1 flex flex-col relative overflow-y-auto bg-slate-50/40 dark:bg-background/95"
           >
             {isNavigating && (
-              <div className="absolute top-0 left-0 right-0 z-40 h-[2px] bg-[#FF5500]" />
+              <div className="absolute top-0 left-0 right-0 z-40 h-[2px] bg-[#C97A45]" />
             )}
             {children}
           </main>

@@ -469,6 +469,7 @@ export default function CarrierLocusMapping() {
   };
 
   const selectedSvgX = toSvgX(activeCarrier.bp);
+  const markerStride = Math.max(1, Math.ceil(carrierLoci.length / 120));
 
   // Mean construct ΔCAI calculation
   const overallCaiDelta = useMemo(() => {
@@ -483,7 +484,7 @@ export default function CarrierLocusMapping() {
       <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full pb-12 select-none">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-5">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2">
               <Dna className="h-6 w-6 text-primary" />
               Carrier Locus &amp; Codon Mapping
             </h1>
@@ -508,7 +509,7 @@ export default function CarrierLocusMapping() {
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/60 pb-5">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2">
             <Dna className="h-6 w-6 text-primary" />
             Carrier Locus &amp; Codon Mapping
           </h1>
@@ -549,12 +550,12 @@ export default function CarrierLocusMapping() {
             size="sm"
             variant="outline"
             onClick={() => setAutoFollowBeam(!autoFollowBeam)}
-            className={`text-xs font-mono gap-1.5 border-border cursor-pointer transition-all ${
-              autoFollowBeam ? "bg-primary/20 text-primary border-primary/40 font-bold" : "text-muted-foreground hover:text-foreground"
+            className={`text-xs font-mono gap-1.5 border-border cursor-pointer transition-colors ${
+              autoFollowBeam ? "bg-primary/20 text-primary border-primary/40 font-semibold" : "text-muted-foreground hover:text-foreground"
             }`}
             title="Automatically track carrier locus under the scanning beam"
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${autoFollowBeam ? "bg-primary animate-ping" : "bg-zinc-500"}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${autoFollowBeam ? "bg-primary " : "bg-zinc-500"}`} />
             {autoFollowBeam ? "Auto-Follow ON" : "Auto-Follow"}
           </Button>
 
@@ -579,21 +580,20 @@ export default function CarrierLocusMapping() {
           title="Peptide Sequence"
           value="100.0%"
           subtext="0 alterations across reading frame"
-          change="INVARIANT"
+          change="Invariant"
           isPositive={true}
           icon={<ShieldCheck className="h-4 w-4 text-zinc-400" />}
         />
         <MetricCard
           title="Carrier Density"
-          value="64 Synonymous Loci"
-          subtext={`1 carrier / ${(currentConstruct.totalLengthBp / 64).toFixed(1)} bp • HKDF Keyed`}
-          icon={<Dna className="h-4 w-4 text-[#66898B]" />}
+          value="64"
+          subtext={`Synonymous carrier loci • 1 carrier / ${(currentConstruct.totalLengthBp / 64).toFixed(1)} bp • HKDF keyed`}
         />
         <MetricCard
           title="Host CAI Score"
           value={currentConstruct.baseCai.toFixed(3)}
           subtext={`Host Concordant (ΔCAI ${overallCaiDelta})`}
-          change="OPTIMAL"
+          change="Optimal"
           isPositive={true}
           icon={<Gauge className="h-4 w-4 text-primary" />}
         />
@@ -604,9 +604,9 @@ export default function CarrierLocusMapping() {
         <button
           onClick={() => setActiveTab("architecture")}
           className={cn(
-            "pb-2.5 transition-all flex items-center gap-2 cursor-pointer font-medium",
+            "pb-2.5 transition-colors flex items-center gap-2 cursor-pointer font-medium",
             activeTab === "architecture"
-              ? "border-b-2 border-primary text-foreground font-bold"
+              ? "border-b-2 border-primary text-foreground font-semibold"
               : "text-muted-foreground hover:text-foreground"
           )}
         >
@@ -616,9 +616,9 @@ export default function CarrierLocusMapping() {
         <button
           onClick={() => setActiveTab("heatmap")}
           className={cn(
-            "pb-2.5 transition-all flex items-center gap-2 cursor-pointer font-medium",
+            "pb-2.5 transition-colors flex items-center gap-2 cursor-pointer font-medium",
             activeTab === "heatmap"
-              ? "border-b-2 border-primary text-foreground font-bold"
+              ? "border-b-2 border-primary text-foreground font-semibold"
               : "text-muted-foreground hover:text-foreground"
           )}
         >
@@ -628,9 +628,9 @@ export default function CarrierLocusMapping() {
         <button
           onClick={() => setActiveTab("capacity")}
           className={cn(
-            "pb-2.5 transition-all flex items-center gap-2 cursor-pointer font-medium",
+            "pb-2.5 transition-colors flex items-center gap-2 cursor-pointer font-medium",
             activeTab === "capacity"
-              ? "border-b-2 border-primary text-foreground font-bold"
+              ? "border-b-2 border-primary text-foreground font-semibold"
               : "text-muted-foreground hover:text-foreground"
           )}
         >
@@ -643,18 +643,18 @@ export default function CarrierLocusMapping() {
       {activeTab === "architecture" && (
         <div className="space-y-6">
           {/* CENTRAL INTERACTIVE DNA SCHEMATIC CANVAS */}
-          <div className="rounded-2xl border border-border bg-[#111116] p-6 shadow-xl relative overflow-hidden">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-xl relative overflow-hidden">
             {/* Top Toolbar */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-border/50">
               <div className="flex items-center gap-2 text-xs font-mono">
                 <span className="w-2.5 h-2.5 rounded-full bg-primary" />
-                <span className="text-foreground font-bold">{currentConstruct.name}</span>
+                <span className="text-foreground font-semibold">{currentConstruct.name}</span>
                 <span className="text-muted-foreground">• Host: {currentConstruct.organism}</span>
               </div>
 
               <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground">
                 <span>Selected Carrier Locus:</span>
-                <span className="text-primary font-bold">
+                <span className="text-primary font-semibold">
                   {activeCarrier.bp.toLocaleString()} bp (Codon #{activeCarrier.codonIndex})
                 </span>
               </div>
@@ -666,9 +666,9 @@ export default function CarrierLocusMapping() {
                 <defs>
                   {/* Subtle glow for the active carrier locus */}
                   <radialGradient id="locusGlow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#FF5500" stopOpacity="0.8" />
-                    <stop offset="60%" stopColor="#FF5500" stopOpacity="0.15" />
-                    <stop offset="100%" stopColor="#FF5500" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#C97A45" stopOpacity="0.8" />
+                    <stop offset="60%" stopColor="#C97A45" stopOpacity="0.15" />
+                    <stop offset="100%" stopColor="#C97A45" stopOpacity="0" />
                   </radialGradient>
                   <linearGradient id="dnaStrandGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="#806353" stopOpacity="0.3" />
@@ -677,7 +677,7 @@ export default function CarrierLocusMapping() {
                 </defs>
 
                 {/* 1. Scale Ruler Along Top (0 bp to totalLengthBp) */}
-                <line x1="80" y1="45" x2="920" y2="45" stroke="#2a2a38" strokeWidth="1" />
+                <line x1="80" y1="45" x2="920" y2="45" stroke="var(--border)" strokeWidth="1" />
                 {[
                   { bp: 0, label: "5' (0 bp)" },
                   { bp: Math.floor(currentConstruct.totalLengthBp * 0.16), label: `${Math.floor(currentConstruct.totalLengthBp * 0.16).toLocaleString()} bp` },
@@ -690,8 +690,8 @@ export default function CarrierLocusMapping() {
                   const tickX = toSvgX(tick.bp);
                   return (
                     <g key={`ruler-${i}`}>
-                      <line x1={tickX} y1="40" x2={tickX} y2="45" stroke="#4a4a5e" strokeWidth="1" />
-                      <text x={tickX} y="34" fill="#8e8ea0" fontSize="9" fontFamily="monospace" textAnchor="middle">
+                      <line x1={tickX} y1="40" x2={tickX} y2="45" stroke="var(--muted-foreground)" strokeWidth="1" />
+                      <text x={tickX} y="34" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace" textAnchor="middle">
                         {tick.label}
                       </text>
                     </g>
@@ -720,8 +720,8 @@ export default function CarrierLocusMapping() {
                         width={Math.max(1, width - 2)}
                         height="26"
                         rx="4"
-                        fill="#15151e"
-                        stroke={isDomainOfActiveCarrier ? "#FF5500" : isHovered ? "#7A7F80" : "#282836"}
+                        fill="var(--card)"
+                        stroke={isDomainOfActiveCarrier ? "#C97A45" : isHovered ? "#7A7F80" : "#282836"}
                         strokeWidth={isDomainOfActiveCarrier ? "1.8" : isHovered ? "1.4" : "1"}
                       />
                       <rect
@@ -730,12 +730,12 @@ export default function CarrierLocusMapping() {
                         width="3"
                         height="26"
                         rx="1"
-                        fill={isDomainOfActiveCarrier ? "#FF5500" : seg.color}
+                        fill={isDomainOfActiveCarrier ? "#C97A45" : seg.color}
                       />
                       <text
                         x={x1 + 10}
                         y="78"
-                        fill={isDomainOfActiveCarrier ? "#FF5500" : isHovered ? "#ffffff" : "#a1a1aa"}
+                        fill={isDomainOfActiveCarrier ? "#C97A45" : isHovered ? "#ffffff" : "#a1a1aa"}
                         fontSize="9"
                         fontFamily="monospace"
                         fontWeight={isDomainOfActiveCarrier || isHovered ? "bold" : "normal"}
@@ -753,17 +753,17 @@ export default function CarrierLocusMapping() {
                   width="840"
                   height="110"
                   rx="6"
-                  fill="#121219"
-                  stroke="#262634"
+                  fill="var(--card)"
+                  stroke="var(--border)"
                   strokeWidth="1.2"
                 />
 
                 {/* DNA Sense Strand (5' -> 3') & Antisense Strand (3' -> 5') Guide Ribbons */}
-                <line x1="85" y1="135" x2="915" y2="135" stroke="#252535" strokeWidth="2" strokeDasharray="4,4" />
-                <text x="88" y="130" fill="#71717a" fontSize="8" fontFamily="monospace">5&apos; SENSE STRAND</text>
+                <line x1="85" y1="135" x2="915" y2="135" stroke="var(--border)" strokeWidth="2" strokeDasharray="4,4" />
+                <text x="88" y="130" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace">5&apos; SENSE STRAND</text>
                 
-                <line x1="85" y1="190" x2="915" y2="190" stroke="#252535" strokeWidth="2" strokeDasharray="4,4" />
-                <text x="88" y="202" fill="#71717a" fontSize="8" fontFamily="monospace">3&apos; ANTISENSE STRAND</text>
+                <line x1="85" y1="190" x2="915" y2="190" stroke="var(--border)" strokeWidth="2" strokeDasharray="4,4" />
+                <text x="88" y="202" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace">3&apos; ANTISENSE STRAND</text>
 
                 {/* Hydrogen Bond Rungs connecting strands across reading frame */}
                 {[...Array(42)].map((_, idx) => {
@@ -775,14 +775,16 @@ export default function CarrierLocusMapping() {
                       y1="137"
                       x2={rungX}
                       y2="188"
-                      stroke="#1a1a24"
+                      stroke="var(--border)"
                       strokeWidth="1"
                     />
                   );
                 })}
 
                 {/* 64 HKDF-Keyed Synonymous Carrier Loci along the CDS */}
-                {carrierLoci.map((carrier) => {
+                {carrierLoci
+                  .filter((carrier, idx) => idx === activeCarrier.index || idx % markerStride === 0)
+                  .map((carrier) => {
                   const cX = toSvgX(carrier.bp);
                   const isSelected = carrier.index === activeCarrier.index;
 
@@ -797,16 +799,16 @@ export default function CarrierLocusMapping() {
                         y1="125"
                         x2={cX}
                         y2="200"
-                        stroke={isSelected ? "#FF5500" : "#ff5500"}
+                        stroke={isSelected ? "#C97A45" : "var(--muted-foreground)"}
                         strokeWidth={isSelected ? "2.5" : "1"}
-                        opacity={isSelected ? 1.0 : 0.35}
+                        opacity={isSelected ? 1.0 : 0.45}
                       />
                       <circle
                         cx={cX}
                         cy="162"
                         r={isSelected ? 5 : 2.5}
-                        fill={isSelected ? "#FF5500" : "#ff5500"}
-                        opacity={isSelected ? 1 : 0.6}
+                        fill={isSelected ? "#C97A45" : "var(--muted-foreground)"}
+                        opacity={isSelected ? 1 : 0.5}
                       />
                     </g>
                   );
@@ -819,7 +821,7 @@ export default function CarrierLocusMapping() {
                     y1="108"
                     x2={80 + ((scanTick % 360) / 360) * 840}
                     y2="218"
-                    stroke="#FF5500"
+                    stroke="#C97A45"
                     strokeWidth="1.2"
                     strokeDasharray="2,2"
                     opacity="0.75"
@@ -828,8 +830,8 @@ export default function CarrierLocusMapping() {
 
                 {/* Active Carrier Locus Highlight & Beacon */}
                 <circle cx={selectedSvgX} cy="162" r="32" fill="url(#locusGlow)" />
-                <circle cx={selectedSvgX} cy="162" r="6" fill="#FF5500" />
-                <circle cx={selectedSvgX} cy="162" r="14" fill="none" stroke="#FF5500" strokeWidth="1.2" opacity="0.6" strokeDasharray="3,3" />
+                <circle cx={selectedSvgX} cy="162" r="6" fill="#C97A45" />
+                <circle cx={selectedSvgX} cy="162" r="14" fill="none" stroke="#C97A45" strokeWidth="1.2" opacity="0.6" strokeDasharray="3,3" />
 
                 {/* Floating Locus Information Callout Badge */}
                 <g transform={`translate(${Math.max(190, Math.min(810, selectedSvgX))}, 242)`}>
@@ -839,15 +841,15 @@ export default function CarrierLocusMapping() {
                     width="360"
                     height="42"
                     rx="5"
-                    fill="#15151f"
-                    stroke="#FF5500"
+                    fill="var(--card)"
+                    stroke="#C97A45"
                     strokeWidth="1.2"
                   />
-                  <circle cx="-162" cy="21" r="4" fill="#FF5500" />
-                  <text x="-148" y="18" fill="#ffffff" fontSize="10.5" fontFamily="monospace" fontWeight="bold">
+                  <circle cx="-162" cy="21" r="4" fill="#C97A45" />
+                  <text x="-148" y="18" fill="var(--foreground)" fontSize="10.5" fontFamily="monospace" fontWeight="bold">
                     Carrier Locus #{activeCarrier.codonIndex}: {activeCarrier.aminoAcid}
                   </text>
-                  <text x="-148" y="32" fill="#a1a1aa" fontSize="9" fontFamily="monospace">
+                  <text x="-148" y="32" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">
                     Wildtype: {activeCarrier.wildtypeCodon} &rarr; Stamped: {activeCarrier.watermarkCodon} (Synonymous) &bull; RS: {activeCarrier.rsSymbolHex}
                   </text>
                 </g>
@@ -856,27 +858,27 @@ export default function CarrierLocusMapping() {
 
             {/* Bottom Invariant Guarantee Ribbon - Dynamically Bound to Selected Carrier */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-5 mt-4 border-t border-border/50 text-xs font-mono">
-              <div className="p-3 rounded-lg border border-border bg-[#15151d]">
-                <span className="text-muted-foreground block text-[10px]">SELECTED CARRIER LOCUS</span>
-                <span className="text-sm font-bold text-foreground mt-0.5 block">
+              <div className="p-3 rounded-lg border border-border bg-muted/30">
+                <span className="text-muted-foreground block text-[10px]">Selected carrier locus</span>
+                <span className="text-sm font-semibold text-foreground mt-0.5 block">
                   {activeCarrier.bp.toLocaleString()} bp ({activeCarrier.aminoAcid})
                 </span>
               </div>
-              <div className="p-3 rounded-lg border border-border bg-[#15151d]">
-                <span className="text-muted-foreground block text-[10px]">CODON SUBSTITUTION</span>
-                <span className="text-sm font-bold text-primary mt-0.5 block">
+              <div className="p-3 rounded-lg border border-border bg-muted/30">
+                <span className="text-muted-foreground block text-[10px]">Codon substitution</span>
+                <span className="text-sm font-semibold text-primary mt-0.5 block">
                   {activeCarrier.wildtypeCodon} &rarr; {activeCarrier.watermarkCodon} (Synonymous)
                 </span>
               </div>
-              <div className="p-3 rounded-lg border border-border bg-[#15151d]">
-                <span className="text-muted-foreground block text-[10px]">CODON ADAPTATION (CAI)</span>
-                <span className="text-sm font-bold text-muted-foreground mt-0.5 block">
+              <div className="p-3 rounded-lg border border-border bg-muted/30">
+                <span className="text-muted-foreground block text-[10px]">Codon adaptation (CAI)</span>
+                <span className="text-sm font-semibold text-muted-foreground mt-0.5 block">
                   w = {activeCarrier.relativeAdaptiveness.toFixed(3)} ({activeCarrier.caiDelta >= 0 ? "+" : ""}{activeCarrier.caiDelta.toFixed(3)})
                 </span>
               </div>
-              <div className="p-3 rounded-lg border border-border bg-[#15151d]">
-                <span className="text-muted-foreground block text-[10px]">REED-SOLOMON CODEWORD</span>
-                <span className="text-sm font-bold text-foreground mt-0.5 block">
+              <div className="p-3 rounded-lg border border-border bg-muted/30">
+                <span className="text-muted-foreground block text-[10px]">Reed-Solomon codeword</span>
+                <span className="text-sm font-semibold text-foreground mt-0.5 block">
                   GF(2⁸) Symbol: {activeCarrier.rsSymbolHex}
                 </span>
               </div>
@@ -886,8 +888,7 @@ export default function CarrierLocusMapping() {
           {/* 4-SEGMENT GENOMIC CARRIER DOMAIN TELEMETRY STRIP */}
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs font-mono text-muted-foreground px-1">
-              <span className="font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5 text-primary" />
+              <span className="font-medium text-foreground">
                 4-Segment Genomic Carrier Domain Telemetry (Codon Adaptation &amp; Parity)
               </span>
               <span className="text-muted-foreground">Standard Bacterial Table 11 Codec</span>
@@ -905,9 +906,9 @@ export default function CarrierLocusMapping() {
                     onMouseLeave={() => setHoveredSegment(null)}
                     onClick={() => setSelectedCarrierIndex(seg.firstCarrierIndex)}
                     className={cn(
-                      "rounded-xl border p-4 transition-all bg-[#12121a] relative overflow-hidden cursor-pointer",
+                      "rounded-xl border p-4 transition-colors bg-card relative overflow-hidden cursor-pointer",
                       isSelectedDomain
-                        ? "border-[#FF5500] ring-1 ring-[#FF5500]/40 shadow-[0_0_15px_rgba(255,85,0,0.12)]"
+                        ? "border-[#C97A45] ring-1 ring-[#C97A45]/40"
                         : isHovered
                         ? "border-primary/50"
                         : "border-border/60"
@@ -918,9 +919,9 @@ export default function CarrierLocusMapping() {
                       <div className="flex items-center gap-2">
                         <span
                           className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: isSelectedDomain ? "#FF5500" : seg.color }}
+                          style={{ backgroundColor: isSelectedDomain ? "#C97A45" : seg.color }}
                         />
-                        <span className={cn("font-mono font-bold text-xs", isSelectedDomain ? "text-[#FF5500]" : "text-foreground")}>
+                        <span className={cn("font-mono font-medium text-xs", isSelectedDomain ? "text-[#C97A45]" : "text-foreground")}>
                           {seg.id}
                         </span>
                         <span className="text-[10px] text-muted-foreground truncate">{seg.name.split(" ")[0]}</span>
@@ -929,21 +930,21 @@ export default function CarrierLocusMapping() {
                         variant="outline"
                         className={cn(
                           "font-mono text-[10px] px-1.5 py-0 border-border",
-                          isSelectedDomain ? "border-[#FF5500]/50 text-[#FF5500] font-bold" : "text-foreground"
+                          isSelectedDomain ? "border-[#C97A45]/50 text-[#C97A45] font-medium" : "text-foreground"
                         )}
                       >
-                        {seg.carrierCount} CARRIERS
+                        {seg.carrierCount} carriers
                       </Badge>
                     </div>
 
                     {/* Region */}
-                    <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono mt-2">
-                      <span className="truncate pr-2">{seg.type}</span>
-                      <span className="shrink-0">{seg.region}</span>
+                    <div className="mt-2 text-[10px] text-muted-foreground font-mono leading-relaxed">
+                      <div className="line-clamp-2">{seg.type}</div>
+                      <div className="text-muted-foreground/70 mt-0.5">{seg.region}</div>
                     </div>
 
                     {/* Codon Relative Adaptiveness Profile Mini Chart */}
-                    <div className="my-2.5 h-12 w-full bg-[#0d0d13] rounded border border-border/60 p-1 flex items-end justify-between gap-1">
+                    <div className="my-2.5 h-12 w-full bg-muted/30 rounded border border-border/60 p-1 flex items-end justify-between gap-1">
                       {seg.profile.map((val, pIdx) => {
                         const barHeight = Math.floor((val - 0.90) * 800);
                         return (
@@ -951,7 +952,7 @@ export default function CarrierLocusMapping() {
                             key={`bar-${pIdx}`}
                             className={cn(
                               "flex-1 rounded-t-sm transition-colors",
-                              isSelectedDomain ? "bg-[#FF5500]/80 hover:bg-[#FF5500]" : "bg-muted/60 hover:bg-primary"
+                              isSelectedDomain ? "bg-[#C97A45]/80 hover:bg-[#C97A45]" : "bg-muted-foreground/25 hover:bg-primary"
                             )}
                             style={{
                               height: `${Math.max(12, Math.min(38, barHeight))}px`,
@@ -966,15 +967,15 @@ export default function CarrierLocusMapping() {
                     <div className="grid grid-cols-3 gap-1 pt-1 font-mono text-[10px] text-muted-foreground">
                       <div>
                         <span className="text-[9px] text-muted-foreground block">ΔCAI</span>
-                        <span className="text-foreground font-bold">{seg.caiDelta}</span>
+                        <span className="text-foreground font-semibold">{seg.caiDelta}</span>
                       </div>
                       <div>
                         <span className="text-[9px] text-muted-foreground block">GC Skew</span>
-                        <span className="text-foreground font-bold">{seg.gcSkew}</span>
+                        <span className="text-foreground font-semibold">{seg.gcSkew}</span>
                       </div>
                       <div>
                         <span className="text-[9px] text-muted-foreground block">Translation</span>
-                        <span className="text-foreground font-bold">Invariant</span>
+                        <span className="text-foreground font-semibold">Invariant</span>
                       </div>
                     </div>
                   </div>
@@ -990,7 +991,7 @@ export default function CarrierLocusMapping() {
         <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl border border-border bg-card/60 text-xs">
             <div>
-              <h3 className="font-bold text-foreground text-sm">Codon Relative Adaptiveness &amp; GC Skew Distribution</h3>
+              <h3 className="font-semibold text-foreground text-sm">Codon Relative Adaptiveness &amp; GC Skew Distribution</h3>
               <p className="text-muted-foreground text-[11px] mt-0.5">
                 Spatial heatmap across {currentConstruct.totalLengthBp.toLocaleString()} bp coding frame verifying that watermarked synonymous substitutions remain within the high-expression host boundary.
               </p>
@@ -1003,8 +1004,8 @@ export default function CarrierLocusMapping() {
                   key={m}
                   onClick={() => setFilterMode(m)}
                   className={cn(
-                    "px-2.5 py-1 rounded text-xs font-mono uppercase transition-colors cursor-pointer",
-                    filterMode === m ? "bg-primary text-white font-bold" : "bg-secondary text-muted-foreground hover:text-foreground"
+                    "px-2.5 py-1 rounded text-xs font-mono transition-colors cursor-pointer",
+                    filterMode === m ? "bg-primary text-primary-foreground font-medium" : "bg-secondary text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {m === "all" ? "All Codons" : m === "carriers" ? "Carrier Loci" : "High CAI (w ≥ 0.95)"}
@@ -1014,7 +1015,7 @@ export default function CarrierLocusMapping() {
           </div>
 
           {/* 2D HEATMAP GRID */}
-          <div className="rounded-2xl border border-border bg-[#111116] p-6 text-xs shadow-xl">
+          <div className="rounded-2xl border border-border bg-card p-6 text-xs shadow-xl">
             <div className="flex items-center justify-between pb-3 border-b border-border/50 font-mono text-[11px] text-muted-foreground">
               <span>Reading Frame Bins (0 to {currentConstruct.totalLengthBp.toLocaleString()} bp) vs Relative Adaptiveness (w = 0.5 to 1.0)</span>
               <span className="text-primary font-semibold">Mean Construct CAI: {currentConstruct.baseCai.toFixed(3)} ({currentConstruct.organism} Concordance)</span>
@@ -1067,7 +1068,7 @@ export default function CarrierLocusMapping() {
                     <div
                       key={`heat-${i}`}
                       title={`Window [${binStartBp.toLocaleString()} - ${binEndBp.toLocaleString()} bp]: ${count} Codons (Adaptiveness Tier ${6 - row}/6)`}
-                      className={cn("rounded-sm transition-all hover:scale-110 hover:z-10 cursor-pointer", bg)}
+                      className={cn("rounded-sm transition-colors hover:scale-110 hover:z-10 cursor-pointer", bg)}
                       style={{ opacity }}
                     />
                   );
@@ -1078,7 +1079,7 @@ export default function CarrierLocusMapping() {
               <div className="flex justify-between font-mono text-[10px] text-muted-foreground pt-2 border-t border-border/40">
                 <span>5&apos; (0 bp)</span>
                 <span>{Math.floor(currentConstruct.totalLengthBp * 0.25).toLocaleString()} bp</span>
-                <span className="text-primary font-bold">{Math.floor(currentConstruct.totalLengthBp * 0.50).toLocaleString()} bp (Mid-CDS)</span>
+                <span className="text-primary font-semibold">{Math.floor(currentConstruct.totalLengthBp * 0.50).toLocaleString()} bp (Mid-CDS)</span>
                 <span>{Math.floor(currentConstruct.totalLengthBp * 0.75).toLocaleString()} bp</span>
                 <span>3&apos; ({currentConstruct.totalLengthBp.toLocaleString()} bp)</span>
               </div>
@@ -1086,23 +1087,23 @@ export default function CarrierLocusMapping() {
 
             {/* Heatmap Stats Row */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5 mt-4 border-t border-border/50 text-xs font-mono">
-              <div className="p-3 rounded-lg border border-border bg-[#14141c]">
+              <div className="p-3 rounded-lg border border-border bg-muted/30">
                 <span className="text-muted-foreground block">Domain 1: 5&apos; Initiation Stability</span>
-                <span className="text-lg font-bold text-foreground mt-1 block">
+                <span className="text-lg font-semibold text-foreground mt-1 block">
                   {carrierLoci.filter((c) => c.segmentId === "SEG-01").length} Carrier Codons
                 </span>
                 <span className="text-[10px] text-primary">ΔG = -18.4 kcal/mol (Zero Hairpin Traps)</span>
               </div>
-              <div className="p-3 rounded-lg border border-border bg-[#14141c]">
+              <div className="p-3 rounded-lg border border-border bg-muted/30">
                 <span className="text-muted-foreground block">Domain 2: Core Catalytic Fidelity</span>
-                <span className="text-lg font-bold text-foreground mt-1 block">
+                <span className="text-lg font-semibold text-foreground mt-1 block">
                   {carrierLoci.filter((c) => c.segmentId === "SEG-02" || c.segmentId === "SEG-03").length} Carrier Codons
                 </span>
                 <span className="text-[10px] text-muted-foreground">100.0% Amino Acid Invariant Proof</span>
               </div>
-              <div className="p-3 rounded-lg border border-border bg-[#14141c]">
+              <div className="p-3 rounded-lg border border-border bg-muted/30">
                 <span className="text-muted-foreground block">Domain 3: 3&apos; Termination Efficiency</span>
-                <span className="text-lg font-bold text-foreground mt-1 block">
+                <span className="text-lg font-semibold text-foreground mt-1 block">
                   {carrierLoci.filter((c) => c.segmentId === "SEG-04").length} Carrier Codons
                 </span>
                 <span className="text-[10px] text-muted-foreground">Amber Stop Preserved (Zero Readthrough)</span>
@@ -1116,18 +1117,18 @@ export default function CarrierLocusMapping() {
       {activeTab === "capacity" && (
         <div className="space-y-6">
           <div className="p-4 rounded-xl border border-border bg-card/60 text-xs">
-            <h3 className="font-bold text-foreground text-sm">Synonymous Degeneracy Matrix &amp; Shannon Capacity Curves</h3>
+            <h3 className="font-semibold text-foreground text-sm">Synonymous Degeneracy Matrix &amp; Shannon Capacity Curves</h3>
             <p className="text-muted-foreground text-[11px] mt-0.5">
               Mathematical proof of usable steganographic bit capacity per codon family under host viability constraints and Reed-Solomon RS(16,8) parity budgets.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border bg-[#111116] p-6 text-xs shadow-xl">
+          <div className="rounded-2xl border border-border bg-card p-6 text-xs shadow-xl">
             <div className="flex items-center justify-between pb-3 border-b border-border/50 font-mono text-[11px] text-muted-foreground">
               <span>Information Capacity (Bits / Codon) vs Amino Acid Degeneracy Class</span>
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-muted-foreground" /> Theoretical Max (log₂ d)</span>
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#66898B]" /> Host Viable Rate (ΔCAI ≤ 0.015)</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-muted-foreground" /> Host Viable Rate (ΔCAI ≤ 0.015)</span>
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-primary" /> Net Protected RS(16,8) Rate</span>
               </div>
             </div>
@@ -1144,37 +1145,37 @@ export default function CarrierLocusMapping() {
               <div className="ml-14 h-60 border-l border-b border-border relative">
                 <svg viewBox="0 0 600 240" className="w-full h-full overflow-visible">
                   {/* Grid Lines */}
-                  <line x1="0" y1="60" x2="600" y2="60" stroke="#23232d" strokeWidth="1" strokeDasharray="3,3" />
-                  <line x1="0" y1="120" x2="600" y2="120" stroke="#23232d" strokeWidth="1" strokeDasharray="3,3" />
-                  <line x1="0" y1="180" x2="600" y2="180" stroke="#23232d" strokeWidth="1" strokeDasharray="3,3" />
+                  <line x1="0" y1="60" x2="600" y2="60" stroke="var(--border)" strokeWidth="1" strokeDasharray="3,3" />
+                  <line x1="0" y1="120" x2="600" y2="120" stroke="var(--border)" strokeWidth="1" strokeDasharray="3,3" />
+                  <line x1="0" y1="180" x2="600" y2="180" stroke="var(--border)" strokeWidth="1" strokeDasharray="3,3" />
 
                   {/* Theoretical Max Curve (Top Gray Dashed) */}
                   <path
                     d="M 50 240 L 175 160 L 300 113 L 425 80 L 550 33"
                     fill="none"
-                    stroke="#71717a"
+                    stroke="var(--muted-foreground)"
                     strokeWidth="2"
                     strokeDasharray="4,4"
                   />
-                  <text x="500" y="28" fill="#a1a1aa" fontSize="9" fontFamily="monospace">Theoretical (log₂ d)</text>
+                  <text x="500" y="28" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">Theoretical (log₂ d)</text>
 
                   {/* Host Viable Rate Curve (Middle Cyan) */}
                   <path
                     d="M 50 240 L 175 182 L 300 150 L 425 121 L 550 84"
                     fill="none"
-                    stroke="#66898B"
+                    stroke="var(--muted-foreground)"
                     strokeWidth="2.5"
                   />
-                  <text x="490" y="78" fill="#66898B" fontSize="9" fontFamily="monospace" fontWeight="bold">Viable Rate</text>
+                  <text x="490" y="78" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace" fontWeight="bold">Viable Rate</text>
 
                   {/* Net Protected RS(16,8) Curve (Bottom Orange Accent) */}
                   <path
                     d="M 50 240 L 175 211 L 300 195 L 425 180 L 550 162"
                     fill="none"
-                    stroke="#FF5500"
+                    stroke="#C97A45"
                     strokeWidth="3"
                   />
-                  <text x="470" y="156" fill="#FF5500" fontSize="9" fontFamily="monospace" fontWeight="bold">RS(16,8) Net</text>
+                  <text x="470" y="156" fill="#C97A45" fontSize="9" fontFamily="monospace" fontWeight="bold">RS(16,8) Net</text>
 
                   {/* Data Points */}
                   {CAPACITY_CURVE.map((pt, i) => {
@@ -1185,9 +1186,9 @@ export default function CarrierLocusMapping() {
 
                     return (
                       <g key={`pt-${i}`}>
-                        <circle cx={cx} cy={cyTheoretical} r="3" fill="#71717a" />
-                        <circle cx={cx} cy={cyViable} r="3.5" fill="#66898B" />
-                        <circle cx={cx} cy={cyRs} r="4.5" fill="#FF5500" />
+                        <circle cx={cx} cy={cyTheoretical} r="3" fill="var(--muted-foreground)" />
+                        <circle cx={cx} cy={cyViable} r="3.5" fill="var(--muted-foreground)" />
+                        <circle cx={cx} cy={cyRs} r="4.5" fill="#C97A45" />
                       </g>
                     );
                   })}
@@ -1205,12 +1206,12 @@ export default function CarrierLocusMapping() {
             </div>
 
             {/* Capacity Proof Footnote */}
-            <div className="mt-6 p-4 rounded-xl border border-border/60 bg-[#14141c] text-xs font-mono text-muted-foreground leading-relaxed">
-              <div className="text-foreground font-bold mb-1 flex items-center gap-2">
+            <div className="mt-6 p-4 rounded-xl border border-border/60 bg-muted/30 text-xs font-mono text-muted-foreground leading-relaxed">
+              <div className="text-foreground font-semibold mb-1 flex items-center gap-2">
                 <Info className="w-3.5 h-3.5 text-primary" />
                 Capacity Theorem Guarantee
               </div>
-              For any coding sequence of length <span className="text-foreground font-bold">{currentConstruct.totalLengthBp.toLocaleString()} bp ({Math.floor(currentConstruct.totalLengthBp / 3).toLocaleString()} codons)</span> containing at least <span className="text-primary font-bold">64 degenerate carrier codons</span>, HelixSign embeds a <span className="text-foreground font-bold">64-bit cryptographic ownership payload</span> with <span className="text-foreground font-bold">64 bits of Reed-Solomon error correction parity</span> with <span className="text-foreground font-semibold">0.00% primary protein sequence alteration</span> and <span className="text-foreground font-bold">ΔCAI &le; 0.015</span>.
+              For any coding sequence of length <span className="text-foreground font-semibold">{currentConstruct.totalLengthBp.toLocaleString()} bp ({Math.floor(currentConstruct.totalLengthBp / 3).toLocaleString()} codons)</span> containing at least <span className="text-primary font-semibold">64 degenerate carrier codons</span>, HelixSign embeds a <span className="text-foreground font-semibold">64-bit cryptographic ownership payload</span> with <span className="text-foreground font-semibold">64 bits of Reed-Solomon error correction parity</span> with <span className="text-foreground font-semibold">0.00% primary protein sequence alteration</span> and <span className="text-foreground font-semibold">ΔCAI &le; 0.015</span>.
             </div>
           </div>
         </div>

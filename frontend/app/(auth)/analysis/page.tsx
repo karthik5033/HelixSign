@@ -265,8 +265,8 @@ export default function AnalysisPage() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-3 border-b border-border/60">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-                <Activity className="h-6 w-6 text-[#FF5500]" />
+              <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2">
+                <Activity className="h-6 w-6 text-[#C97A45]" />
                 Steganographic Pipeline Explorer
               </h1>
               <MlPipelineStatusBadge />
@@ -291,8 +291,8 @@ export default function AnalysisPage() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-3 border-b border-border/60">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              <Activity className="h-6 w-6 text-[#FF5500]" />
+            <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2">
+              <Activity className="h-6 w-6 text-[#C97A45]" />
               Steganographic Pipeline Explorer
             </h1>
             <MlPipelineStatusBadge />
@@ -347,15 +347,15 @@ export default function AnalysisPage() {
                 onClick={() => setActiveTab(stage.key as TabKey)}
                 className={`flex-1 p-2 rounded-lg text-left transition-all cursor-pointer ${
                   isActive
-                    ? "bg-[#FF5500]/15 border border-[#FF5500]/50 shadow-sm"
+                    ? "bg-[#C97A45]/15 border border-[#C97A45]/50 "
                     : "hover:bg-muted/40 border border-transparent"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`font-semibold ${isActive ? "text-[#FF5500]" : "text-foreground"}`}>
+                  <span className={`font-semibold ${isActive ? "text-[#C97A45]" : "text-foreground"}`}>
                     {stage.label}
                   </span>
-                  <CheckCircle2 className={`w-3.5 h-3.5 ${isActive ? "text-[#FF5500]" : "text-muted-foreground/30"}`} />
+                  <CheckCircle2 className={`w-3.5 h-3.5 ${isActive ? "text-[#C97A45]" : "text-muted-foreground/30"}`} />
                 </div>
                 <span className="text-[10px] text-muted-foreground font-mono block mt-0.5">
                   {stage.sub}
@@ -396,20 +396,20 @@ export default function AnalysisPage() {
               {/* 4 Primary Metric Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 shrink-0">
                 <div className="p-3 rounded-xl border border-border bg-card/80 min-w-[125px]">
-                  <span className="text-[10px] uppercase font-mono text-muted-foreground block">Peptide Match</span>
-                  <span className="text-xl font-bold font-mono text-foreground">100.0%</span>
+                  <span className="text-[10px] font-mono text-muted-foreground block">Peptide Match</span>
+                  <span className="text-xl font-semibold font-mono text-foreground">100.0%</span>
                 </div>
                 <div className="p-3 rounded-xl border border-border bg-card/80 min-w-[125px]">
-                  <span className="text-[10px] uppercase font-mono text-muted-foreground block">Stealth AUC</span>
-                  <span className="text-xl font-bold font-mono text-foreground">{rocAuc}</span>
+                  <span className="text-[10px] font-mono text-muted-foreground block">Stealth AUC</span>
+                  <span className="text-xl font-semibold font-mono text-foreground">{rocAuc}</span>
                 </div>
                 <div className="p-3 rounded-xl border border-border bg-card/80 min-w-[125px]">
-                  <span className="text-[10px] uppercase font-mono text-muted-foreground block">Carrier Loci</span>
-                  <span className="text-xl font-bold font-mono text-foreground">{carrierCount} Loci</span>
+                  <span className="text-[10px] font-mono text-muted-foreground block">Carrier Loci</span>
+                  <span className="text-xl font-semibold font-mono text-foreground">{carrierCount} Loci</span>
                 </div>
                 <div className="p-3 rounded-xl border border-border bg-card/80 min-w-[125px]">
-                  <span className="text-[10px] uppercase font-mono text-muted-foreground block">Host Delta CAI</span>
-                  <span className="text-xl font-bold font-mono text-[#FF5500]">{deltaCaiStr}</span>
+                  <span className="text-[10px] font-mono text-muted-foreground block">Host Delta CAI</span>
+                  <span className="text-xl font-semibold font-mono text-[#C97A45]">{deltaCaiStr}</span>
                 </div>
               </div>
             </div>
@@ -422,7 +422,7 @@ export default function AnalysisPage() {
               <div className="flex flex-wrap items-center justify-between pb-3 border-b border-border/50 gap-2">
                 <div>
                   <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <LineChart className="h-4 w-4 text-[#FF5500]" />
+                    <LineChart className="h-4 w-4 text-[#C97A45]" />
                     Codon Relative Adaptiveness (w_i) &amp; Carrier Loci Profile
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -449,17 +449,17 @@ export default function AnalysisPage() {
                   onMouseLeave={handleSvgMouseLeave}
                 >
                   {/* Grid Lines */}
-                  <line x1="45" y1="25" x2="680" y2="25" stroke="#222230" strokeWidth="0.8" strokeDasharray="3,3" />
-                  <line x1="45" y1="85" x2="680" y2="85" stroke="#1c1c28" strokeWidth="0.8" strokeDasharray="2,2" />
-                  <line x1="45" y1="145" x2="680" y2="145" stroke="#222230" strokeWidth="0.8" strokeDasharray="3,3" />
+                  <line x1="45" y1="25" x2="680" y2="25" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="3,3" />
+                  <line x1="45" y1="85" x2="680" y2="85" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2,2" />
+                  <line x1="45" y1="145" x2="680" y2="145" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="3,3" />
 
-                  <text x="12" y="28" fill="#71717a" fontSize="9" fontFamily="monospace">w = 1.00</text>
-                  <text x="12" y="88" fill="#71717a" fontSize="9" fontFamily="monospace">w = 0.85</text>
-                  <text x="12" y="148" fill="#71717a" fontSize="9" fontFamily="monospace">w = 0.70</text>
+                  <text x="12" y="28" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">w = 1.00</text>
+                  <text x="12" y="88" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">w = 0.85</text>
+                  <text x="12" y="148" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">w = 0.70</text>
 
                   {/* Safety Threshold (w_min = 0.85) */}
-                  <line x1="45" y1="85" x2="680" y2="85" stroke="#FF5500" strokeWidth="1" strokeDasharray="3,3" opacity="0.7" />
-                  <text x="590" y="78" fill="#FF5500" fontSize="8" fontFamily="monospace">w_min = 0.85 (Safe)</text>
+                  <line x1="45" y1="85" x2="680" y2="85" stroke="#C97A45" strokeWidth="1" strokeDasharray="3,3" opacity="0.7" />
+                  <text x="590" y="78" fill="#C97A45" fontSize="8" fontFamily="monospace">w_min = 0.85 (Safe)</text>
 
                   {/* Area fill spanning full width */}
                   <path
@@ -474,7 +474,7 @@ export default function AnalysisPage() {
                       p += " L 680 145 Z";
                       return p;
                     })()}
-                    fill="#FF5500"
+                    fill="#C97A45"
                     opacity="0.08"
                   />
 
@@ -486,7 +486,7 @@ export default function AnalysisPage() {
                       return i === 0 ? `M ${x.toFixed(1)} ${y.toFixed(1)}` : `${acc} L ${x.toFixed(1)} ${y.toFixed(1)}`;
                     }, "")}
                     fill="none"
-                    stroke="#FF5500"
+                    stroke="#C97A45"
                     strokeWidth="1.8"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -506,7 +506,7 @@ export default function AnalysisPage() {
                             cy={y.toFixed(1)}
                             r="8"
                             fill="none"
-                            stroke="#FF5500"
+                            stroke="#C97A45"
                             strokeWidth="1.2"
                             opacity="0.9"
                           />
@@ -515,8 +515,8 @@ export default function AnalysisPage() {
                           cx={x.toFixed(1)}
                           cy={y.toFixed(1)}
                           r={isNearHover ? "4.5" : "3"}
-                          fill="#FF5500"
-                          stroke="#ffffff"
+                          fill="#C97A45"
+                          stroke="var(--foreground)"
                           strokeWidth={isNearHover ? "1.2" : "0.8"}
                         />
                       </g>
@@ -532,7 +532,7 @@ export default function AnalysisPage() {
                         y1="18"
                         x2={hoverX.toFixed(1)}
                         y2="152"
-                        stroke="#FF5500"
+                        stroke="#C97A45"
                         strokeWidth="1.4"
                         strokeDasharray="2,2"
                         opacity="0.9"
@@ -542,8 +542,8 @@ export default function AnalysisPage() {
                         cx={hoverX.toFixed(1)}
                         cy={hoverY.toFixed(1)}
                         r="4"
-                        fill="#ffffff"
-                        stroke="#FF5500"
+                        fill="var(--foreground)"
+                        stroke="#C97A45"
                         strokeWidth="1.8"
                       />
                       {/* Tooltip badge above cursor */}
@@ -554,15 +554,15 @@ export default function AnalysisPage() {
                           width="96"
                           height="20"
                           rx="4"
-                          fill="#18181b"
-                          stroke="#FF5500"
+                          fill="var(--card)"
+                          stroke="#C97A45"
                           strokeWidth="0.8"
                           opacity="0.95"
                         />
                         <text
                           x="0"
                           y="-3"
-                          fill="#ffffff"
+                          fill="var(--foreground)"
                           fontSize="8.5"
                           fontFamily="monospace"
                           fontWeight="bold"
@@ -575,10 +575,10 @@ export default function AnalysisPage() {
                   )}
 
                   {/* X-Axis Labels */}
-                  <text x="45" y="175" fill="#71717a" fontSize="9" fontFamily="monospace">Codon 1 (ATG)</text>
-                  <text x="250" y="175" fill="#71717a" fontSize="9" fontFamily="monospace">Codon {Math.round(totalCodons * 0.35).toLocaleString()}</text>
-                  <text x="460" y="175" fill="#71717a" fontSize="9" fontFamily="monospace">Codon {Math.round(totalCodons * 0.70).toLocaleString()}</text>
-                  <text x="680" y="175" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="end">{totalCodons.toLocaleString()} ({construct.sequence?.slice(-3) || "TAA"})</text>
+                  <text x="45" y="175" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">Codon 1 (ATG)</text>
+                  <text x="250" y="175" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">Codon {Math.round(totalCodons * 0.35).toLocaleString()}</text>
+                  <text x="460" y="175" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">Codon {Math.round(totalCodons * 0.70).toLocaleString()}</text>
+                  <text x="680" y="175" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace" textAnchor="end">{totalCodons.toLocaleString()} ({construct.sequence?.slice(-3) || "TAA"})</text>
                 </svg>
               </div>
 
@@ -586,13 +586,13 @@ export default function AnalysisPage() {
                 <div className="flex items-center gap-2 min-h-[20px]">
                   {isHovered && currentHoveredCodon ? (
                     <>
-                      <span className="w-2 h-2 rounded-full bg-[#FF5500]" />
+                      <span className="w-2 h-2 rounded-full bg-[#C97A45]" />
                       <span className="text-foreground font-semibold">
                         Codon #{currentHoveredCodon.codonIdx + 1}:
                       </span>
                       <span>w_i = {currentHoveredCodon.wi.toFixed(3)}</span>
                       <span className="text-zinc-500">|</span>
-                      <span className={currentHoveredCodon.isCarrier ? "text-[#FF5500] font-bold" : "text-muted-foreground"}>
+                      <span className={currentHoveredCodon.isCarrier ? "text-[#C97A45] font-semibold" : "text-muted-foreground"}>
                         {currentHoveredCodon.isCarrier ? "Synonymous Carrier Locus (Modulated)" : "Invariant Host Backbone"}
                       </span>
                     </>
@@ -625,19 +625,19 @@ export default function AnalysisPage() {
               <div className="space-y-2 text-xs font-mono pt-1">
                 <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/40">
                   <span className="text-muted-foreground">Host Organism:</span>
-                  <span className="text-foreground font-bold">{construct.hostOrganism || "E. coli K-12"}</span>
+                  <span className="text-foreground font-semibold">{construct.hostOrganism || "E. coli K-12"}</span>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/40">
                   <span className="text-muted-foreground">Wildtype CAI:</span>
-                  <span className="text-foreground font-bold">{wtCai.toFixed(3)}</span>
+                  <span className="text-foreground font-semibold">{wtCai.toFixed(3)}</span>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/40">
                   <span className="text-muted-foreground">Stamped CAI:</span>
-                  <span className="text-foreground font-bold">{stampedCai.toFixed(3)} (Δ {deltaCaiStr})</span>
+                  <span className="text-foreground font-semibold">{stampedCai.toFixed(3)} (Δ {deltaCaiStr})</span>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/40">
                   <span className="text-muted-foreground">GC Content:</span>
-                  <span className="text-foreground font-bold">{wtGc}% → {stampedGc}%</span>
+                  <span className="text-foreground font-semibold">{wtGc}% → {stampedGc}%</span>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/40">
                   <span className="text-muted-foreground">Max Homopolymer:</span>
@@ -678,13 +678,13 @@ export default function AnalysisPage() {
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs font-mono">
               <div className="p-3 rounded-lg bg-muted/20 border border-border">
                 <span className="text-[10px] text-muted-foreground block">Start Codon Guard</span>
-                <span className="text-foreground font-bold mt-0.5 block">
+                <span className="text-foreground font-semibold mt-0.5 block">
                   {construct.sequence ? `${construct.sequence.slice(0, 3)} (Position #1)` : "ATG (Methionine #1)"}
                 </span>
               </div>
               <div className="p-3 rounded-lg bg-muted/20 border border-border">
                 <span className="text-[10px] text-muted-foreground block">Stop Codon Guard</span>
-                <span className="text-foreground font-bold mt-0.5 block">
+                <span className="text-foreground font-semibold mt-0.5 block">
                   {construct.sequence ? `${construct.sequence.slice(-3)} (Terminal Guard)` : "TAA (Ochre Guard)"}
                 </span>
               </div>
@@ -694,13 +694,13 @@ export default function AnalysisPage() {
               </div>
               <div className="p-3 rounded-lg bg-muted/20 border border-border">
                 <span className="text-[10px] text-muted-foreground block">Total Codons</span>
-                <span className="text-foreground font-bold mt-0.5 block">{totalCodons.toLocaleString()} Codons</span>
+                <span className="text-foreground font-semibold mt-0.5 block">{totalCodons.toLocaleString()} Codons</span>
               </div>
             </div>
 
             {/* Synonymous Codon Degeneracy Table */}
             <div className="space-y-2 pt-2">
-              <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider font-mono">
+              <h4 className="text-xs font-semibold text-foreground font-mono">
                 Host Synonymous Codon Degeneracy &amp; Translation Efficiency Table
               </h4>
               <div className="overflow-x-auto rounded-lg border border-border">
@@ -728,7 +728,7 @@ export default function AnalysisPage() {
                     ].map((row, idx) => (
                       <TableRow key={idx} className="border-border hover:bg-muted/40">
                         <TableCell className="text-xs font-semibold text-foreground">{row.aa}</TableCell>
-                        <TableCell className="text-xs font-mono text-primary font-bold">{row.deg}</TableCell>
+                        <TableCell className="text-xs font-mono text-primary font-semibold">{row.deg}</TableCell>
                         <TableCell className="text-xs font-mono text-muted-foreground">{row.codons}</TableCell>
                         <TableCell className="text-xs font-mono text-foreground">{row.freq}</TableCell>
                         <TableCell className="text-xs font-mono text-zinc-300">{row.wi}</TableCell>
@@ -772,14 +772,14 @@ export default function AnalysisPage() {
               </div>
 
               {/* Graphical Ruler */}
-              <div className="relative h-14 w-full bg-[#111116] rounded-lg border border-border/60 flex items-center px-4 overflow-hidden">
+              <div className="relative h-14 w-full bg-card rounded-lg border border-border/60 flex items-center px-4 overflow-hidden">
                 <div className="w-full h-1 bg-border/60 relative">
                   {lociToDisplay.map((m, i) => {
                     const pct = Math.min(0.98, Math.max(0.01, (m.codonIndex * 3) / totalBp));
                     return (
                       <div
                         key={i}
-                        className="absolute -top-2 w-1.5 h-5 rounded-sm bg-[#FF5500] hover:bg-white hover:scale-125 transition-all cursor-pointer shadow-sm"
+                        className="absolute -top-2 w-1.5 h-5 rounded-sm bg-[#C97A45] hover:bg-white hover:scale-125 transition-all cursor-pointer "
                         style={{ left: `${pct * 98}%` }}
                         title={`Carrier Locus #${i + 1}: Codon #${m.codonIndex} (${m.fromCodon} → ${m.toCodon})`}
                       />
@@ -799,11 +799,11 @@ export default function AnalysisPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
               <div className="p-3 rounded-lg bg-muted/20 border border-border">
                 <span className="text-[10px] text-muted-foreground block">PRNG Uniformity Entropy</span>
-                <span className="text-foreground font-bold mt-0.5 block">7.994 Bits / Byte</span>
+                <span className="text-foreground font-semibold mt-0.5 block">7.994 Bits / Byte</span>
               </div>
               <div className="p-3 rounded-lg bg-muted/20 border border-border">
                 <span className="text-[10px] text-muted-foreground block">Minimum Spacing</span>
-                <span className="text-foreground font-bold mt-0.5 block">≥ 4 Codons Separation</span>
+                <span className="text-foreground font-semibold mt-0.5 block">≥ 4 Codons Separation</span>
               </div>
               <div className="p-3 rounded-lg bg-muted/20 border border-border">
                 <span className="text-[10px] text-muted-foreground block">Key Security</span>
@@ -865,12 +865,12 @@ export default function AnalysisPage() {
                     key={idx}
                     className={`p-3 rounded-lg border text-center font-mono ${
                       sym.isParity
-                        ? "border-[#FF5500]/40 bg-[#FF5500]/10"
+                        ? "border-[#C97A45]/40 bg-[#C97A45]/10"
                         : "border-border bg-muted/30"
                     }`}
                   >
                     <span className="text-[10px] text-muted-foreground block">{sym.label}</span>
-                    <span className={`text-base font-bold mt-1 block ${sym.isParity ? "text-[#FF5500]" : "text-foreground"}`}>
+                    <span className={`text-base font-semibold mt-1 block ${sym.isParity ? "text-[#C97A45]" : "text-foreground"}`}>
                       {sym.hex}
                     </span>
                   </div>
@@ -937,7 +937,7 @@ export default function AnalysisPage() {
                       <TableCell className="text-xs font-mono font-semibold text-primary">{row.id}</TableCell>
                       <TableCell className="text-xs font-mono text-foreground">{row.pos}</TableCell>
                       <TableCell className="text-xs font-mono text-foreground font-semibold">{row.aa}</TableCell>
-                      <TableCell className="text-xs font-mono text-primary font-bold">{row.mut}</TableCell>
+                      <TableCell className="text-xs font-mono text-primary font-semibold">{row.mut}</TableCell>
                       <TableCell className="text-xs font-mono text-muted-foreground">{row.bit}</TableCell>
                       <TableCell className="text-xs font-mono text-zinc-300">{row.wi}</TableCell>
                       <TableCell className="text-xs font-mono text-foreground font-semibold text-right pr-4">{row.status}</TableCell>
@@ -974,18 +974,18 @@ export default function AnalysisPage() {
             {/* k-mer Frequency Divergence Matrix */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
               <div className="p-4 rounded-xl border border-border bg-muted/20 text-center">
-                <span className="text-[10px] text-muted-foreground block uppercase">Wildtype Host Benchmark</span>
-                <div className="text-2xl font-bold text-foreground mt-1">0.000</div>
+                <span className="text-[10px] text-muted-foreground block ">Wildtype Host Benchmark</span>
+                <div className="text-2xl font-semibold text-foreground mt-1">0.000</div>
                 <span className="text-[11px] text-muted-foreground mt-1 block">MMD Divergence Baseline</span>
               </div>
-              <div className="p-4 rounded-xl border border-border bg-[#FF5500]/10 border-[#FF5500]/40 text-center">
-                <span className="text-[10px] text-[#FF5500] block uppercase font-bold">HelixSign (WGAN Refined)</span>
-                <div className="text-2xl font-bold text-[#FF5500] mt-1">0.012</div>
+              <div className="p-4 rounded-xl border border-border bg-[#C97A45]/10 border-[#C97A45]/40 text-center">
+                <span className="text-[10px] text-[#C97A45] block font-semibold">HelixSign (WGAN Refined)</span>
+                <div className="text-2xl font-semibold text-[#C97A45] mt-1">0.012</div>
                 <span className="text-[11px] text-zinc-300 mt-1 block">Indistinguishable from Host</span>
               </div>
               <div className="p-4 rounded-xl border border-border bg-muted/20 text-center">
-                <span className="text-[10px] text-muted-foreground block uppercase">Naive Tagging Scheme</span>
-                <div className="text-2xl font-bold text-rose-400 mt-1">0.185</div>
+                <span className="text-[10px] text-muted-foreground block ">Naive Tagging Scheme</span>
+                <div className="text-2xl font-semibold text-rose-400 mt-1">0.185</div>
                 <span className="text-[11px] text-rose-400 mt-1 block">Flagged by Biosecurity Classifiers</span>
               </div>
             </div>
@@ -1020,7 +1020,7 @@ export default function AnalysisPage() {
             </div>
 
             {/* Peptide Alignment Track Display */}
-            <div className="space-y-2 p-4 rounded-xl border border-border bg-[#0d0d12] font-mono text-xs">
+            <div className="space-y-2 p-4 rounded-xl border border-border bg-muted/30 font-mono text-xs">
               <div className="flex items-center justify-between pb-2 border-b border-border/40 text-muted-foreground text-[11px]">
                 <span>Peptide Translation (Codon 1 to {Math.min(60, wtPeptide.length)})</span>
                 <span className="text-foreground font-semibold">100.0% Identity Verified</span>
@@ -1029,19 +1029,19 @@ export default function AnalysisPage() {
               <div className="space-y-1.5 pt-2 text-[11px] leading-relaxed">
                 <div className="flex items-center gap-3">
                   <span className="text-muted-foreground w-20 shrink-0">WILDTYPE:</span>
-                  <span className="text-foreground tracking-widest break-all">
+                  <span className="text-foreground break-all">
                     {wtPeptide.slice(0, 60)}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-muted-foreground w-20 shrink-0">STAMPED:</span>
-                  <span className="text-foreground font-mono tracking-widest break-all">
+                  <span className="text-foreground font-mono break-all">
                     {stampedPeptide.slice(0, 60)}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-muted-foreground w-20 shrink-0">MATCH:</span>
-                  <span className="text-emerald-400 tracking-widest break-all">
+                  <span className="text-emerald-400 break-all">
                     {peptideMatchBar.slice(0, 60)}
                   </span>
                 </div>
@@ -1051,14 +1051,14 @@ export default function AnalysisPage() {
             {/* Cryptographic Provenance Ledger Card */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono pt-2">
               <div className="p-3.5 rounded-lg border border-border bg-muted/20 space-y-2">
-                <span className="text-muted-foreground text-[10px] uppercase font-bold block">Cryptographic Construct Signature</span>
+                <span className="text-muted-foreground text-[10px] font-semibold block">Cryptographic Construct Signature</span>
                 <span className="text-foreground font-mono text-[11px] break-all block">
                   SHA-256: {construct.stampResult?.stampId ? `HS-${construct.stampResult.stampId.toUpperCase().slice(0, 16)}` : "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}
                 </span>
               </div>
 
               <div className="p-3.5 rounded-lg border border-border bg-muted/20 space-y-2">
-                <span className="text-muted-foreground text-[10px] uppercase font-bold block">Provenance Registry Seal</span>
+                <span className="text-muted-foreground text-[10px] font-semibold block">Provenance Registry Seal</span>
                 <span className="text-zinc-300 font-mono text-[11px] block">
                   Registered in Provenance Ledger &bull; Immutable Timestamp: {construct.stampResult?.createdAt ? new Date(construct.stampResult.createdAt).toUTCString() : "2026-11-13 00:58 UTC"}
                 </span>

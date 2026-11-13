@@ -20,7 +20,6 @@ export function MetricCard({
   change,
   isPositive = true,
   subtext,
-  icon,
   className,
   showTrendIcon,
 }: MetricCardProps) {
@@ -29,23 +28,18 @@ export function MetricCard({
   const shouldShowTrend = showTrendIcon ?? hasTrendPrefix;
 
   return (
-    <Card className={cn("min-h-[170px] overflow-hidden border border-border bg-card shadow-sm hover:border-border/80 transition-all", className)}>
+    <Card className={cn("min-h-[170px] overflow-hidden border border-border bg-card transition-colors hover:border-border/80", className)}>
       <CardContent className="p-5 flex flex-col justify-between h-full">
-        {/* Top Header: Title and Icon */}
+        {/* Top Header: Title */}
         <div className="flex items-start justify-between gap-3 min-h-10">
-          <span className="text-xs leading-5 font-semibold uppercase tracking-wider text-muted-foreground" title={title}>
+          <span className="text-xs leading-5 font-medium text-muted-foreground" title={title}>
             {title}
           </span>
-          {icon && (
-            <div className="p-1.5 rounded-lg bg-secondary/50 text-muted-foreground shrink-0 flex items-center justify-center">
-              {icon}
-            </div>
-          )}
         </div>
 
         {/* Value and Change Badge - flex-wrap with gap so they NEVER overlap */}
         <div className="mt-4 flex items-center justify-between gap-3 flex-wrap">
-          <div className="min-w-0 text-2xl sm:text-[28px] font-bold tracking-tight text-foreground font-mono leading-tight whitespace-nowrap">
+          <div className="min-w-0 text-2xl sm:text-[28px] font-semibold tracking-tight text-foreground font-mono leading-tight whitespace-nowrap">
             {value}
           </div>
           {change && (

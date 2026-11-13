@@ -38,7 +38,7 @@ export function MlPipelineStatusBadge({ compact = false }: { compact?: boolean }
   if (compact) {
     return (
       <div className="flex items-center gap-1.5 text-[11px] font-mono px-2 py-0.5 rounded-md border border-border/60 bg-muted/20">
-        <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
+        <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-emerald-500" : "bg-amber-500"}`} />
         <span className="text-muted-foreground">ML Engine:</span>
         <span className={isConnected ? "text-emerald-400 font-semibold" : "text-amber-400 font-semibold"}>
           {loading ? "Checking..." : isConnected ? "Active (Port 8000)" : "Local Fallback"}
@@ -50,7 +50,7 @@ export function MlPipelineStatusBadge({ compact = false }: { compact?: boolean }
   return (
     <div className="flex items-center gap-2 p-2 rounded-lg border border-border/60 bg-card/60 backdrop-blur text-xs">
       <div className="flex items-center gap-1.5">
-        <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
+        <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-emerald-500" : "bg-amber-500"}`} />
         <span className="font-mono text-muted-foreground">FastAPI v{health?.version || "0.1.0"}:</span>
         <Badge
           variant="outline"

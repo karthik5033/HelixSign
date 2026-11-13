@@ -75,7 +75,7 @@ export default function AssessmentReportsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2">
               <FileText className="h-6 w-6 text-primary" />
               Provenance Certificates &amp; Forensic Audit Reports
             </h1>
@@ -90,7 +90,7 @@ export default function AssessmentReportsPage() {
           <Button
             size="sm"
             onClick={() => handleDownloadPdf(activeReport)}
-            className="bg-[#FF5500] hover:bg-[#E54B00] text-white gap-1.5 text-xs shadow-sm cursor-pointer"
+            className="bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] gap-1.5 text-xs cursor-pointer"
           >
             <Download className="h-3.5 w-3.5" />
             Download PDF
@@ -174,17 +174,17 @@ export default function AssessmentReportsPage() {
                       onClick={() => setActiveReport(rep)}
                       className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${
                         isSelected
-                          ? "border-[#FF5500] bg-[#FF5500]/10 shadow-sm"
+                          ? "border-[#C97A45] bg-[#C97A45]/10 "
                           : "border-border hover:border-primary/40 bg-card/60 hover:bg-muted/40"
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-[11px] text-primary font-bold">
+                        <span className="font-mono text-[11px] text-primary font-semibold">
                           {rep.id}
                         </span>
                         <Badge
                           variant={isCritical ? "destructive" : isModerate ? "secondary" : "outline"}
-                          className={`text-[10px] uppercase font-bold ${
+                          className={`text-[10px] font-semibold ${
                             !isCritical && !isModerate ? "border-border text-muted-foreground bg-muted/20" : ""
                           }`}
                         >
@@ -192,7 +192,7 @@ export default function AssessmentReportsPage() {
                         </Badge>
                       </div>
 
-                      <h4 className="text-xs font-bold text-foreground mt-1.5 leading-snug">
+                      <h4 className="text-xs font-semibold text-foreground mt-1.5 leading-snug">
                         {rep.title}
                       </h4>
 
@@ -210,7 +210,7 @@ export default function AssessmentReportsPage() {
           {/* Card 2: Digital Audit Verification & Calibration Seal */}
           <Card className="border border-border bg-card">
             <CardHeader className="pb-3 border-b border-border/50">
-              <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-primary" />
                 Digital Biosecurity &amp; Provenance Protocol
               </CardTitle>
@@ -218,11 +218,11 @@ export default function AssessmentReportsPage() {
             <CardContent className="pt-3 space-y-2.5 text-xs font-mono">
               <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50">
                 <span className="text-[11px] text-muted-foreground">Standard</span>
-                <span className="text-[11px] font-bold text-foreground">ISO/IEC 27001 &bull; NIST Bio-ECC</span>
+                <span className="text-[11px] font-semibold text-foreground">ISO/IEC 27001 &bull; NIST Bio-ECC</span>
               </div>
               <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50">
                 <span className="text-[11px] text-muted-foreground">Audit Signature</span>
-                <span className="text-[11px] text-foreground font-mono font-bold">{activeReport.auditHash || "SHA-256: 4e91b0c9a41e8f23"}</span>
+                <span className="text-[11px] text-foreground font-mono font-semibold">{activeReport.auditHash || "SHA-256: 4e91b0c9a41e8f23"}</span>
               </div>
               <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50">
                 <span className="text-[11px] text-muted-foreground">Model Engine</span>
@@ -259,14 +259,14 @@ export default function AssessmentReportsPage() {
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-mono tracking-wider text-primary uppercase font-bold">
+                    <span className="text-[11px] font-mono text-primary font-semibold">
                       HelixSign Forensic Biosecurity Lab
                     </span>
                     <Badge variant="outline" className="text-[10px] font-mono border-border text-muted-foreground">
                       OFFICIAL PROVENANCE CERTIFICATE
                     </Badge>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+                  <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">
                     {activeReport.title}
                   </h2>
                   <p className="text-xs text-muted-foreground">
@@ -278,7 +278,7 @@ export default function AssessmentReportsPage() {
                   <Button
                     size="sm"
                     onClick={() => handleDownloadPdf(activeReport)}
-                    className="bg-[#FF5500] hover:bg-[#E54B00] text-white gap-1.5 text-xs h-8 shadow-sm cursor-pointer"
+                    className="bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] gap-1.5 text-xs h-8 cursor-pointer"
                   >
                     <Download className="h-3.5 w-3.5" />
                     PDF
@@ -298,21 +298,21 @@ export default function AssessmentReportsPage() {
               {/* Key Technical Metadata Strip */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-lg bg-muted/30 border border-border/60 text-xs font-mono">
                 <div>
-                  <span className="text-[10px] text-muted-foreground uppercase block font-semibold">Certificate ID</span>
-                  <span className="font-bold text-foreground text-xs mt-0.5 block">{activeReport.id}</span>
+                  <span className="text-[10px] text-muted-foreground block font-semibold">Certificate ID</span>
+                  <span className="font-semibold text-foreground text-xs mt-0.5 block">{activeReport.id}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-muted-foreground uppercase block font-semibold">Generated (UTC)</span>
+                  <span className="text-[10px] text-muted-foreground block font-semibold">Generated (UTC)</span>
                   <span className="font-medium text-foreground text-xs mt-0.5 block">{activeReport.dateGenerated}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-muted-foreground uppercase block font-semibold">Lead Investigator</span>
+                  <span className="text-[10px] text-muted-foreground block font-semibold">Lead Investigator</span>
                   <span className="font-medium text-foreground text-xs mt-0.5 block truncate" title={activeReport.author}>
                     {activeReport.author}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-muted-foreground uppercase block font-semibold">Compliance Standard</span>
+                  <span className="text-[10px] text-muted-foreground block font-semibold">Compliance Standard</span>
                   <span className="font-medium text-foreground text-xs mt-0.5 block">ISO/IEC 27001 &bull; NIST</span>
                 </div>
               </div>
@@ -322,17 +322,17 @@ export default function AssessmentReportsPage() {
             <div
               className={`p-4 rounded-xl border ${
                 activeReport.precursorRisk === "Critical"
-                  ? "border-[#FF5500]/40 bg-[#FF5500]/10"
+                  ? "border-[#C97A45]/40 bg-[#C97A45]/10"
                   : "border-border bg-muted/20"
               }`}
             >
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs uppercase font-mono font-bold tracking-wider text-foreground">
+                <span className="text-xs font-mono font-semibold text-foreground">
                   Executive Provenance Determination
                 </span>
                 <Badge
                   variant={activeReport.precursorRisk === "Critical" ? "destructive" : "outline"}
-                  className="text-xs font-bold font-mono"
+                  className="text-xs font-semibold font-mono"
                 >
                   {activeReport.precursorRisk === "Low" ? "Verified Invariant" : `${activeReport.precursorRisk} Status`}
                 </Badge>
@@ -344,43 +344,43 @@ export default function AssessmentReportsPage() {
 
             {/* Quantitative Pipeline Stage Verifications (4 Equal-Height Cards) */}
             <div className="space-y-3 text-xs">
-              <h3 className="font-semibold text-foreground uppercase tracking-wider font-mono text-[11px] pb-1 border-b border-border/50">
+              <h3 className="font-semibold text-foreground font-mono text-[11px] pb-1 border-b border-border/50">
                 Quantitative Pipeline Stage Verifications
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="p-3.5 rounded-lg border border-border bg-muted/20 flex flex-col justify-between">
-                  <span className="text-[10px] font-mono text-muted-foreground block uppercase font-semibold">
+                  <span className="text-[10px] font-mono text-muted-foreground block font-semibold">
                     Primary Verification Status
                   </span>
-                  <span className="text-xs font-bold text-foreground block mt-1">
+                  <span className="text-xs font-semibold text-foreground block mt-1">
                     {activeReport.primaryDamageMode}
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-lg border border-border bg-muted/20 flex flex-col justify-between">
-                  <span className="text-[10px] font-mono text-muted-foreground block uppercase font-semibold">
+                  <span className="text-[10px] font-mono text-muted-foreground block font-semibold">
                     Codon Manifold Cycles
                   </span>
-                  <span className="text-xs font-bold text-foreground block mt-1">
+                  <span className="text-xs font-semibold text-foreground block mt-1">
                     {activeReport.h1Loops || 16} Synonymous Equivalence Loops (Stealth AUC {activeReport.maxPersistence || 0.505})
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-lg border border-border bg-muted/20 flex flex-col justify-between">
-                  <span className="text-[10px] font-mono text-muted-foreground block uppercase font-semibold">
+                  <span className="text-[10px] font-mono text-muted-foreground block font-semibold">
                     Carrier Codon Loci
                   </span>
-                  <span className="text-xs font-bold text-foreground block mt-1">
+                  <span className="text-xs font-semibold text-foreground block mt-1">
                     {activeReport.changepoints || 64} Carrier Loci (RS(16,8) GF(2⁸) Margin Intact)
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-lg border border-border bg-muted/20 flex flex-col justify-between">
-                  <span className="text-[10px] font-mono text-muted-foreground block uppercase font-semibold">
+                  <span className="text-[10px] font-mono text-muted-foreground block font-semibold">
                     Sequence Translation Verification
                   </span>
-                  <span className="text-xs font-bold text-foreground block mt-1">
+                  <span className="text-xs font-semibold text-foreground block mt-1">
                     Identity: {((activeReport.f1Score || 1.0) * 100).toFixed(1)}% (0 alterations)
                   </span>
                 </div>
@@ -389,7 +389,7 @@ export default function AssessmentReportsPage() {
 
             {/* Carrier Loci Telemetry Table */}
             <div className="space-y-3 text-xs">
-              <h3 className="font-semibold text-foreground uppercase tracking-wider font-mono text-[11px] pb-1 border-b border-border/50">
+              <h3 className="font-semibold text-foreground font-mono text-[11px] pb-1 border-b border-border/50">
                 4-Segment Carrier Locus Mapping &amp; Parity Verification
               </h3>
 
@@ -408,7 +408,7 @@ export default function AssessmentReportsPage() {
                   <TableBody>
                     {PROVENANCE_CHANNELS.map((ch) => (
                       <TableRow key={ch.id} className="text-xs font-mono">
-                        <TableCell className="font-bold text-primary">{ch.id}</TableCell>
+                        <TableCell className="font-semibold text-primary">{ch.id}</TableCell>
                         <TableCell className="font-sans font-medium text-foreground">{ch.name}</TableCell>
                         <TableCell className="text-muted-foreground">{ch.deltaT}</TableCell>
                         <TableCell className="text-foreground">{ch.amp}</TableCell>
@@ -431,7 +431,7 @@ export default function AssessmentReportsPage() {
 
             {/* Actionable Forensic Recommendations */}
             <div className="space-y-2 text-xs">
-              <h3 className="font-semibold text-foreground uppercase tracking-wider font-mono text-[11px] pb-1 border-b border-border/50">
+              <h3 className="font-semibold text-foreground font-mono text-[11px] pb-1 border-b border-border/50">
                 Actionable Forensic Recommendations
               </h3>
               <ul className="space-y-2 text-muted-foreground leading-relaxed">

@@ -72,7 +72,7 @@ export default function ModelComparisonPage() {
       <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2">
               <GitCompare className="h-6 w-6 text-primary" />
               Stealth Detector &amp; Watermark Benchmarking
             </h1>
@@ -98,7 +98,7 @@ export default function ModelComparisonPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2">
             <GitCompare className="h-6 w-6 text-primary" />
             Stealth Detector &amp; Watermark Benchmarking
           </h1>
@@ -121,28 +121,28 @@ export default function ModelComparisonPage() {
       {/* Model Cards Triad */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* HelixSign */}
-        <Card className="border-2 border-[#FF5500] bg-card p-5 relative overflow-hidden shadow-lg h-full flex flex-col justify-between">
+        <Card className="border-2 border-[#C97A45] bg-card p-5 relative overflow-hidden shadow-lg h-full flex flex-col justify-between">
           <div>
-            <div className="absolute top-0 right-0 bg-[#FF5500] text-white text-[10px] font-bold px-3 py-0.5 rounded-bl-lg uppercase tracking-wider">
+            <div className="absolute top-0 right-0 bg-[#C97A45] text-[#1a1614] text-[10px] font-semibold px-3 py-0.5 rounded-bl-lg ">
               Proposed (Optimal)
             </div>
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-[#FF5500]/20 text-[#FF5500] flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-lg bg-[#C97A45]/20 text-[#C97A45] flex items-center justify-center font-semibold">
                 H
               </div>
               <div>
-                <h3 className="text-sm font-bold text-foreground">HelixSign (WGAN-GP + RS ECC)</h3>
+                <h3 className="text-sm font-semibold text-foreground">HelixSign (WGAN-GP + RS ECC)</h3>
                 <span className="text-[10px] font-mono text-muted-foreground">Keyed HKDF + WGAN Refiner + RS(16,8)</span>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
               <div className="p-2 rounded bg-muted/30">
                 <span className="text-[10px] text-muted-foreground block font-mono">Protein Match</span>
-                <span className="text-lg font-bold font-mono text-foreground">100.0%</span>
+                <span className="text-lg font-semibold font-mono text-foreground">100.0%</span>
               </div>
               <div className="p-2 rounded bg-muted/30">
                 <span className="text-[10px] text-muted-foreground block font-mono">Stealth AUC</span>
-                <span className="text-lg font-bold font-mono text-foreground">0.505</span>
+                <span className="text-lg font-semibold font-mono text-foreground">0.505</span>
               </div>
             </div>
             <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed">
@@ -155,22 +155,22 @@ export default function ModelComparisonPage() {
         <Card className="border border-border bg-card p-5 h-full flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-secondary text-muted-foreground flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-lg bg-secondary text-muted-foreground flex items-center justify-center font-semibold">
                 N
               </div>
               <div>
-                <h3 className="text-sm font-bold text-foreground">Naive Codebook Tagging</h3>
+                <h3 className="text-sm font-semibold text-foreground">Naive Codebook Tagging</h3>
                 <span className="text-[10px] font-mono text-muted-foreground">Direct Bit-to-Base Mapping</span>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
               <div className="p-2 rounded bg-muted/30">
                 <span className="text-[10px] text-muted-foreground block font-mono">Protein Match</span>
-                <span className="text-lg font-bold font-mono text-foreground">91.4%</span>
+                <span className="text-lg font-semibold font-mono text-foreground">91.4%</span>
               </div>
               <div className="p-2 rounded bg-muted/30">
                 <span className="text-[10px] text-muted-foreground block font-mono">Stealth AUC</span>
-                <span className="text-lg font-bold font-mono text-primary font-semibold">0.998</span>
+                <span className="text-lg font-semibold font-mono text-primary font-semibold">0.998</span>
               </div>
             </div>
             <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed">
@@ -183,22 +183,22 @@ export default function ModelComparisonPage() {
         <Card className="border border-border bg-card p-5 h-full flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-secondary text-muted-foreground flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-lg bg-secondary text-muted-foreground flex items-center justify-center font-semibold">
                 B
               </div>
               <div>
-                <h3 className="text-sm font-bold text-foreground">Non-Coding Barcode Insertion</h3>
+                <h3 className="text-sm font-semibold text-foreground">Non-Coding Barcode Insertion</h3>
                 <span className="text-[10px] font-mono text-muted-foreground">Synthetic Exogenous Insert</span>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
               <div className="p-2 rounded bg-muted/30">
                 <span className="text-[10px] text-muted-foreground block font-mono">Protein Match</span>
-                <span className="text-lg font-bold font-mono text-foreground">88.2%</span>
+                <span className="text-lg font-semibold font-mono text-foreground">88.2%</span>
               </div>
               <div className="p-2 rounded bg-muted/30">
                 <span className="text-[10px] text-muted-foreground block font-mono">Stealth AUC</span>
-                <span className="text-lg font-bold font-mono text-primary font-semibold">0.985</span>
+                <span className="text-lg font-semibold font-mono text-primary font-semibold">0.985</span>
               </div>
             </div>
             <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed">
@@ -230,7 +230,7 @@ export default function ModelComparisonPage() {
                   }}
                   className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                     activeConstruct === "helixsign"
-                      ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                      ? "bg-primary text-primary-foreground font-semibold "
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -243,7 +243,7 @@ export default function ModelComparisonPage() {
                   }}
                   className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                     activeConstruct === "naive"
-                      ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                      ? "bg-primary text-primary-foreground font-semibold "
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -254,7 +254,7 @@ export default function ModelComparisonPage() {
                 size="sm"
                 onClick={handleRunStealthCheck}
                 disabled={isRunningStealth}
-                className="bg-[#FF5500] hover:bg-[#E54B00] text-white text-xs gap-1.5 font-mono cursor-pointer"
+                className="bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] text-xs gap-1.5 font-mono cursor-pointer"
               >
                 {isRunningStealth ? "Scoring with Critic..." : "Score with Trained Critic"}
               </Button>
@@ -264,10 +264,10 @@ export default function ModelComparisonPage() {
         <CardContent className="pt-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="p-3 rounded-lg border border-border bg-secondary/20">
-              <span className="text-[10px] font-mono text-muted-foreground block uppercase">
+              <span className="text-[10px] font-mono text-muted-foreground block ">
                 k-mer XGBoost Probability
               </span>
-              <span className="text-xl font-bold font-mono text-foreground block mt-1">
+              <span className="text-xl font-semibold font-mono text-foreground block mt-1">
                 {liveStealthResult ? liveStealthResult.kmerProbability.toFixed(4) : activeConstruct === "helixsign" ? "0.4917" : "0.9954"}
               </span>
               <span className="text-[11px] font-mono text-muted-foreground block mt-0.5">
@@ -278,10 +278,10 @@ export default function ModelComparisonPage() {
             </div>
 
             <div className="p-3 rounded-lg border border-border bg-secondary/20">
-              <span className="text-[10px] font-mono text-muted-foreground block uppercase">
+              <span className="text-[10px] font-mono text-muted-foreground block ">
                 1D CNN Detector Score
               </span>
-              <span className="text-xl font-bold font-mono text-foreground block mt-1">
+              <span className="text-xl font-semibold font-mono text-foreground block mt-1">
                 {liveStealthResult ? liveStealthResult.cnnProbability.toFixed(4) : activeConstruct === "helixsign" ? "0.5119" : "0.9936"}
               </span>
               <span className="text-[11px] font-mono text-muted-foreground block mt-0.5">
@@ -292,15 +292,15 @@ export default function ModelComparisonPage() {
             </div>
 
             <div className="p-3 rounded-lg border border-border bg-secondary/20">
-              <span className="text-[10px] font-mono text-muted-foreground block uppercase">
+              <span className="text-[10px] font-mono text-muted-foreground block ">
                 Biosecurity Critic Verdict
               </span>
               <Badge
                 variant="outline"
                 className={`mt-2 font-mono text-xs ${
                   (liveStealthResult?.kmerProbability ?? (activeConstruct === "helixsign" ? 0.49 : 0.99)) < 0.6
-                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-bold"
-                    : "border-rose-500/40 bg-rose-500/10 text-rose-400 font-bold"
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-semibold"
+                    : "border-rose-500/40 bg-rose-500/10 text-rose-400 font-semibold"
                 }`}
               >
                 {(liveStealthResult?.kmerProbability ?? (activeConstruct === "helixsign" ? 0.49 : 0.99)) < 0.6
@@ -331,7 +331,7 @@ export default function ModelComparisonPage() {
             <TableHeader>
               <TableRow className="border-border">
                 <TableHead className="text-xs">Evaluation Metric</TableHead>
-                <TableHead className="text-xs text-[#FF5500] font-bold">HelixSign (Proposed)</TableHead>
+                <TableHead className="text-xs text-[#C97A45] font-semibold">HelixSign (Proposed)</TableHead>
                 <TableHead className="text-xs text-muted-foreground">Naive Codebook Tagging</TableHead>
                 <TableHead className="text-xs text-muted-foreground">Exogenous Barcode</TableHead>
                 <TableHead className="text-xs text-right pr-4">Advantage</TableHead>
@@ -343,7 +343,7 @@ export default function ModelComparisonPage() {
                   <TableCell className="text-xs font-semibold text-foreground">
                     {row.metric}
                   </TableCell>
-                  <TableCell className="text-xs font-mono font-bold text-[#FF5500] bg-[#FF5500]/5">
+                  <TableCell className="text-xs font-mono font-semibold text-[#C97A45] bg-[#C97A45]/5">
                     {row.helixSign}
                   </TableCell>
                   <TableCell className="text-xs font-mono text-muted-foreground">

@@ -420,7 +420,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
               onClick={() => setSelectedCategory(cat)}
               className={`px-2.5 py-1 rounded-md whitespace-nowrap transition-colors cursor-pointer ${
                 selectedCategory === cat
-                  ? "bg-[#FF5500] text-white font-bold"
+                  ? "bg-[#FF5500] text-white font-semibold"
                   : "bg-muted/30 text-muted-foreground hover:text-foreground border border-border/50"
               }`}
             >
@@ -497,7 +497,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
             <span>&crarr; to select</span>
             <span>ESC to close</span>
           </div>
-          <span className="text-primary font-bold">HelixSign Deep Search</span>
+          <span className="text-primary font-semibold">HelixSign Deep Search</span>
         </div>
       </div>
     </div>

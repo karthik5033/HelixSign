@@ -309,7 +309,7 @@ export default function RealTimeMonitorPage() {
       <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full font-sans select-none pb-12">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2.5">
               <Radio className="h-5 w-5 text-primary" />
               <span>Channel Stress Lab &amp; Real-Time Noise Simulator</span>
             </h1>
@@ -335,7 +335,7 @@ export default function RealTimeMonitorPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/60">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+          <h1 className="text-xl sm:text-2xl font-serif font-medium tracking-tight text-foreground flex items-center gap-2.5">
             <Radio className="h-5 w-5 text-primary" />
             <span>Channel Stress Lab &amp; Real-Time Noise Simulator</span>
           </h1>
@@ -350,7 +350,7 @@ export default function RealTimeMonitorPage() {
             size="sm"
             onClick={handleRunLiveStress}
             disabled={isRunningLiveStress}
-            className="h-8 text-xs font-mono gap-1.5 cursor-pointer bg-[#FF5500] hover:bg-[#E54B00] text-white shadow-sm"
+            className="h-8 text-xs font-mono gap-1.5 cursor-pointer bg-[#C97A45] hover:bg-[#B5673A] text-[#1a1614] "
           >
             {isRunningLiveStress ? (
               <>
@@ -371,8 +371,8 @@ export default function RealTimeMonitorPage() {
             onClick={handleTriggerBurst}
             className={`h-8 text-xs font-mono gap-1.5 cursor-pointer transition-all ${
               burstCountdown > 0
-                ? "bg-[#FF5500]/20 border-[#FF5500] text-[#FF5500] shadow-[0_0_12px_rgba(255,85,0,0.3)] font-bold"
-                : "border-[#FF5500]/40 text-[#FF5500] hover:bg-[#FF5500]/10"
+                ? "bg-[#C97A45]/20 border-[#C97A45] text-[#C97A45] font-semibold"
+                : "border-[#C97A45]/40 text-[#C97A45] hover:bg-[#C97A45]/10"
             }`}
             title="Inject simulated biological mutation burst into the channel"
           >
@@ -442,7 +442,7 @@ export default function RealTimeMonitorPage() {
               onClick={() => setDisplayMode("recovery")}
               className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors cursor-pointer ${
                 displayMode === "recovery"
-                  ? "bg-card text-foreground font-semibold shadow-sm"
+                  ? "bg-card text-foreground font-semibold "
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -452,7 +452,7 @@ export default function RealTimeMonitorPage() {
               onClick={() => setDisplayMode("kmer")}
               className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors cursor-pointer ${
                 displayMode === "kmer"
-                  ? "bg-card text-foreground font-semibold shadow-sm"
+                  ? "bg-card text-foreground font-semibold "
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -467,7 +467,7 @@ export default function RealTimeMonitorPage() {
                 onClick={() => setWindowSize(size)}
                 className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors cursor-pointer ${
                   windowSize === size
-                    ? "bg-card text-foreground font-semibold shadow-sm"
+                    ? "bg-card text-foreground font-semibold "
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -479,11 +479,11 @@ export default function RealTimeMonitorPage() {
       </div>
 
       {/* Manual Noise Stress Slider */}
-      <div className="p-3.5 rounded-xl border border-border/80 bg-[#121218] flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs font-mono">
+      <div className="p-3.5 rounded-xl border border-border/80 bg-muted/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs font-mono">
         <div className="flex items-center gap-2">
-          <Sliders className="w-4 h-4 text-[#FF5500]" />
-          <span className="text-foreground font-bold">Interactive Mutation Noise Injector:</span>
-          <span className="text-[#FF5500] font-bold">{activeBaseNoise.toFixed(1)}% Noise</span>
+          <Sliders className="w-4 h-4 text-[#C97A45]" />
+          <span className="text-foreground font-semibold">Interactive Mutation Noise Injector:</span>
+          <span className="text-[#C97A45] font-semibold">{activeBaseNoise.toFixed(1)}% Noise</span>
           {manualNoiseOverride !== null && (
             <button
               onClick={() => setManualNoiseOverride(null)}
@@ -503,14 +503,14 @@ export default function RealTimeMonitorPage() {
             step="0.5"
             value={activeBaseNoise}
             onChange={(e) => setManualNoiseOverride(parseFloat(e.target.value))}
-            className="w-full accent-[#FF5500] cursor-pointer"
+            className="w-full accent-[#C97A45] cursor-pointer"
           />
           <span className="text-[10px] text-muted-foreground">30.0%</span>
         </div>
       </div>
 
       {/* REAL-TIME DUAL-AXIS OSCILLOSCOPE CANVAS */}
-      <Card className="border border-border bg-[#0a0a0e] p-5 shadow-2xl relative overflow-hidden">
+      <Card className="border border-border bg-muted/30 p-5 shadow-2xl relative overflow-hidden">
         {/* Scope Header */}
         <div className="flex flex-wrap items-center justify-between pb-3 border-b border-border/40 text-xs font-mono gap-2">
           <div className="flex items-center gap-2">
@@ -539,35 +539,35 @@ export default function RealTimeMonitorPage() {
               {/* Scope Grid Background */}
               <defs>
                 <pattern id="scopeGrid" width="40" height="30" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 30" fill="none" stroke="#161622" strokeWidth="0.8" />
+                  <path d="M 40 0 L 0 0 0 30" fill="none" stroke="var(--border)" strokeWidth="0.8" />
                 </pattern>
                 <linearGradient id="rsRecoveryGlow" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#FF5500" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#FF5500" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor="#C97A45" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#C97A45" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
               <rect width="800" height="240" fill="url(#scopeGrid)" />
 
               {/* Horizontal Grid Lines */}
-              <line x1="0" y1="30" x2="800" y2="30" stroke="#2a2a3e" strokeWidth="1" strokeDasharray="3 3" />
-              <line x1="0" y1="77" x2="800" y2="77" stroke="#1e1e2c" strokeWidth="0.8" strokeDasharray="2 2" />
-              <line x1="0" y1="125" x2="800" y2="125" stroke="#1e1e2c" strokeWidth="0.8" strokeDasharray="2 2" />
-              <line x1="0" y1="172" x2="800" y2="172" stroke="#1e1e2c" strokeWidth="0.8" strokeDasharray="2 2" />
-              <line x1="0" y1="220" x2="800" y2="220" stroke="#2a2a3e" strokeWidth="1" />
+              <line x1="0" y1="30" x2="800" y2="30" stroke="var(--border)" strokeWidth="1" strokeDasharray="3 3" />
+              <line x1="0" y1="77" x2="800" y2="77" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2 2" />
+              <line x1="0" y1="125" x2="800" y2="125" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2 2" />
+              <line x1="0" y1="172" x2="800" y2="172" stroke="var(--border)" strokeWidth="0.8" strokeDasharray="2 2" />
+              <line x1="0" y1="220" x2="800" y2="220" stroke="var(--border)" strokeWidth="1" />
 
               {/* Left Y-Axis Labels: Watermark Recovery (%) */}
-              <text x="12" y="34" fill="#FF5500" fontSize="9" fontFamily="monospace" fontWeight="bold">100% Rec</text>
-              <text x="12" y="81" fill="#71717a" fontSize="8" fontFamily="monospace">75% Rec</text>
-              <text x="12" y="129" fill="#71717a" fontSize="8" fontFamily="monospace">50% Rec</text>
-              <text x="12" y="176" fill="#71717a" fontSize="8" fontFamily="monospace">25% Rec</text>
-              <text x="12" y="217" fill="#71717a" fontSize="8" fontFamily="monospace">0% Rec</text>
+              <text x="12" y="34" fill="#C97A45" fontSize="9" fontFamily="monospace" fontWeight="bold">100% Rec</text>
+              <text x="12" y="81" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace">75% Rec</text>
+              <text x="12" y="129" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace">50% Rec</text>
+              <text x="12" y="176" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace">25% Rec</text>
+              <text x="12" y="217" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace">0% Rec</text>
 
               {/* Right Y-Axis Labels: Channel Noise Level (%) */}
               <text x="740" y="34" fill="#06b6d4" fontSize="9" fontFamily="monospace" textAnchor="end">30% Noise</text>
-              <text x="740" y="81" fill="#71717a" fontSize="8" fontFamily="monospace" textAnchor="end">22.5% Noise</text>
-              <text x="740" y="129" fill="#71717a" fontSize="8" fontFamily="monospace" textAnchor="end">15% Noise</text>
-              <text x="740" y="176" fill="#71717a" fontSize="8" fontFamily="monospace" textAnchor="end">7.5% Noise</text>
-              <text x="740" y="217" fill="#71717a" fontSize="8" fontFamily="monospace" textAnchor="end">0% Noise</text>
+              <text x="740" y="81" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace" textAnchor="end">22.5% Noise</text>
+              <text x="740" y="129" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace" textAnchor="end">15% Noise</text>
+              <text x="740" y="176" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace" textAnchor="end">7.5% Noise</text>
+              <text x="740" y="217" fill="var(--muted-foreground)" fontSize="8" fontFamily="monospace" textAnchor="end">0% Noise</text>
 
               {/* Trace 1: Injected Channel Mutation Noise (%) - Cyan Dotted (Mapped to Right Axis: 0% -> 220, 30% -> 30) */}
               <path
@@ -592,7 +592,7 @@ export default function RealTimeMonitorPage() {
                   return i === 0 ? `M ${x.toFixed(1)} ${y.toFixed(1)}` : `${acc} L ${x.toFixed(1)} ${y.toFixed(1)}`;
                 }, "")}
                 fill="none"
-                stroke="#a1a1aa"
+                stroke="var(--muted-foreground)"
                 strokeWidth="1.6"
                 strokeDasharray="4,4"
                 opacity="0.80"
@@ -614,7 +614,7 @@ export default function RealTimeMonitorPage() {
                   return i === 0 ? `M ${x.toFixed(1)} ${y.toFixed(1)}` : `${acc} L ${x.toFixed(1)} ${y.toFixed(1)}`;
                 }, "")}
                 fill="none"
-                stroke="#FF5500"
+                stroke="#C97A45"
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -622,10 +622,10 @@ export default function RealTimeMonitorPage() {
 
               {/* Legend inside canvas */}
               <g transform="translate(480, 16)">
-                <line x1="0" y1="5" x2="20" y2="5" stroke="#FF5500" strokeWidth="2.5" />
-                <text x="26" y="8" fill="#ffffff" fontSize="9" fontFamily="monospace" fontWeight="bold">HelixSign RS(16,8) Recovery</text>
-                <line x1="0" y1="18" x2="20" y2="18" stroke="#a1a1aa" strokeWidth="1.6" strokeDasharray="4,4" />
-                <text x="26" y="21" fill="#a1a1aa" fontSize="9" fontFamily="monospace">Uncorrected Naive Watermark</text>
+                <line x1="0" y1="5" x2="20" y2="5" stroke="#C97A45" strokeWidth="2.5" />
+                <text x="26" y="8" fill="var(--foreground)" fontSize="9" fontFamily="monospace" fontWeight="bold">HelixSign RS(16,8) Recovery</text>
+                <line x1="0" y1="18" x2="20" y2="18" stroke="var(--muted-foreground)" strokeWidth="1.6" strokeDasharray="4,4" />
+                <text x="26" y="21" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">Uncorrected Naive Watermark</text>
                 <line x1="0" y1="31" x2="20" y2="31" stroke="#06b6d4" strokeWidth="1.3" strokeDasharray="2,2" />
                 <text x="26" y="34" fill="#06b6d4" fontSize="9" fontFamily="monospace">Channel Noise (%)</text>
               </g>
@@ -639,7 +639,7 @@ export default function RealTimeMonitorPage() {
                     y1="12"
                     x2={((tick * 4) % 800)}
                     y2="220"
-                    stroke="#FF5500"
+                    stroke="#C97A45"
                     strokeWidth="1.5"
                     strokeDasharray="3 2"
                     opacity="0.85"
@@ -649,8 +649,8 @@ export default function RealTimeMonitorPage() {
                     cx={((tick * 4) % 800)}
                     cy={220 - (recoveryPoints[Math.min(SAMPLE_COUNT - 1, Math.floor((((tick * 4) % 800) / 800) * SAMPLE_COUNT))] / 100) * 190}
                     r="5"
-                    fill="#FF5500"
-                    stroke="#FFFFFF"
+                    fill="#C97A45"
+                    stroke="var(--foreground)"
                     strokeWidth="1.5"
                   />
                   {/* Sweep Head Pulse Point on Naive Decay Trace */}
@@ -658,8 +658,8 @@ export default function RealTimeMonitorPage() {
                     cx={((tick * 4) % 800)}
                     cy={220 - (rawUncorrectedPoints[Math.min(SAMPLE_COUNT - 1, Math.floor((((tick * 4) % 800) / 800) * SAMPLE_COUNT))] / 100) * 190}
                     r="3.5"
-                    fill="#71717a"
-                    stroke="#FFFFFF"
+                    fill="var(--muted-foreground)"
+                    stroke="var(--foreground)"
                     strokeWidth="1"
                   />
                 </g>
@@ -670,7 +670,7 @@ export default function RealTimeMonitorPage() {
             <svg viewBox="0 0 800 240" className="w-full h-full">
               <defs>
                 <pattern id="fftGrid" width="50" height="30" patternUnits="userSpaceOnUse">
-                  <path d="M 50 0 L 0 0 0 30" fill="none" stroke="#161622" strokeWidth="0.8" />
+                  <path d="M 50 0 L 0 0 0 30" fill="none" stroke="var(--border)" strokeWidth="0.8" />
                 </pattern>
               </defs>
               <rect width="800" height="240" fill="url(#fftGrid)" />
@@ -679,24 +679,24 @@ export default function RealTimeMonitorPage() {
               <path
                 d={`M 50 210 Q 150 200 250 190 T 400 170 Q 470 ${Math.max(30, 90 - activeBaseNoise * 3)} 490 ${Math.max(20, 60 - activeBaseNoise * 3)} T 510 ${Math.max(30, 90 - activeBaseNoise * 3)} Q 550 160 650 195 T 750 210`}
                 fill="none"
-                stroke="#FF5500"
+                stroke="#C97A45"
                 strokeWidth="2.2"
               />
               <path
                 d={`M 50 210 Q 150 200 250 190 T 400 170 Q 470 ${Math.max(30, 90 - activeBaseNoise * 3)} 490 ${Math.max(20, 60 - activeBaseNoise * 3)} T 510 ${Math.max(30, 90 - activeBaseNoise * 3)} Q 550 160 650 195 T 750 210 L 750 220 L 50 220 Z`}
-                fill="#FF5500"
+                fill="#C97A45"
                 opacity="0.12"
               />
 
-              <line x1="490" y1="50" x2="490" y2="220" stroke="#FF5500" strokeWidth="1" strokeDasharray="3 3" />
-              <text x="490" y="38" fill="#FF5500" fontSize="10" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
+              <line x1="490" y1="50" x2="490" y2="220" stroke="#C97A45" strokeWidth="1" strokeDasharray="3 3" />
+              <text x="490" y="38" fill="#C97A45" fontSize="10" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
                 Codon Manifold Peak Density (W₁ = {(0.008 + activeBaseNoise * 0.0006).toFixed(4)})
               </text>
 
-              <text x="50" y="232" fill="#71717a" fontSize="9" fontFamily="monospace">0.0% Mutation</text>
-              <text x="250" y="232" fill="#71717a" fontSize="9" fontFamily="monospace">5.0% Mutation</text>
-              <text x="490" y="232" fill="#71717a" fontSize="9" fontFamily="monospace">15.0% Mutation</text>
-              <text x="750" y="232" fill="#71717a" fontSize="9" fontFamily="monospace">30.0% Mutation</text>
+              <text x="50" y="232" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">0.0% Mutation</text>
+              <text x="250" y="232" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">5.0% Mutation</text>
+              <text x="490" y="232" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">15.0% Mutation</text>
+              <text x="750" y="232" fill="var(--muted-foreground)" fontSize="9" fontFamily="monospace">30.0% Mutation</text>
             </svg>
           )}
 
@@ -708,8 +708,8 @@ export default function RealTimeMonitorPage() {
                 <span className="font-semibold">PARITY EXHAUSTED (Waterfall Drop: {recoveryPoints[recoveryPoints.length - 1].toFixed(1)}%)</span>
               </div>
             ) : currentParityUsed > 0 ? (
-              <div className="bg-[#FF5500]/15 border border-[#FF5500]/60 text-white rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <ShieldAlert className="w-3.5 h-3.5 text-[#FF5500]" />
+              <div className="bg-[#C97A45]/15 border border-[#C97A45]/60 text-[#1a1614] rounded-lg px-3 py-1.5 flex items-center gap-2">
+                <ShieldAlert className="w-3.5 h-3.5 text-[#C97A45]" />
                 <span className="font-semibold">RS ECC ACTIVE: {currentParityUsed}/4 Parity Symbols Engaged</span>
               </div>
             ) : (
@@ -747,11 +747,11 @@ export default function RealTimeMonitorPage() {
         <div className="lg:col-span-4 space-y-4">
           <Card className="border border-border bg-card p-4 space-y-3">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Activity className="h-4 w-4 text-[#FF5500]" />
+              <Activity className="h-4 w-4 text-[#C97A45]" />
               Reed-Solomon Parity Gauge
             </h3>
             <div className="min-h-[180px] p-4 rounded-xl border border-border bg-muted/20 text-center flex flex-col justify-center">
-              <div className="text-4xl font-black font-mono text-[#FF5500]">
+              <div className="text-4xl font-black font-mono text-[#C97A45]">
                 {currentParityUsed} / 4
               </div>
               <span className="text-xs font-semibold text-primary block mt-1">
@@ -769,12 +769,12 @@ export default function RealTimeMonitorPage() {
                       key={symIdx}
                       className={`py-1.5 px-1 rounded-lg border text-center transition-all ${
                         isEngaged
-                          ? "bg-[#FF5500]/25 border-[#FF5500] text-[#FF5500] shadow-[0_0_8px_rgba(255,85,0,0.25)] font-bold"
-                          : "bg-[#14141d] border-border/60 text-zinc-500 font-mono"
+                          ? "bg-[#C97A45]/25 border-[#C97A45] text-[#C97A45] font-semibold"
+                          : "bg-card border-border/60 text-zinc-500 font-mono"
                       }`}
                     >
                       <span className="text-[9px] block">P{symIdx + 1}</span>
-                      <span className="text-[10px] font-bold block mt-0.5">
+                      <span className="text-[10px] font-semibold block mt-0.5">
                         {isEngaged ? "ACTIVE" : "IDLE"}
                       </span>
                     </div>
@@ -797,11 +797,11 @@ export default function RealTimeMonitorPage() {
             </h3>
             <div className="flex items-center justify-between text-xs font-mono p-2 rounded bg-muted/40">
               <span className="text-muted-foreground">Codons Shuffled:</span>
-              <span className="font-bold text-foreground">{activeBaseNoise.toFixed(1)}% Synonymous</span>
+              <span className="font-semibold text-foreground">{activeBaseNoise.toFixed(1)}% Synonymous</span>
             </div>
             <div className="flex items-center justify-between text-xs font-mono p-2 rounded bg-muted/40">
               <span className="text-muted-foreground">Watermark Recovery:</span>
-              <span className="font-bold text-primary">
+              <span className="font-semibold text-primary">
                 {recoveryPoints[recoveryPoints.length - 1].toFixed(1)}% {recoveryPoints[recoveryPoints.length - 1] >= 100 ? "Verified" : "Degraded"}
               </span>
             </div>
@@ -828,7 +828,7 @@ export default function RealTimeMonitorPage() {
                   <TableHead className="text-xs">Noise Level</TableHead>
                   <TableHead className="text-xs">Perturbation Mode</TableHead>
                   <TableHead className="text-xs">Uncorrected</TableHead>
-                  <TableHead className="text-xs font-semibold text-[#FF5500]">RS(16,8) Recovery</TableHead>
+                  <TableHead className="text-xs font-semibold text-[#C97A45]">RS(16,8) Recovery</TableHead>
                   <TableHead className="text-right text-xs pr-4">Action</TableHead>
                 </TableRow>
               </TableHeader>
@@ -868,7 +868,7 @@ export default function RealTimeMonitorPage() {
                       <TableCell className="font-mono text-xs text-muted-foreground">
                         {hit.uncorrectedRecovery.toFixed(1)}%
                       </TableCell>
-                      <TableCell className="font-mono text-xs text-foreground font-bold">
+                      <TableCell className="font-mono text-xs text-foreground font-semibold">
                         {hit.rsRecovery.toFixed(1)}%
                       </TableCell>
                       <TableCell className="text-right pr-4">

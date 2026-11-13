@@ -80,7 +80,7 @@ export function EmptyConstructState({
         </div>
 
         <div className="space-y-1.5 max-w-lg mx-auto">
-          <h2 className="text-lg font-bold text-foreground tracking-tight">{title}</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">{title}</h2>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
             {description}
           </p>
