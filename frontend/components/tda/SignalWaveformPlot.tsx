@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dna, ShieldCheck, ZoomIn, ZoomOut, Info } from "lucide-react";
@@ -20,6 +20,9 @@ export function SignalWaveformPlot({
 }: SignalWaveformPlotProps) {
   const [showThreshold, setShowThreshold] = useState(true);
   const [showCarriers, setShowCarriers] = useState(true);
+  const [hoverX, setHoverX] = useState<number | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const svgRef = useRef<SVGSVGElement | null>(null);
 
   // Generate realistic biological codon relative adaptiveness trajectory (w_i in [0.75, 1.0])
   const pointsCount = 140;
@@ -109,7 +112,25 @@ export function SignalWaveformPlot({
 
       {/* Trajectory SVG */}
       <div className="pt-2 overflow-hidden">
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${width} ${height}`}
+          className="w-full h-auto cursor-crosshair"
+          onMouseMove={(e) => {
+            if (!svgRef.current) return;
+            const rect = svgRef.current.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const vbX = (mouseX / rect.width) * width;
+            if (vbX >= padLeft && vbX <= width - padRight) {
+              setHoverX(vbX);
+              setIsHovered(true);
+            }
+          }}
+          onMouseLeave={() => {
+            setIsHovered(false);
+            setHoverX(null);
+          }}
+        >
           <defs>
             <clipPath id="plotInnerClipBio">
               <rect x={padLeft} y={padTop} width={plotW} height={plotH} />
@@ -192,30 +213,61 @@ export function SignalWaveformPlot({
 
           {/* Carrier Codon Loci Points */}
           {showCarriers &&
-            codonData
-              .filter((d) => d.isCarrier)
-              .map((d, idx) => (
-                <g key={idx}>
+            codonData.map((d, i) => {
+              if (!d.isCarrier) return null;
+              const x = getX(i);
+              const y = getY(d.wi);
+              const isNearHover = isHovered && hoverX !== null && Math.abs(x - hoverX) < 14;
+              return (
+                <g key={i}>
                   <line
-                    x1={getX(idx * 4 + 2)}
+                    x1={x}
                     y1={getY(minW)}
-                    x2={getX(idx * 4 + 2)}
-                    y2={getY(d.wi)}
+                    x2={x}
+                    y2={y}
                     stroke="#FF5500"
                     strokeWidth="0.8"
                     strokeDasharray="2,2"
-                    opacity="0.6"
+                    opacity={isNearHover ? "0.9" : "0.5"}
                   />
+                  {isNearHover && (
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r="6.5"
+                      fill="none"
+                      stroke="#FF5500"
+                      strokeWidth="1.2"
+                      opacity="0.8"
+                    />
+                  )}
                   <circle
-                    cx={getX(idx * 4 + 2)}
-                    cy={getY(d.wi)}
-                    r="3"
+                    cx={x}
+                    cy={y}
+                    r={isNearHover ? 4.5 : 3}
                     fill="#FF5500"
                     stroke="#111116"
                     strokeWidth="1"
                   />
                 </g>
-              ))}
+              );
+            })}
+
+          {/* Inspection Beam: ONLY VISIBLE WHEN HOVERED */}
+          {isHovered && hoverX !== null && (
+            <g>
+              <line
+                x1={hoverX}
+                y1={padTop}
+                x2={hoverX}
+                y2={padTop + plotH}
+                stroke="#FF5500"
+                strokeWidth="1.4"
+                strokeDasharray="2,2"
+                opacity="0.85"
+              />
+            </g>
+          )}
 
           {/* X-Axis Codon Coordinates */}
           {[0, 250, 500, 750, 1025].map((codon) => {

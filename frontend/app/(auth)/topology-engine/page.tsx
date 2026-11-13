@@ -95,7 +95,7 @@ export default function TopologyEnginePage() {
 
   const [activeTab, setActiveTab] = useState<TabKey>("filtration");
 
-  // Filtration state (Idle by default, only animates when user scrubs or hits Play)
+  // Filtration state (Fixed by default, animates when scrubbing or Play clicked)
   const [epsilon, setEpsilon] = useState<number>(0.42);
   const [isFiltrationPlaying, setIsFiltrationPlaying] = useState<boolean>(false);
   const [filtrationDirection, setFiltrationDirection] = useState<number>(1);

@@ -214,8 +214,13 @@ export async function runStressTest(params: {
 /** Fetch all registered stamped constructs */
 export async function fetchRegistry(): Promise<RegistryItem[]> {
   try {
-    const res = await request<{ status: string; data: RegistryItem[] }>("/api/registry");
-    return res.data || [];
+    const res = await request<any>("/api/registry");
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res.stamps)) return res.stamps;
+    if (Array.isArray(res.data?.stamps)) return res.data.stamps;
+    if (Array.isArray(res.data)) return res.data;
+    return [];
   } catch {
     return [];
   }
