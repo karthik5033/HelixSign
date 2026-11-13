@@ -17,6 +17,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Sparkles,
+  FileKey,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppLogo } from "@/components/ui/AppLogo";
@@ -27,6 +28,7 @@ export const NAV_ITEMS = [
   { label: "Input Sequence", href: "/input", icon: Sparkles },
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { label: "Construct Ingestion", href: "/upload", icon: Waves },
+  { label: "Universal File Stego", href: "/file-stego", icon: FileKey },
   { label: "Steganographic Pipeline", href: "/analysis", icon: Activity },
   { label: "Carrier Locus Mapping", href: "/localization", icon: Crosshair },
   { label: "Codon Manifold Engine", href: "/topology-engine", icon: Cpu },
