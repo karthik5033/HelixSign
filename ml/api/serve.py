@@ -764,12 +764,12 @@ async def embed_endpoint(req: EmbedRequest) -> EmbedResponse:
         raise HTTPException(status_code=400, detail="carrierPositions must be non-empty.")
     if any(b not in (0, 1) for b in req.codewordBits):
         raise HTTPException(status_code=400, detail="All codewordBits must be 0 or 1.")
-    if len(req.carrierPositions) < len(req.codewordBits):
+    if len(req.carrierPositions) != len(req.codewordBits):
         raise HTTPException(
             status_code=400,
             detail=(
-                f"Need at least {len(req.codewordBits)} carrier positions "
-                f"for {len(req.codewordBits)} bits; got {len(req.carrierPositions)}."
+                f"codewordBits length ({len(req.codewordBits)}) must equal "
+                f"carrierPositions length ({len(req.carrierPositions)})."
             ),
         )
 

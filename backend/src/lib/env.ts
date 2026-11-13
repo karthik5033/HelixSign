@@ -1,6 +1,6 @@
 export function isStubMode(): boolean {
   const value = process.env.USE_STUBS;
-  if (value === undefined) return true;
+  if (value === undefined) return false;
   return !['false', '0', 'no', 'off'].includes(value.trim().toLowerCase());
 }
 

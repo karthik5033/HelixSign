@@ -1,6 +1,11 @@
 import { createHash } from 'node:crypto';
 import { bitsToBytes } from '@/core/payload';
-import { embedCodeword, extractSoftBits, type CodonMutation } from '@/core/embed';
+import {
+  embedCodeword,
+  extractSoftBits,
+  extractSoftBitsFromOffsets,
+  type CodonMutation,
+} from '@/core/embed';
 import { mulberry32 } from '@/core/crypto';
 import { BASES, eligibleCodonIndices, translate } from '@/core/codons';
 import {
@@ -67,7 +72,10 @@ function localEmbed(
   codewordBits: number[],
   carrierPositions: number[],
 ): MlEmbedResult {
-  const codeword = bitsToBytes(codewordBits.slice(0, 128));
+  const paddedLen = Math.max(128, Math.ceil(codewordBits.length / 8) * 8);
+  const padded = [...codewordBits];
+  while (padded.length < paddedLen) padded.push(0);
+  const codeword = bitsToBytes(padded.slice(0, 128));
   const result = embedCodeword(sequence, codeword, carrierPositions);
   const gcBefore = Number(gcContent(sequence).toFixed(2));
   const gcAfter = Number(gcContent(result.stampedSequence).toFixed(2));
@@ -111,21 +119,30 @@ export async function embed(
 
 export async function extract(
   sequence: string,
-  carrierPositions: number[],
+  carrierPositions?: number[],
   host = 'E. coli K-12',
+  carrierStartOffsets?: (number | null)[],
 ): Promise<MlExtractResult> {
+  const useOffsets = carrierStartOffsets !== undefined && carrierStartOffsets.length > 0;
   if (!isStubMode()) {
     try {
-      return await postJson<MlExtractResult>('/ml/extract', {
-        sequence,
-        carrierPositions,
-        host,
-      });
+      const payload: Record<string, unknown> = { sequence, host };
+      if (useOffsets) {
+        payload.carrierStartOffsets = carrierStartOffsets;
+      } else if (carrierPositions !== undefined) {
+        payload.carrierPositions = carrierPositions;
+      }
+      return await postJson<MlExtractResult>('/ml/extract', payload);
     } catch (error) {
       console.warn('[helixsign] ML extract unavailable; using local extraction fallback:', error);
     }
   }
-  const local = extractSoftBits(sequence, carrierPositions);
+
+  if (useOffsets && carrierStartOffsets) {
+    const local = extractSoftBitsFromOffsets(sequence, carrierStartOffsets);
+    return { bitEstimates: local.estimates, confidences: local.confidences };
+  }
+  const local = extractSoftBits(sequence, carrierPositions ?? []);
   return { bitEstimates: local.estimates, confidences: local.confidences };
 }
 
@@ -262,7 +279,6 @@ export function capacity(sequence: string): number {
 }
 
 export async function mlServiceHealthy(): Promise<boolean> {
-  if (isStubMode()) return false;
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 1_500);

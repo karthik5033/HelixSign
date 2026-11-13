@@ -1,7 +1,13 @@
 import { buildCarrierLayout } from '@/core/carrier';
-import { decodeTiles, extractSoftBits, type DecodeSummary, type TileExtraction } from '@/core/embed';
+import {
+  decodeTiles,
+  extractSoftBits,
+  extractSoftBitsFromOffsets,
+  type DecodeSummary,
+  type TileExtraction,
+} from '@/core/embed';
 import { getMasterKey } from '@/core/crypto';
-import { alignToReference } from '@/core/align';
+import { alignToReferenceDetailed, mapCarrierOffsets } from '@/core/align';
 import { sha256Sequence } from '@/core/sequence';
 import type { VerifyResponse, VerifyStatus } from '@/types';
 import * as registry from './registry';
@@ -19,17 +25,30 @@ async function extractionFor(
   sequence: string,
   positions: number[],
   useMlBridge: boolean,
+  carrierStartOffsets?: (number | null)[],
 ): Promise<TileExtraction> {
-  if (!useMlBridge) return extractSoftBits(sequence, positions);
+  const useOffsets = carrierStartOffsets !== undefined && carrierStartOffsets.length > 0;
+  if (!useMlBridge) {
+    return useOffsets
+      ? extractSoftBitsFromOffsets(sequence, carrierStartOffsets)
+      : extractSoftBits(sequence, positions);
+  }
   try {
-    const result = await mlExtract(sequence, positions);
+    const result = await mlExtract(
+      sequence,
+      useOffsets ? undefined : positions,
+      'E. coli K-12',
+      useOffsets ? carrierStartOffsets : undefined,
+    );
     return {
       estimates: result.bitEstimates,
       confidences: result.confidences,
       erasures: result.confidences.filter((confidence) => confidence === 0).length,
     };
   } catch {
-    return extractSoftBits(sequence, positions);
+    return useOffsets
+      ? extractSoftBitsFromOffsets(sequence, carrierStartOffsets)
+      : extractSoftBits(sequence, positions);
   }
 }
 
@@ -77,13 +96,21 @@ export async function verifyAgainstReference(
 
   let target = sequence.toUpperCase();
   let aligned = false;
+  let carrierStartOffsets: (number | null)[] | undefined;
 
   if (target.length !== referenceSequence.length) {
-    target = alignToReference(referenceSequence, target);
+    const alignment = alignToReferenceDetailed(referenceSequence, target);
+    target = alignment.alignedSequence;
     aligned = true;
+    carrierStartOffsets = mapCarrierOffsets(alignment.refToQuery, layout.positions);
   }
 
-  const extraction = await extractionFor(target, layout.positions, useMlBridge && !aligned);
+  const extraction = await extractionFor(
+    carrierStartOffsets ? sequence.toUpperCase() : target,
+    layout.positions,
+    useMlBridge,
+    carrierStartOffsets,
+  );
   const decoded = decodeTiles(extraction, masterKey);
 
   if (!decoded) {

@@ -101,18 +101,27 @@ export interface TileExtraction {
 }
 
 /**
- * Read soft bit estimates at the carrier positions. Bases marked with N (from
- * alignment gaps) become erasures.
+ * Read soft bit estimates at arbitrary nucleotide start offsets. Offsets marked
+ * with null or out-of-bounds or containing N become erasures (confidence 0).
  */
-export function extractSoftBits(sequence: string, positions: readonly number[]): TileExtraction {
+export function extractSoftBitsFromOffsets(
+  sequence: string,
+  offsets: readonly (number | null)[],
+): TileExtraction {
   const estimates: number[] = [];
   const confidences: number[] = [];
   let erasures = 0;
 
-  for (let i = 0; i < positions.length; i += 1) {
-    const offset = positions[i] * 3;
-    const codon = sequence.slice(offset, offset + 3).toUpperCase();
+  for (let i = 0; i < offsets.length; i += 1) {
+    const offset = offsets[i];
+    if (offset === null || offset < 0 || offset + 3 > sequence.length) {
+      estimates.push(0.5);
+      confidences.push(0);
+      erasures += 1;
+      continue;
+    }
 
+    const codon = sequence.slice(offset, offset + 3).toUpperCase();
     if (codon.length !== 3 || codon.includes('N') || !/^[ACGT]{3}$/.test(codon)) {
       estimates.push(0.5);
       confidences.push(0);
@@ -127,6 +136,17 @@ export function extractSoftBits(sequence: string, positions: readonly number[]):
   }
 
   return { estimates, confidences, erasures };
+}
+
+/**
+ * Read soft bit estimates at the carrier positions. Bases marked with N (from
+ * alignment gaps) become erasures.
+ */
+export function extractSoftBits(sequence: string, positions: readonly number[]): TileExtraction {
+  return extractSoftBitsFromOffsets(
+    sequence,
+    positions.map((pos) => pos * 3),
+  );
 }
 
 export interface DecodedTiles {
