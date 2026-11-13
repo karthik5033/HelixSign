@@ -73,7 +73,8 @@ function getFileCategory(file: File | { type: string; name: string }) {
 }
 
 async function computeSha256(buffer: ArrayBuffer): Promise<string> {
-  const hashBuffer = await window.crypto.subtle.digest("SHA-256", buffer);
+  const cryptoObj = typeof window !== "undefined" && window.crypto ? window.crypto : (globalThis as any).crypto;
+  const hashBuffer = await cryptoObj.subtle.digest("SHA-256", buffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }

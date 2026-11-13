@@ -40,7 +40,7 @@ const DEFAULT_KEY_PASSPHRASE = "HelixSign-QuantumBio-2026-MasterKey";
 // ---------------------------------------------------------------------------
 
 function getCrypto(): Crypto {
-  if (typeof window !== "undefined" && getCrypto()) return getCrypto();
+  if (typeof window !== "undefined" && window.crypto) return window.crypto;
   if (typeof globalThis !== "undefined" && (globalThis as any).crypto) return (globalThis as any).crypto;
   throw new Error("Web Crypto API is not available in this environment.");
 }
