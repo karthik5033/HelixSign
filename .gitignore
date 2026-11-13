@@ -2,7 +2,10 @@
 
 # Do not commit raw frontend template / zip as requested
 frontend.zip
-frontend/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
 
 # OS and Editor metadata
 .DS_Store

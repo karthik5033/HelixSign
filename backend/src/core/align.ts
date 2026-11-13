@@ -17,7 +17,7 @@ function bandedAlignment(
   reference: string,
   query: string,
   band: number,
-): { aligned: string[]; score: number } {
+): { aligned: string[]; refToQuery: (number | null)[]; score: number } {
   const n = reference.length;
   const m = query.length;
   const width = 2 * band + 1;
@@ -88,6 +88,7 @@ function bandedAlignment(
   }
 
   const aligned = new Array<string>(n).fill('N');
+  const refToQuery = new Array<number | null>(n).fill(null);
   let i = n;
   let j = m;
   let guard = 0;
@@ -102,6 +103,7 @@ function bandedAlignment(
     }
     if (j === 0) {
       aligned[i - 1] = 'N';
+      refToQuery[i - 1] = null;
       i -= 1;
       continue;
     }
@@ -111,10 +113,12 @@ function bandedAlignment(
 
     if (direction === DIAG) {
       aligned[i - 1] = query[j - 1];
+      refToQuery[i - 1] = j - 1;
       i -= 1;
       j -= 1;
     } else if (direction === UP) {
       aligned[i - 1] = 'N';
+      refToQuery[i - 1] = null;
       i -= 1;
     } else if (direction === LEFT) {
       j -= 1;
@@ -123,7 +127,74 @@ function bandedAlignment(
     }
   }
 
-  return { aligned, score };
+  return { aligned, refToQuery, score };
+}
+
+export interface DetailedAlignment {
+  alignedSequence: string;
+  refToQuery: (number | null)[];
+  score: number;
+}
+
+/**
+ * Align query to reference and return detailed alignment info with coordinate mapping.
+ */
+export function alignToReferenceDetailed(
+  reference: string,
+  query: string,
+  initialBand = 64,
+): DetailedAlignment {
+  const ref = reference.toUpperCase();
+  const qry = query.toUpperCase();
+
+  if (ref === qry) {
+    return {
+      alignedSequence: ref,
+      refToQuery: Array.from({ length: ref.length }, (_, i) => i),
+      score: ref.length * MATCH,
+    };
+  }
+
+  const lengthDelta = Math.abs(ref.length - qry.length);
+  let band = Math.max(initialBand, lengthDelta + 32);
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    try {
+      const result = bandedAlignment(ref, qry, Math.min(band, Math.max(ref.length, qry.length)));
+      return {
+        alignedSequence: result.aligned.join(''),
+        refToQuery: result.refToQuery,
+        score: result.score,
+      };
+    } catch {
+      band *= 2;
+      if (band > Math.max(ref.length, qry.length) + 32) break;
+    }
+  }
+
+  throw new Error('Unable to align suspect sequence to reference; indel load too high');
+}
+
+/**
+ * Map reference codon positions to nucleotide start offsets in the query sequence.
+ * Codons ruptured or deleted by indels are set to null (explicit erasures).
+ */
+export function mapCarrierOffsets(
+  refToQuery: readonly (number | null)[],
+  carrierPositions: readonly number[],
+): (number | null)[] {
+  return carrierPositions.map((pos) => {
+    const r0 = pos * 3;
+    const r1 = r0 + 1;
+    const r2 = r0 + 2;
+    const q0 = refToQuery[r0];
+    const q1 = refToQuery[r1];
+    const q2 = refToQuery[r2];
+    if (q0 !== null && q1 !== null && q2 !== null && q1 === q0 + 1 && q2 === q1 + 1) {
+      return q0;
+    }
+    return null;
+  });
 }
 
 /**
@@ -132,25 +203,7 @@ function bandedAlignment(
  * the first attempt.
  */
 export function alignToReference(reference: string, query: string, initialBand = 64): string {
-  const ref = reference.toUpperCase();
-  const qry = query.toUpperCase();
-
-  if (ref === qry) return ref;
-
-  const lengthDelta = Math.abs(ref.length - qry.length);
-  let band = Math.max(initialBand, lengthDelta + 32);
-
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    try {
-      const { aligned } = bandedAlignment(ref, qry, Math.min(band, Math.max(ref.length, qry.length)));
-      return aligned.join('');
-    } catch {
-      band *= 2;
-      if (band > Math.max(ref.length, qry.length) + 32) break;
-    }
-  }
-
-  throw new Error('Unable to align suspect sequence to reference; indel load too high');
+  return alignToReferenceDetailed(reference, query, initialBand).alignedSequence;
 }
 
 /** Fraction of reference bases that aligned to an identical base. */
