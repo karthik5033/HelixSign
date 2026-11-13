@@ -277,7 +277,7 @@ export default function DashboardPage() {
     if (hasActiveConstruct && construct.sequence) {
       const activeItem: MonitoredConstruct = {
         id: "active-construct",
-        name: `${construct.geneName || "Active Stamped Construct"} (${construct.sequence.length.toLocaleString()} bp)`,
+        name: construct.geneName || "Active Stamped Construct",
         gene: construct.geneName || "Synthetic CDS",
         lengthBp: construct.sequence.length,
         codons: Math.floor(construct.sequence.length / 3),
@@ -301,21 +301,39 @@ export default function DashboardPage() {
     let mounted = true;
     fetchRegistry().then((items) => {
       if (!mounted || !Array.isArray(items) || items.length === 0) return;
-      const mapped: MonitoredConstruct[] = items.map((it: any) => ({
-        id: it.id || `reg-${Math.random()}`,
-        name: `${it.geneName || it.project || "Construct"} (${it.projectName || it.project || "HelixSign"})`,
-        gene: `${it.geneName || "Synthetic CDS"} (${it.ownerName || it.owner || "ApexBio"})`,
-        lengthBp: it.stampedSequence ? it.stampedSequence.length : (it.lengthBp || 3075),
-        codons: it.stampedSequence ? Math.floor(it.stampedSequence.length / 3) : (it.codons || 1025),
-        carrierCount: it.carrierPositions ? it.carrierPositions.length : (it.capacityUsed || 64),
-        baseCai: 0.988,
-        gcContent: 50.8,
-        eccTiles: 1,
-        status: "Verified",
-        runId: it.id?.slice(0, 8) || "HS-7402",
-        summary: `${it.carrierPositions?.length || it.capacityUsed || 64} carrier codons verified via ML microservice. Owner: ${it.ownerName || it.owner || "ApexBio"}.`,
-      }));
-      setMonitoredConstructs([...mapped, ...MONITORED_CONSTRUCTS]);
+      const seen = new Set<string>();
+      const mapped: MonitoredConstruct[] = [];
+      for (const it of items) {
+        const id = it.id || `reg-${Math.random()}`;
+        const rawName = it.geneName || it.projectName || it.ownerName || "Construct";
+        let cleanName = rawName.replace(/^Bench-/, "").trim();
+        cleanName = cleanName.replace(/\s*\([^)]*\)$/, "").trim();
+        if (!cleanName) cleanName = "Construct";
+        if (seen.has(cleanName)) continue;
+        seen.add(cleanName);
+        const len = it.stampedSequence ? it.stampedSequence.length : 3075;
+        mapped.push({
+          id,
+          name: cleanName,
+          gene: `${cleanName} (${it.ownerName || "ApexBio"})`,
+          lengthBp: len,
+          codons: Math.floor(len / 3),
+          carrierCount: it.carrierPositions ? it.carrierPositions.length : (it.capacityUsed || 64),
+          baseCai: 0.988,
+          gcContent: 50.8,
+          eccTiles: 1,
+          status: "Verified",
+          runId: it.id?.slice(0, 8) || "HS-7402",
+          summary: `${it.carrierPositions?.length || it.capacityUsed || 64} carrier codons verified via ML microservice. Owner: ${it.ownerName || "ApexBio"}.`,
+        });
+        if (mapped.length >= 8) break;
+      }
+
+      setMonitoredConstructs((prev) => {
+        const active = prev.filter((p) => p.id === "active-construct");
+        const remainingPresets = MONITORED_CONSTRUCTS.filter((p) => !seen.has(p.name));
+        return [...active, ...mapped, ...remainingPresets];
+      });
     });
     return () => {
       mounted = false;
@@ -601,10 +619,10 @@ export default function DashboardPage() {
       </div>
 
       {/* Main Charts & Overview Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
         {/* Left 8 Cols: AE Burst Progression Trend */}
-        <Card className="lg:col-span-8 border border-border bg-card shadow-sm">
+        <Card className="lg:col-span-8 border border-border bg-card shadow-sm flex flex-col justify-between lg:h-[530px]">
           <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-border/50">
             <div>
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -785,20 +803,26 @@ export default function DashboardPage() {
         </Card>
 
         {/* Right 4 Cols: Active Construct Monitoring (Interactive Selectors) */}
-        <Card className="lg:col-span-4 border border-border bg-card flex flex-col justify-between shadow-sm">
-          <CardHeader className="pb-3 border-b border-border/50">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Activity className="h-4 w-4 text-[#FF5500]" />
-              Construct Provenance Status
-            </CardTitle>
+        <Card className="lg:col-span-4 border border-border bg-card flex flex-col justify-between shadow-sm h-[530px] max-h-[530px]">
+          <CardHeader className="pb-3 border-b border-border/50 shrink-0">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <Activity className="h-4 w-4 text-[#FF5500]" />
+                Construct Provenance Status
+              </CardTitle>
+              <span className="text-[10px] font-mono text-muted-foreground px-2 py-0.5 rounded border border-border bg-muted/40">
+                {monitoredConstructs.length} Recorded
+              </span>
+            </div>
             <CardDescription className="text-xs">
               Select monitored construct to evaluate biophysical stress telemetry
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="pt-3 space-y-3 flex-1">
+          <CardContent className="pt-3 space-y-2.5 overflow-y-auto flex-1 pr-1.5 scrollbar-thin">
             {monitoredConstructs.map((c) => {
               const isSelected = selectedConstructId === c.id;
+              const displayName = c.name.replace(/\s*\(\d+[\d,]*\s*bp\)$/i, "");
               return (
                 <div
                   key={c.id}
@@ -810,12 +834,12 @@ export default function DashboardPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between font-semibold">
-                    <span className={isSelected ? "text-[#FF5500] font-bold" : "text-foreground group-hover:underline"}>
-                      {c.name} ({c.lengthBp.toLocaleString()} bp)
+                    <span className={`truncate mr-2 ${isSelected ? "text-[#FF5500] font-bold" : "text-foreground group-hover:underline"}`}>
+                      {displayName} <span className="text-[11px] font-mono font-normal text-muted-foreground">({c.lengthBp.toLocaleString()} bp)</span>
                     </span>
                     <Badge
                       variant="outline"
-                      className={`uppercase font-mono text-[9px] ${
+                      className={`uppercase font-mono text-[9px] shrink-0 ${
                         isSelected
                           ? "border-[#FF5500]/50 text-[#FF5500] bg-[#FF5500]/15 font-bold"
                           : "border-border text-muted-foreground bg-secondary"
@@ -824,7 +848,7 @@ export default function DashboardPage() {
                       {c.status}
                     </Badge>
                   </div>
-                  <p className="text-muted-foreground text-[11px] leading-relaxed">
+                  <p className="text-muted-foreground text-[11px] leading-relaxed line-clamp-2">
                     {c.summary}
                   </p>
                 </div>
@@ -832,7 +856,7 @@ export default function DashboardPage() {
             })}
           </CardContent>
 
-          <div className="p-4 pt-2 border-t border-border/40">
+          <div className="p-4 pt-2 border-t border-border/40 shrink-0">
             <Link href="/monitor" className="w-full">
               <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs border-border cursor-pointer font-medium">
                 Launch Channel Stress Lab
