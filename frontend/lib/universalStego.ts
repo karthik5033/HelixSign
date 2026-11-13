@@ -274,12 +274,15 @@ export async function embedImageLsb(
 
   ctx.putImageData(imgData, 0, 0);
 
-  return new Promise<Blob>((resolve, reject) => {
+  const pngBlob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) resolve(blob);
       else reject(new Error("Failed to export canvas to PNG blob."));
     }, "image/png");
   });
+
+  const pngBuffer = await pngBlob.arrayBuffer();
+  return await embedEnvelopeStego(pngBuffer, payload, password, "image/png");
 }
 
 /**
@@ -457,12 +460,15 @@ export async function embedCropResilientTiles(
 
   ctx.putImageData(imgData, 0, 0);
 
-  return new Promise<Blob>((resolve, reject) => {
+  const pngBlob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) resolve(blob);
       else reject(new Error("Failed to export canvas to PNG blob."));
     }, "image/png");
   });
+
+  const pngBuffer = await pngBlob.arrayBuffer();
+  return await embedEnvelopeStego(pngBuffer, payload, password, "image/png");
 }
 
 /**
@@ -613,14 +619,20 @@ export async function detectStego(file: File | Blob): Promise<StegoDetectionResu
             byteIdx++;
           }
         }
-        let match = true;
+        let matchLsb = true;
+        let matchTile = true;
         for (let m = 0; m < 7; m++) {
-          if (magic[m] !== MAGIC_LSB[m]) {
-            match = false;
-            break;
-          }
+          if (magic[m] !== MAGIC_LSB[m]) matchLsb = false;
+          if (magic[m] !== MAGIC_TILE[m]) matchTile = false;
         }
-        if (match) {
+        if (matchTile) {
+          return {
+            hasStego: true,
+            mode: "image_crop_tiles",
+            carrierType: file.type,
+          };
+        }
+        if (matchLsb) {
           return {
             hasStego: true,
             mode: "image_lsb",
@@ -648,7 +660,16 @@ export async function universalExtract(
   file: File | Blob,
   password: string = DEFAULT_KEY_PASSPHRASE
 ): Promise<{ payload: StegoPayload; mode: string }> {
-  // If it's an image, attempt Crop-Resilient Spatial Tiling first (survives cropping & re-renders)
+  // 1. Try envelope container first (instant & covers all non-cropped files, images, PDFs, videos)
+  try {
+    const buffer = await file.arrayBuffer();
+    const payload = await extractEnvelopeStego(buffer, password);
+    return { payload, mode: "Dual-Layer Container (AES-256-GCM)" };
+  } catch (envelopeErr) {
+    // If envelope not present or was stripped by image cropping, try pixel decoding
+  }
+
+  // 2. If it is an image, attempt Crop-Resilient Spatial Tiling first (survives cropping & re-renders)
   if (file.type.startsWith("image/") && typeof window !== "undefined") {
     try {
       const bitmap = await createImageBitmap(file);
@@ -662,54 +683,22 @@ export async function universalExtract(
           const payload = await extractCropResilientTiles(canvas, password);
           return { payload, mode: "Crop-Resilient Spatial Tiling (Survives Cropping & Edits)" };
         } catch (tileErr) {
-          // Fall through to other modes
+          // Fall through to standard LSB
+        }
+
+        try {
+          const payload = await extractImageLsb(canvas, password);
+          return { payload, mode: "Pixel-Level LSB Steganography (AES-256-GCM)" };
+        } catch (lsbErr) {
+          // Fall through
         }
       }
     } catch (e) {
       // Ignore
     }
   }
-  const detection = await detectStego(file);
 
-  if (detection.mode === "envelope") {
-    const buffer = await file.arrayBuffer();
-    const payload = await extractEnvelopeStego(buffer, password);
-    return { payload, mode: "Universal Polyglot Envelope (AES-256-GCM)" };
-  }
-
-  if (detection.mode === "image_lsb" && typeof window !== "undefined") {
-    const bitmap = await createImageBitmap(file);
-    const canvas = document.createElement("canvas");
-    canvas.width = bitmap.width;
-    canvas.height = bitmap.height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Could not acquire canvas context.");
-    ctx.drawImage(bitmap, 0, 0);
-    const payload = await extractImageLsb(canvas, password);
-    return { payload, mode: "Pixel-Level LSB Steganography (AES-256-GCM)" };
-  }
-
-  // Fallback try both
-  try {
-    const buffer = await file.arrayBuffer();
-    const payload = await extractEnvelopeStego(buffer, password);
-    return { payload, mode: "Universal Polyglot Envelope" };
-  } catch (envelopeErr) {
-    if (file.type.startsWith("image/") && typeof window !== "undefined") {
-      const bitmap = await createImageBitmap(file);
-      const canvas = document.createElement("canvas");
-      canvas.width = bitmap.width;
-      canvas.height = bitmap.height;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.drawImage(bitmap, 0, 0);
-        const payload = await extractImageLsb(canvas, password);
-        return { payload, mode: "Pixel-Level LSB Steganography" };
-      }
-    }
-    throw new Error(
-      "No valid HelixSign steganographic watermark could be decrypted. Check your password or verify the file contains a watermark."
-    );
-  }
+  throw new Error(
+    "No valid HelixSign steganographic watermark could be decrypted. Check your password or verify the file contains a watermark."
+  );
 }
-

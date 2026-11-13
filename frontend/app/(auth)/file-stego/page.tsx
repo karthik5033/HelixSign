@@ -248,13 +248,16 @@ export default function UniversalFileStegoPage() {
       const blobBuffer = await outputBlob.arrayBuffer();
       const sha256 = await computeSha256(blobBuffer);
 
-      // Name output file e.g., "stego_document.pdf"
+      // Name output file e.g., "stego_document.pdf" or "photo_watermarked.png"
       const originalName = carrierFile.name;
       const dotIndex = originalName.lastIndexOf(".");
-      const outName =
-        dotIndex !== -1
-          ? `${originalName.substring(0, dotIndex)}_watermarked${originalName.substring(dotIndex)}`
-          : `${originalName}_watermarked`;
+      const baseName = dotIndex !== -1 ? originalName.substring(0, dotIndex) : originalName;
+      const originalExt = dotIndex !== -1 ? originalName.substring(dotIndex) : "";
+
+      const isImage = carrierFile.type.startsWith("image/") || /\.(png|jpe?g|webp|bmp|gif)$/i.test(originalName);
+      // For images, ensure lossless .png extension to prevent lossy re-encoding artifacts
+      const outExt = isImage ? ".png" : originalExt;
+      const outName = `${baseName}_watermarked${outExt}`;
 
       setEmbedSuccess({
         fileName: outName,
@@ -929,8 +932,10 @@ export default function UniversalFileStegoPage() {
                           <span className="text-emerald-400 font-medium flex items-center gap-1.5">
                             <CheckCircle2 className="w-3.5 h-3.5" />
                             {detectionInfo.mode === "envelope"
-                              ? "Polyglot Envelope Found"
-                              : "Pixel LSB Header Found"}
+                              ? "Polyglot Envelope Found (AES-256-GCM)"
+                              : detectionInfo.mode === "image_crop_tiles"
+                              ? "Crop-Resilient Spatial Tiles Found"
+                              : "Pixel LSB Watermark Found"}
                           </span>
                         ) : (
                           <span className="text-amber-400 font-medium flex items-center gap-1.5">
