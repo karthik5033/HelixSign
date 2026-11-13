@@ -79,6 +79,7 @@ export async function runStressTest(input: StressRequest): Promise<StressRespons
   const averageErrorsCorrected = Number((main.errorsCorrected / main.trials).toFixed(2));
 
   return {
+    status: 'success',
     data: {
       substitutionRate: input.substitutionRate,
       indelRate: input.indelRate,

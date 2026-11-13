@@ -12,14 +12,16 @@ const nextConfig = {
     return config;
   },
   async rewrites() {
+    const backendUrl = (process.env.BACKEND_API_URL || 'http://localhost:3001').replace(/\/+$/, '');
+    const mlUrl = (process.env.ML_SERVICE_URL || 'http://127.0.0.1:8000').replace(/\/+$/, '');
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:3001/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
       {
         source: '/ml/:path*',
-        destination: 'http://127.0.0.1:8000/ml/:path*',
+        destination: `${mlUrl}/ml/:path*`,
       },
     ];
   },

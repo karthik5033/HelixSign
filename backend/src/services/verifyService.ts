@@ -216,6 +216,8 @@ export async function verifyAndFormat(sequence: string): Promise<VerifyResponse>
   return {
     status: outcome.status,
     data: {
+      verified: outcome.status === 'verified',
+      status: outcome.status,
       owner: names.owner,
       project: names.project,
       batch: names.batch,

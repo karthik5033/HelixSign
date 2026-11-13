@@ -86,6 +86,7 @@ export async function stampSequence(input: StampRequest): Promise<StampResponse>
       proteinTranslation: stampedProtein,
       proteinIdentityPercent: Number(proteinIdentityPercent(sequence, stampedSequence).toFixed(2)),
       mutations: embedded.mutations,
+      mutationsApplied: embedded.mutations.length,
       stats: {
         gcBefore: embedded.bioStats.gcBefore,
         gcAfter: embedded.bioStats.gcAfter,

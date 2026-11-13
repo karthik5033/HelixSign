@@ -43,5 +43,5 @@ export async function runTrace(suspectSequence: string): Promise<TraceResponse> 
     };
   });
 
-  return { data: { matches } };
+  return { status: 'success', data: { matches } };
 }

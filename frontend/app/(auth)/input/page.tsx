@@ -24,6 +24,10 @@ import {
   Layers,
   ArrowRight,
   Filter,
+  FolderOpen,
+  FileCheck,
+  X,
+  ChevronDown,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,8 +53,31 @@ import {
   type PresetConstruct,
 } from "@/lib/codonMetrics";
 
+interface BenchmarkFileInfo {
+  filename: string;
+  gene: string;
+  lengthBp: number;
+  codons: number;
+  header: string;
+}
+
+const TEST_BENCHMARK_FILES: BenchmarkFileInfo[] = [
+  { filename: "01_pUC19_lacZ_beta_galactosidase.fasta", gene: "lacZ", lengthBp: 3075, codons: 1025, header: "pUC19_lacZ | E. coli K-12 | 3075 bp | Beta-galactosidase CDS" },
+  { filename: "02_pGLO_sfGFP_superfolder.fasta", gene: "sfGFP", lengthBp: 717, codons: 239, header: "sfGFP | Aequorea victoria / E. coli | 717 bp | Superfolder GFP CDS" },
+  { filename: "03_px458_SpCas9_endonuclease.fasta", gene: "SpCas9", lengthBp: 4107, codons: 1369, header: "SpCas9 | S. pyogenes | 4104 bp | Cas9 endonuclease CDS" },
+  { filename: "04_pUC19_ampR_beta_lactamase.fasta", gene: "bla", lengthBp: 861, codons: 287, header: "ampR | E. coli | 861 bp | Beta-lactamase (TEM-1) CDS" },
+  { filename: "05_mCherry_red_fluorescent_protein.fasta", gene: "mCherry", lengthBp: 711, codons: 237, header: "mCherry | Discosoma sp. | 711 bp | Red Fluorescent Protein CDS" },
+  { filename: "06_T7_RNA_polymerase.fasta", gene: "T7RNAP", lengthBp: 2652, codons: 884, header: "T7RNAP | Enterobacteria phage T7 | 2652 bp | T7 RNA Polymerase CDS" },
+  { filename: "07_firefly_luciferase_luc2.fasta", gene: "luc2", lengthBp: 1653, codons: 551, header: "luc2 | Photinus pyralis | 1653 bp | Synthetic Firefly Luciferase CDS" },
+  { filename: "08_kanamycin_resistance_aph3.fasta", gene: "aph3", lengthBp: 795, codons: 265, header: "aph3 | Transposon Tn5 | 795 bp | Kanamycin Resistance CDS" },
+  { filename: "09_chloramphenicol_acetyltransferase_cat.fasta", gene: "cat", lengthBp: 660, codons: 220, header: "cat | Transposon Tn9 | 660 bp | Chloramphenicol Transferase CDS" },
+  { filename: "10_cre_recombinase_bacteriophage_p1.fasta", gene: "cre", lengthBp: 1032, codons: 344, header: "cre | Bacteriophage P1 | 1032 bp | Site-specific Recombinase Cre CDS" },
+  { filename: "11_dCas9_catalytically_dead.fasta", gene: "dCas9", lengthBp: 4107, codons: 1369, header: "dCas9 | S. pyogenes (D10A/H840A) | 4107 bp | Catalytic-dead dCas9 CDS" },
+  { filename: "12_tetR_tetracycline_repressor.fasta", gene: "tetR", lengthBp: 624, codons: 208, header: "tetR | Transposon Tn10 / E. coli | 624 bp | Tetracycline repressor TetR CDS" },
+];
+
 export default function InputStudioPage() {
-  const { construct: sharedConstruct, setStampedData } = useConstruct();
+  const { construct: sharedConstruct, setStampedData, updateConstructSequence } = useConstruct();
 
   // Preset Selection
   const [selectedPresetId, setSelectedPresetId] = useState<string>("lacz-ecoli");
@@ -70,6 +97,8 @@ export default function InputStudioPage() {
   const [sequenceInput, setSequenceInput] = useState(currentPreset.sequence);
   const [originalWildtype, setOriginalWildtype] = useState(currentPreset.sequence);
   const [fastaHeader, setFastaHeader] = useState("");
+  const [loadedFileName, setLoadedFileName] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Stamping & Verification State
@@ -88,6 +117,62 @@ export default function InputStudioPage() {
   const [activeDiffCodon, setActiveDiffCodon] = useState<number | null>(null);
   const [visibleMutationCount, setVisibleMutationCount] = useState(16);
 
+  // Parse FASTA Content from text or uploaded file
+  const parseFastaContent = (content: string, sourceName?: string) => {
+    const lines = content.split("\n");
+    let header = "";
+    let seq = "";
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith(">")) {
+        header = trimmed;
+      } else {
+        seq += trimmed.replace(/[^a-zA-Z]/g, "").toUpperCase();
+      }
+    }
+
+    if (seq.length > 0) {
+      setSequenceInput(seq);
+      setOriginalWildtype(seq);
+      setFastaHeader(header);
+      setLoadedFileName(sourceName || null);
+
+      let extractedGene = "construct";
+      if (header.includes("|")) {
+        const parts = header.slice(1).split("|");
+        if (parts[0]) extractedGene = parts[0].trim().replace(/[^a-zA-Z0-9_-]/g, "");
+      } else if (header.length > 1) {
+        extractedGene = header.slice(1).split(" ")[0].trim().replace(/[^a-zA-Z0-9_-]/g, "");
+      }
+      setGeneName(extractedGene);
+
+      setLiveStampData(null);
+      setLiveVerifyData(null);
+      setLiveStealthData(null);
+      setErrorMessage(null);
+      updateConstructSequence?.(seq, extractedGene);
+    }
+  };
+
+  // Load Benchmark File by Filename from public folder
+  const loadBenchmarkByFilename = async (filename: string) => {
+    try {
+      const res = await fetch(`/test_sequences/${filename}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      parseFastaContent(text, filename);
+    } catch (err) {
+      console.warn("Could not fetch test sequence file, falling back to preset:", err);
+      const match = TEST_BENCHMARK_FILES.find((f) => f.filename === filename);
+      const preset = match ? BENCHMARK_PRESETS.find((p) => p.gene.toLowerCase() === match.gene.toLowerCase()) : null;
+      if (preset) {
+        handleSelectPreset(preset);
+        setLoadedFileName(filename);
+      }
+    }
+  };
+
   // Load Preset
   const handleSelectPreset = (preset: PresetConstruct) => {
     setSelectedPresetId(preset.id);
@@ -95,10 +180,12 @@ export default function InputStudioPage() {
     setOriginalWildtype(preset.sequence);
     setGeneName(preset.gene);
     setFastaHeader("");
+    setLoadedFileName(null);
     setLiveStampData(null);
     setLiveVerifyData(null);
     setLiveStealthData(null);
     setErrorMessage(null);
+    updateConstructSequence?.(preset.sequence, preset.gene);
   };
 
   // File Upload Handler (.fasta, .fa, .txt)
@@ -109,35 +196,40 @@ export default function InputStudioPage() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target?.result as string;
-      if (!content) return;
-
-      const lines = content.split("\n");
-      let header = "";
-      let seq = "";
-
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed.startsWith(">")) {
-          header = trimmed;
-        } else {
-          seq += trimmed.replace(/[^a-zA-Z]/g, "").toUpperCase();
-        }
+      if (content) {
+        parseFastaContent(content, file.name);
       }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
 
-      if (seq.length > 0) {
-        setSequenceInput(seq);
-        setOriginalWildtype(seq);
-        setFastaHeader(header);
-        if (header.includes("|")) {
-          const parts = header.slice(1).split("|");
-          if (parts[0]) setGeneName(parts[0].replace(/[^a-zA-Z0-9_-]/g, ""));
-        } else if (header.length > 1) {
-          setGeneName(header.slice(1).split(" ")[0].replace(/[^a-zA-Z0-9_-]/g, ""));
-        }
-        setLiveStampData(null);
-        setLiveVerifyData(null);
-        setLiveStealthData(null);
-        setErrorMessage(null);
+  // Drag and Drop Handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      if (content) {
+        parseFastaContent(content, file.name);
       }
     };
     reader.readAsText(file);
@@ -380,44 +472,109 @@ export default function InputStudioPage() {
         <div className="lg:col-span-6 space-y-5">
           <Card className="border border-border bg-card shadow-sm">
             <CardHeader className="pb-3 border-b border-border/50">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" />
-                  Target Coding Sequence (CDS) Input
-                </CardTitle>
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base font-bold flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" />
+                    Target Coding Sequence (CDS) Input
+                  </CardTitle>
+                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                    Paste raw nucleotide sequence, drag &amp; drop a FASTA file, or choose from 12 benchmark test files.
+                  </CardDescription>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
                   <input
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileUpload}
-                    accept=".fasta,.fa,.txt"
+                    accept=".fasta,.fa,.fna,.txt"
                     className="hidden"
                   />
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => fileInputRef.current?.click()}
-                    className="h-7 text-xs gap-1.5 font-mono cursor-pointer"
+                    className="h-8 text-xs gap-1.5 font-mono cursor-pointer border-primary/50 text-primary hover:bg-primary/10 font-semibold"
                   >
                     <UploadCloud className="w-3.5 h-3.5" />
-                    Import FASTA
+                    Add File
                   </Button>
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        loadBenchmarkByFilename(e.target.value);
+                        e.target.value = "";
+                      }
+                    }}
+                    defaultValue=""
+                    className="h-8 text-xs font-mono px-2.5 py-1 rounded-md border border-border bg-secondary/80 text-foreground cursor-pointer hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-primary max-w-[210px] truncate"
+                    title="Load from 12 pre-generated test FASTA files"
+                  >
+                    <option value="" disabled>📁 12 Test Files...</option>
+                    {TEST_BENCHMARK_FILES.map((f, i) => (
+                      <option key={f.filename} value={f.filename}>
+                        [{String(i + 1).padStart(2, "0")}] {f.gene} ({f.lengthBp} bp)
+                      </option>
+                    ))}
+                  </select>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={handleCleanSequence}
-                    className="h-7 text-xs font-mono text-muted-foreground hover:text-foreground"
+                    className="h-8 text-xs font-mono text-muted-foreground hover:text-foreground"
                     title="Remove spaces, numbers, and newlines"
                   >
                     Clean Bases
                   </Button>
                 </div>
               </div>
-              <CardDescription className="text-xs text-muted-foreground">
-                Paste raw nucleotide sequence (5&apos; &rarr; 3&apos; sense strand) or upload FASTA file.
-              </CardDescription>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
+              {/* Loaded File Banner or Drag Prompt */}
+              {loadedFileName ? (
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-primary/10 border border-primary/30 text-xs font-mono text-primary">
+                  <div className="flex items-center gap-2 truncate">
+                    <FileCheck className="w-4 h-4 shrink-0 text-primary" />
+                    <span className="font-semibold truncate">{loadedFileName}</span>
+                    <Badge variant="outline" className="text-[10px] bg-primary/20 text-primary border-primary/40 font-mono">
+                      {validation.length.toLocaleString()} bp
+                    </Badge>
+                    <Badge variant="outline" className="text-[10px] bg-emerald-500/20 text-emerald-400 border-emerald-500/30 font-mono">
+                      {validation.isMod3 ? "In-Frame Mod-3" : "Frame Warning"}
+                    </Badge>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setLoadedFileName(null);
+                      setFastaHeader("");
+                    }}
+                    className="text-muted-foreground hover:text-foreground ml-2 p-1 rounded hover:bg-primary/20 transition-colors cursor-pointer"
+                    title="Clear file"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`p-2.5 rounded-lg border-2 border-dashed transition-all cursor-pointer text-center text-xs font-mono flex items-center justify-center gap-2 ${
+                    isDragging
+                      ? "border-primary bg-primary/20 text-primary scale-[1.01]"
+                      : "border-border/70 hover:border-primary/50 bg-muted/20 hover:bg-muted/40 text-muted-foreground"
+                  }`}
+                >
+                  <UploadCloud className="w-4 h-4 text-primary" />
+                  <span>
+                    {isDragging
+                      ? "Drop FASTA file here to load sequence"
+                      : "Drag & drop FASTA file here or click Add File (or choose from the 12 test files above)"}
+                  </span>
+                </div>
+              )}
+
               {fastaHeader && (
                 <div className="p-2 rounded bg-muted/40 border border-border/80 text-[11px] font-mono text-muted-foreground truncate">
                   <span className="text-primary font-semibold">Header: </span>
@@ -426,7 +583,12 @@ export default function InputStudioPage() {
               )}
 
               {/* Textarea */}
-              <div className="relative">
+              <div
+                className="relative"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
                 <textarea
                   value={sequenceInput}
                   onChange={(e) => {
@@ -435,7 +597,9 @@ export default function InputStudioPage() {
                   }}
                   rows={9}
                   placeholder="ATGACCATGATTACGGATTCACTGGCCGTCGTTTTACAACGTCGT..."
-                  className="w-full font-mono text-xs leading-relaxed p-3.5 rounded-xl border border-border bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none resize-y tracking-wider text-foreground placeholder:text-muted-foreground/50 transition-colors"
+                  className={`w-full font-mono text-xs leading-relaxed p-3.5 rounded-xl border bg-background focus:ring-1 focus:ring-primary focus:border-primary outline-none resize-y tracking-wider text-foreground placeholder:text-muted-foreground/50 transition-colors ${
+                    isDragging ? "border-primary ring-2 ring-primary/40 bg-primary/5" : "border-border"
+                  }`}
                 />
                 <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground mt-1 px-1">
                   <span>

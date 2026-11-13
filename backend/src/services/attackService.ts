@@ -77,6 +77,7 @@ export async function runAttack(input: AttackRequest): Promise<AttackResponse> {
   }
 
   return {
+    status: 'success',
     data: {
       attackType: input.attackType,
       intensity: input.intensity,

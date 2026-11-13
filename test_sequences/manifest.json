@@ -1,0 +1,86 @@
+[
+  {
+    "filename": "01_pUC19_lacZ_beta_galactosidase.fasta",
+    "gene": "lacZ",
+    "lengthBp": 3075,
+    "codons": 1025,
+    "header": "pUC19_lacZ | Escherichia coli K-12 | 3075 bp | Beta-galactosidase CDS (Industrial Reporter)"
+  },
+  {
+    "filename": "02_pGLO_sfGFP_superfolder.fasta",
+    "gene": "sfGFP",
+    "lengthBp": 717,
+    "codons": 239,
+    "header": "sfGFP | Aequorea victoria / E. coli K-12 | 717 bp | Superfolder Green Fluorescent Protein CDS"
+  },
+  {
+    "filename": "03_px458_SpCas9_endonuclease.fasta",
+    "gene": "SpCas9",
+    "lengthBp": 4107,
+    "codons": 1369,
+    "header": "SpCas9 | Streptococcus pyogenes | 4104 bp | Type II CRISPR RNA-guided endonuclease Cas9 CDS"
+  },
+  {
+    "filename": "04_pUC19_ampR_beta_lactamase.fasta",
+    "gene": "bla",
+    "lengthBp": 861,
+    "codons": 287,
+    "header": "ampR | Escherichia coli | 861 bp | Beta-lactamase (Ampicillin Resistance) CDS"
+  },
+  {
+    "filename": "05_mCherry_red_fluorescent_protein.fasta",
+    "gene": "mCherry",
+    "lengthBp": 711,
+    "codons": 237,
+    "header": "mCherry | Discosoma sp. | 711 bp | Monomeric Red Fluorescent Protein CDS"
+  },
+  {
+    "filename": "06_T7_RNA_polymerase.fasta",
+    "gene": "T7RNAP",
+    "lengthBp": 2652,
+    "codons": 884,
+    "header": "T7RNAP | Enterobacteria phage T7 | 2652 bp | DNA-directed RNA polymerase CDS"
+  },
+  {
+    "filename": "07_firefly_luciferase_luc2.fasta",
+    "gene": "luc2",
+    "lengthBp": 1653,
+    "codons": 551,
+    "header": "luc2 | Photinus pyralis | 1653 bp | Synthetic Firefly Luciferase CDS"
+  },
+  {
+    "filename": "08_kanamycin_resistance_aph3.fasta",
+    "gene": "aph3",
+    "lengthBp": 795,
+    "codons": 265,
+    "header": "aph3 | Transposon Tn5 / E. coli | 816 bp | Aminoglycoside 3'-phosphotransferase CDS"
+  },
+  {
+    "filename": "09_chloramphenicol_acetyltransferase_cat.fasta",
+    "gene": "cat",
+    "lengthBp": 660,
+    "codons": 220,
+    "header": "cat | Transposon Tn9 / E. coli | 660 bp | Chloramphenicol O-acetyltransferase CDS"
+  },
+  {
+    "filename": "10_cre_recombinase_bacteriophage_p1.fasta",
+    "gene": "cre",
+    "lengthBp": 1032,
+    "codons": 344,
+    "header": "cre | Bacteriophage P1 | 1032 bp | Site-specific tyrosine recombinase Cre CDS"
+  },
+  {
+    "filename": "11_dCas9_catalytically_dead.fasta",
+    "gene": "dCas9",
+    "lengthBp": 4107,
+    "codons": 1369,
+    "header": "dCas9 | Streptococcus pyogenes (D10A/H840A) | 4104 bp | Catalytically inactive CRISPR-dCas9 targeting CDS"
+  },
+  {
+    "filename": "12_tetR_tetracycline_repressor.fasta",
+    "gene": "tetR",
+    "lengthBp": 624,
+    "codons": 208,
+    "header": "tetR | Transposon Tn10 / E. coli | 624 bp | Tetracycline repressor TetR CDS"
+  }
+]

@@ -31,10 +31,22 @@ export const VerifyRequestSchema = z.object({
   sequence: DnaSequenceSchema,
 });
 
-export const StealthRequestSchema = z.object({
-  sequence: DnaSequenceSchema,
-  payloadBits: z.array(z.number().int().min(0).max(1)).max(4096).optional(),
-});
+export const StealthRequestSchema = z.preprocess(
+  (val: unknown) => {
+    if (val && typeof val === 'object') {
+      const copy = { ...(val as Record<string, unknown>) };
+      if (!copy.sequence && copy.stampedSequence) {
+        copy.sequence = copy.stampedSequence;
+      }
+      return copy;
+    }
+    return val;
+  },
+  z.object({
+    sequence: DnaSequenceSchema,
+    payloadBits: z.array(z.number().int().min(0).max(1)).max(4096).optional(),
+  })
+);
 
 export const StressRequestSchema = z.object({
   sequence: DnaSequenceSchema,
@@ -54,12 +66,33 @@ export const ATTACK_TYPES = [
 
 export type AttackType = (typeof ATTACK_TYPES)[number];
 
-export const AttackRequestSchema = z.object({
-  sequence: DnaSequenceSchema,
-  attackType: z.enum(ATTACK_TYPES),
-  intensity: z.number().min(0).max(1),
-  seed: z.number().int().min(0).max(0x7fffffff).default(42),
-});
+export const AttackRequestSchema = z.preprocess(
+  (val: unknown) => {
+    if (val && typeof val === 'object') {
+      const copy = { ...(val as Record<string, unknown>) };
+      if (!copy.attackType && copy.mode) {
+        copy.attackType = copy.mode;
+      }
+      if (copy.attackType === 'synonymous') {
+        copy.attackType = 'shuffle_synonymous';
+      } else if (copy.attackType === 'mutation') {
+        copy.attackType = 'random_mutation';
+      } else if (copy.attackType === 'trim') {
+        copy.attackType = 'trim_ends';
+      } else if (copy.attackType === 'deletion') {
+        copy.attackType = 'delete_block';
+      }
+      return copy;
+    }
+    return val;
+  },
+  z.object({
+    sequence: DnaSequenceSchema,
+    attackType: z.enum(ATTACK_TYPES),
+    intensity: z.number().min(0).max(1),
+    seed: z.number().int().min(0).max(0x7fffffff).default(42),
+  })
+);
 
 export const TraceRequestSchema = z.object({
   suspectSequence: DnaSequenceSchema,
@@ -104,6 +137,7 @@ export interface StampResponseData {
   proteinTranslation: string;
   proteinIdentityPercent: number;
   mutations: CodonMutation[];
+  mutationsApplied?: number;
   stats: BioStats;
   createdAt: string;
 }
@@ -122,6 +156,8 @@ export interface VerifyResponseData {
   errorsCorrected: number;
   confidenceScore: number;
   timestamp: string;
+  verified?: boolean;
+  status?: VerifyStatus;
 }
 
 export interface VerifyResponse {
@@ -136,13 +172,17 @@ export interface DetectorScores {
 }
 
 export interface StealthResponse {
+  status?: string;
   data: {
+    kmerProbability?: number;
+    cnnProbability?: number;
     naiveTag: DetectorScores;
     helixSign: DetectorScores;
   };
 }
 
 export interface StressResponse {
+  status?: string;
   data: {
     substitutionRate: number;
     indelRate: number;
@@ -155,6 +195,7 @@ export interface StressResponse {
 }
 
 export interface AttackResponse {
+  status?: string;
   data: {
     attackType: AttackType;
     intensity: number;
@@ -177,6 +218,7 @@ export interface TraceMatch {
 }
 
 export interface TraceResponse {
+  status?: string;
   data: {
     matches: TraceMatch[];
   };
