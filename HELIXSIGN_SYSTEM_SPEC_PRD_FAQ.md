@@ -349,3 +349,4 @@ To deliver a cryptographically uncompromised, biologically invariant watermarkin
 **Answer:** No. 
 1. **Brute-Force Resistance:** Deriving the AES key requires $100\,000$ iterations of PBKDF2-SHA256, limiting an attacker to a few hundred attempts per second even on high-end GPUs.
 2. **Anti-Forgery:** AES-256-GCM uses a 128-bit Galois Authentication Tag. The probability of randomly forging a valid tag is $2^{-128} \approx 2.9 \times 10^{-39}$, guaranteeing non-repudiation.
+

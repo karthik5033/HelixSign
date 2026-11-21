@@ -563,3 +563,4 @@ Every distinct gene and every distinct password produces a unique, unpredictable
 
 ### Q18: What is the commercial value of HelixSign for biotechnology companies?
 **Answer:** Biotechnology companies spend millions engineering proprietary strains of yeast, bacteria, or agricultural crops. If a strain is stolen, proving intellectual property ownership in court is difficult. HelixSign embeds an encrypted provenance signature directly into the organism's genome. The owner can sequence the organism, enter their private key, and legally prove biological ownership.
+
