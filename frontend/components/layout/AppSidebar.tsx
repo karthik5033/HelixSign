@@ -17,6 +17,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Sparkles,
+  FileKey,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppLogo } from "@/components/ui/AppLogo";
@@ -27,11 +28,13 @@ export const NAV_ITEMS = [
   { label: "Input Sequence", href: "/input", icon: Sparkles },
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { label: "Construct Ingestion", href: "/upload", icon: Waves },
-  { label: "Steganographic Pipeline", href: "/analysis", icon: Activity },
-  { label: "Carrier Locus Mapping", href: "/localization", icon: Crosshair },
-  { label: "Codon Manifold Engine", href: "/topology-engine", icon: Cpu },
-  { label: "Stealth Benchmarking", href: "/compare", icon: GitCompare },
-  { label: "Channel Stress Lab", href: "/monitor", icon: Radio },
+  { label: "Universal File Stego", href: "/file-stego", icon: FileKey },
+  // Hidden from navigation per user request:
+  // { label: "Steganographic Pipeline", href: "/analysis", icon: Activity },
+  // { label: "Carrier Locus Mapping", href: "/localization", icon: Crosshair },
+  // { label: "Codon Manifold Engine", href: "/topology-engine", icon: Cpu },
+  // { label: "Stealth Benchmarking", href: "/compare", icon: GitCompare },
+  // { label: "Channel Stress Lab", href: "/monitor", icon: Radio },
   { label: "Genomic CDS Datasets", href: "/datasets", icon: Database },
   { label: "Provenance Reports", href: "/reports", icon: FileText },
   { label: "Settings", href: "/settings", icon: Sliders },
